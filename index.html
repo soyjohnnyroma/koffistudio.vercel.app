@@ -3,209 +3,389 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Koffi Studio - Media Engine</title>
-  <script src="[suspicious link removed]"></script>
+  <title>Koffi Studio — Autonomous Media Engine</title>
   <style>
-    @keyframes marquee-left {
-      0% { transform: translateX(0%); }
-      100% { transform: translateX(-50%); }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #050505;
+      color: #f4f4f5;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      line-height: 1.5;
     }
-    @keyframes marquee-right {
-      0% { transform: translateX(-50%); }
-      100% { transform: translateX(0%); }
-    }
-    .animate-marquee-left {
+    header {
+      border-bottom: 1px solid #18181b;
+      padding: 14px 20px;
       display: flex;
-      width: 200%;
-      animation: marquee-left 25s linear infinite;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      background: #09090b;
     }
-    .animate-marquee-right {
+    .brand-wrap { display: flex; align-items: center; gap: 12px; }
+    .brand-logo {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #000000;
+      border: 1.5px solid #ffffff;
       display: flex;
-      width: 200%;
-      animation: marquee-right 25s linear infinite;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex-shrink: 0;
     }
-    .marquee-container:hover .animate-marquee-left,
-    .marquee-container:hover .animate-marquee-right {
-      animation-play-state: paused;
+    .brand-title { font-size: 13px; font-weight: 900; letter-spacing: 1.5px; }
+    .brand-sub { color: #71717a; font-size: 11px; margin-left: 6px; }
+    .header-meta { display: flex; align-items: center; gap: 14px; font-size: 11px; font-family: monospace; }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #18181b;
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid #27272a;
+      color: #a1a1aa;
+    }
+    .pulse-dot { width: 7px; height: 7px; border-radius: 50%; background: #10b981; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
+    .hero {
+      border-bottom: 1px solid #18181b;
+      padding-bottom: 24px;
+      margin-bottom: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 16px;
+    }
+    .hero-pre { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #71717a; font-weight: 700; }
+    .hero-title { font-size: 26px; font-weight: 300; margin-top: 4px; }
+    .hero-title strong { font-weight: 700; color: #ffffff; }
+    .niche-selector {
+      background: #09090b;
+      border: 1px solid #27272a;
+      padding: 8px 12px;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 12px;
+      outline: none;
+    }
+    .section-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #a1a1aa;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .marquee-wrapper {
+      overflow: hidden;
+      position: relative;
+      margin-bottom: 12px;
+      mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+      -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+    }
+    .marquee-track { display: flex; width: max-content; gap: 12px; }
+    .marquee-left { animation: scroll-left 35s linear infinite; }
+    .marquee-right { animation: scroll-right 35s linear infinite; }
+    .marquee-wrapper:hover .marquee-track { animation-play-state: paused; }
+    @keyframes scroll-left { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    @keyframes scroll-right { 0% { transform: translateX(-50%); } 100% { transform: translateX(0); } }
+    .style-card {
+      width: 190px;
+      background: #09090b;
+      border: 1px solid #18181b;
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: pointer;
+      text-align: left;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .style-card:hover { border-color: #52525b; transform: translateY(-2px); }
+    .style-img { width: 100%; height: 95px; object-fit: cover; display: block; filter: brightness(0.85); }
+    .style-body { padding: 8px 10px; }
+    .style-name { font-size: 12px; font-weight: 700; color: #fff; }
+    .style-desc { font-size: 10px; color: #71717a; margin-top: 2px; }
+    .tabs-nav {
+      display: flex;
+      overflow-x: auto;
+      border-bottom: 1px solid #18181b;
+      gap: 20px;
+      padding-bottom: 10px;
+      margin-top: 24px;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      color: #71717a;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      padding-bottom: 8px;
+      white-space: nowrap;
+    }
+    .tab-btn.active { color: #ffffff; border-bottom: 2px solid #ffffff; }
+    .grid-workspace {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-top: 20px;
+    }
+    @media(min-width: 900px) {
+      .grid-workspace { grid-template-columns: 360px 1fr; }
+    }
+    .panel-box {
+      background: #09090b;
+      border: 1px solid #18181b;
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .input-group { margin-bottom: 14px; }
+    .input-label { display: block; font-size: 11px; color: #a1a1aa; margin-bottom: 6px; font-weight: 500; }
+    .input-field {
+      width: 100%;
+      background: #121214;
+      border: 1px solid #27272a;
+      border-radius: 6px;
+      padding: 8px 10px;
+      color: #fff;
+      font-size: 12px;
+      outline: none;
+    }
+    .input-field:focus { border-color: #71717a; }
+    .btn-main {
+      width: 100%;
+      background: #ffffff;
+      color: #000000;
+      border: none;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .console-out {
+      background: #030303;
+      border: 1px solid #18181b;
+      border-radius: 6px;
+      padding: 14px;
+      font-family: monospace;
+      font-size: 11px;
+      line-height: 1.6;
+      color: #d4d4d8;
+      height: 280px;
+      overflow-y: auto;
     }
   </style>
 </head>
-<body class="bg-[#050505] text-white min-h-screen font-sans antialiased selection:bg-zinc-800">
+<body>
 
-  <!-- BARRA SUPERIOR -->
-  <header class="border-b border-zinc-900 px-6 py-4 flex items-center justify-between">
-    <div class="flex items-center space-x-3">
-      <span class="text-xs tracking-widest font-black uppercase bg-white text-black px-2 py-0.5 rounded">KOFFI STUDIO</span>
-      <span class="text-zinc-500 text-sm">/ Johnny Roma Media Engine</span>
+  <header>
+    <div class="brand-wrap">
+      <div class="brand-logo" title="Koffi Studio">
+        <svg width="24" height="24" viewBox="0 0 100 100" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="50" cy="50" r="45" stroke-width="4"/>
+          <polyline points="32,38 38,48 44,40"/>
+          <polyline points="68,38 62,48 56,40"/>
+          <polygon points="44,40 56,40 60,54 53,74 47,74 40,54"/>
+          <rect x="42" y="44" width="6" height="6"/>
+          <rect x="52" y="44" width="6" height="6"/>
+          <polygon points="47,56 53,56 50,61"/>
+          <rect x="47" y="64" width="6" height="10"/>
+          <line x1="50" y1="64" x2="50" y2="74"/>
+        </svg>
+      </div>
+      <div>
+        <span class="brand-title">KOFFI STUDIO</span>
+        <span class="brand-sub">/ Autonomous Engine</span>
+      </div>
     </div>
-    <div class="flex items-center space-x-4 text-xs">
-      <div class="flex items-center space-x-2 text-zinc-400 font-mono text-xs border-r border-zinc-800 pr-4">
-        <span class="text-zinc-500">SYS_TIME:</span>
-        <span id="live-clock" class="text-white font-semibold tracking-wider">--:--:--</span>
+
+    <div class="header-meta">
+      <div class="status-badge">
+        <span class="pulse-dot"></span>
+        <span>SYS_LIVE</span>
       </div>
-      <div class="flex items-center space-x-1.5">
-        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-        <span class="text-zinc-400">Sistema Activo</span>
-      </div>
-      <div class="bg-zinc-900 border border-zinc-800 px-3 py-1.5 rounded text-zinc-300">
-        Nicho: <span class="text-white font-medium">Estoicismo & Filosofía</span>
-      </div>
+      <span id="live-clock">--:--:--</span>
     </div>
   </header>
 
-  <!-- SECCIÓN BIENVENIDA & MÉTRICA -->
-  <main class="max-w-7xl mx-auto px-6 py-8">
-    <div class="flex flex-col md:flex-row md:items-end justify-between border-b border-zinc-900 pb-8 gap-4">
+  <main class="container">
+    <div class="hero">
       <div>
-        <p class="text-xs uppercase tracking-widest text-zinc-500 font-semibold mb-1">Centro de Mando</p>
-        <h1 class="text-3xl font-light tracking-tight text-white">Hola, <span class="font-bold">Johnny</span>. ¿Qué vamos a conquistar hoy?</h1>
+        <p class="hero-pre">Centro de Mando Modular</p>
+        <h1 class="hero-title">Hola, <strong>Johnny</strong>. ¿Qué vamos a conquistar hoy?</h1>
       </div>
-      <div class="bg-zinc-950 border border-zinc-900 p-4 rounded-lg w-full md:w-80">
-        <div class="flex justify-between text-xs mb-2">
-          <span class="text-zinc-400">Canal: Ser Estoico Canal</span>
-          <span class="text-emerald-400 font-mono font-bold">$51.13 / $100.00</span>
-        </div>
-        <div class="w-full bg-zinc-900 h-2 rounded-full overflow-hidden">
-          <div class="bg-white h-full w-[51.13%]"></div>
-        </div>
-        <p class="text-[10px] text-zinc-600 mt-2 text-right">Faltan $48.87 para el umbral de cobro</p>
+      <div>
+        <label class="input-label">Nicho Activo del Proyecto:</label>
+        <select class="niche-selector">
+          <option selected>🏛️ Estoicismo & Filosofía Práctica</option>
+          <option>📈 Finanzas Cuantitativas & Negocios</option>
+          <option>📜 Historia Épica & Mitología</option>
+          <option>🧠 Psicología Oscura & Comportamiento</option>
+          <option>🔍 Crónicas de Misterio & True Crime</option>
+          <option>⚙️ Inteligencia Artificial & Tech</option>
+        </select>
       </div>
     </div>
 
-    <!-- CARRUSELES BIDIRECCIONALES DE ESTILOS VISUALES -->
-    <section class="py-6 border-b border-zinc-900">
-      <div class="flex items-center justify-between mb-3">
-        <h2 class="text-xs uppercase tracking-wider text-zinc-400 font-bold">Estilos Visuales (Multi-Nicho)</h2>
-        <span class="text-[11px] text-zinc-600">Pasa el cursor para pausar y seleccionar</span>
+    <section>
+      <div class="section-title">
+        <span>Catálogo de Estilos Visuales (Multi-Nicho)</span>
+        <span style="color:#52525b;">Auto-Scroll</span>
       </div>
 
-      <!-- Fila 1: Derecha a Izquierda -->
-      <div class="marquee-container overflow-hidden whitespace-nowrap mb-3 relative">
-        <div class="animate-marquee-left gap-3">
-          <button class="bg-zinc-950 border border-zinc-800 hover:border-white px-4 py-3 rounded-lg text-left flex-1 min-w-[200px] transition">
-            <p class="text-sm font-bold text-white">🏛️ Estatua Mármol</p>
-            <p class="text-xs text-zinc-500">Claroscuro romano & lluvia</p>
-          </button>
-          <button class="bg-zinc-950 border border-zinc-800 hover:border-white px-4 py-3 rounded-lg text-left flex-1 min-w-[200px] transition">
-            <p class="text-sm font-bold text-white">🎞️ Documental 35mm</p>
-            <p class="text-xs text-zinc-500">Grano cinematográfico retro</p>
-          </button>
-          <button class="bg-zinc-950 border border-zinc-800 hover:border-white px-4 py-3 rounded-lg text-left flex-1 min-w-[200px] transition">
-            <p class="text-sm font-bold text-white">🌌 Cyberpunk / Sci-Fi</p>
-            <p class="text-xs text-zinc-500">Luces de neón & tecnología</p>
-          </button>
-          <button class="bg-zinc-950 border border-zinc-800 hover:border-white px-4 py-3 rounded-lg text-left flex-1 min-w-[200px] transition">
-            <p class="text-sm font-bold text-white">⚔️ Épica Histórica</p>
-            <p class="text-xs text-zinc-500">Batallas, niebla y armaduras</p>
-          </button>
-          <button class="bg-zinc-950 border border-zinc-800 hover:border-white px-4 py-3 rounded-lg text-left flex-1 min-w-[200px] transition">
-            <p class="text-sm font-bold text-white">🕯️ Misterio Oscuro</p>
-            <p class="text-xs text-zinc-500">Vela tenue, sombras profundas</p>
-          </button>
+      <div class="marquee-wrapper">
+        <div class="marquee-track marquee-left">
+          <div class="style-card">
+            <img class="style-img" src="[suspicious link removed]" alt="Estatua">
+            <div class="style-body"><p class="style-name">🏛️ Estatua & Mármol</p><p class="style-desc">Claroscuro romano & lluvia</p></div>
+          </div>
+          <div class="style-card">
+            <img class="style-img" src="[suspicious link removed]" alt="Cine">
+            <div class="style-body"><p class="style-name">🎞️ Documental 35mm</p><p class="style-desc">Grano analógico retro</p></div>
+          </div>
+          <div class="style-card">
+            <img class="style-img" src="[suspicious link removed]" alt="Cyber">
+            <div class="style-body"><p class="style-name">🌌 Cyberpunk / Tech</p><p class="style-desc">Neón & estética futurista</p></div>
+          </div>
+          <div class="style-card">
+            <img class="style-img" src="[suspicious link removed]" alt="Épico">
+            <div class="style-body"><p class="style-name">⚔️ Épica Histórica</p><p class="style-desc">Niebla, castillos y combate</p></div>
+          </div>
+          <div class="style-card">
+            <img class="style-img" src="[suspicious link removed]" alt="Vela">
+            <div class="style-body"><p class="style-name">🕯️ Misterio Oscuro</p><p class="style-desc">Sombras profundas & luz tenue</p></div>
+          </div>
+          <div class="style-card">
+            <img class="style-img" src="[suspicious link removed]" alt="Estatua">
+            <div class="style-body"><p class="style-name">🏛️ Estatua & Mármol</p><p class="style-desc">Claroscuro romano & lluvia</p></div>
+          </div>
+          <div class="style-card">
+            <img class="style-img" src="[suspicious link removed]" alt="Cine">
+            <div class="style-body"><p class="style-name">🎞️ Documental 35mm</p><p class="style-desc">Grano analógico retro</p></div>
+          </div>
+          <div class="style-card">
+            <img class="style-img" src="[suspicious link removed]" alt="Cyber">
+            <div class="style-body"><p class="style-name">🌌 Cyberpunk / Tech</p><p class="style-desc">Neón & estética futurista</p></div>
+          </div>
+          <div class="style-card">
+            <img class="style-img" src="[suspicious link removed]" alt="Épico">
+            <div class="style-body"><p class="style-name">⚔️ Épica Histórica</p><p class="style-desc">Niebla, castillos y combate</p></div>
+          </div>
+          <div class="style-card">
+            <img class="style-img" src="[suspicious link removed]" alt="Vela">
+            <div class="style-body"><p class="style-name">🕯️ Misterio Oscuro</p><p class="style-desc">Sombras profundas & luz tenue</p></div>
+          </div>
         </div>
       </div>
 
-      <!-- Fila 2: Izquierda a Derecha -->
-      <div class="marquee-container overflow-hidden whitespace-nowrap relative">
-        <div class="animate-marquee-right gap-3">
-          <button class="bg-zinc-950 border border-zinc-800 hover:border-white px-4 py-3 rounded-lg text-left flex-1 min-w-[200px] transition">
-            <p class="text-sm font-bold text-white">📈 Finanzas & Tech</p>
-            <p class="text-xs text-zinc-500">Modelos 3D y gráficos sobrios</p>
-          </button>
-          <button class="bg-zinc-950 border border-zinc-800 hover:border-white px-4 py-3 rounded-lg text-left flex-1 min-w-[200px] transition">
-            <p class="text-sm font-bold text-white">🧠 Psicología Oscura</p>
-            <p class="text-xs text-zinc-500">Siluetas y tableros de ajedrez</p>
-          </button>
-          <button class="bg-zinc-950 border border-zinc-800 hover:border-white px-4 py-3 rounded-lg text-left flex-1 min-w-[200px] transition">
-            <p class="text-sm font-bold text-white">🎨 Óleo Renacentista</p>
-            <p class="text-xs text-zinc-500">Textura de pintura clásica</p>
-          </button>
-          <button class="bg-zinc-950 border border-zinc-800 hover:border-white px-4 py-3 rounded-lg text-left flex-1 min-w-[200px] transition">
-            <p class="text-sm font-bold text-white">📜 Archivo Histórico</p>
-            <p class="text-xs text-zinc-500">Mapas antiguos y pergaminos</p>
-          </button>
-          <button class="bg-zinc-950 border border-zinc-800 hover:border-white px-4 py-3 rounded-lg text-left flex-1 min-w-[200px] transition">
-            <p class="text-sm font-bold text-white">🕳️ Silueta Minimalista</p>
-            <p class="text-xs text-zinc-500">Contraste puro blanco y negro</p>
-          </button>
+      <div class="marquee-wrapper">
+        <div class="marquee-track marquee-right">
+          <div class="style-card">
+            <img class="style-img" src="[suspicious link removed]" alt="Finanzas">
+            <div class="style-body"><p class="style-name">📈 Finanzas & Data</p><p class="style-desc">Mercados y modelos sobrios</p></div>
+          </div>
+          <div class="style-card">
+            <img class="style-img" src="[suspicious link removed]" alt="Psicología">
+            <div class="style-body"><p class="style-name">🧠 Psicología & Mente</p><p class="style-desc">Siluetas y sombras sutiles</p></div>
+          </div>
+          <div class="style-card">
+            <img class="style-img" src="[suspicious link removed]" alt="Óleo">
+            <div class="style-body"><p class="style-name">🎨 Óleo Renacentista</p><p class="style-desc">Pintura clásica al óleo</p></div>
+          </div>
+          <div class="style-card">
+            <img class="style-img" src="[suspicious link removed]" alt="Pergamino">
+            <div class="style-body"><p class="style-name">📜 Archivo Histórico</p><p class="style-desc">Mapas antiguos y manuscritos</p></div>
+          </div>
+          <div class="style-card">
+            <img class="style-img" src="[suspicious link removed]" alt="Minimal">
+            <div class="style-body"><p class="style-name">🕳️ Silueta Minimal</p><p class="style-desc">Contraste blanco y negro</p></div>
+          </div>
+          <div class="style-card">
+            <img class="style-img" src="[suspicious link removed]" alt="Finanzas">
+            <div class="style-body"><p class="style-name">📈 Finanzas & Data</p><p class="style-desc">Mercados y modelos sobrios</p></div>
+          </div>
+          <div class="style-card">
+            <img class="style-img" src="[suspicious link removed]" alt="Psicología">
+            <div class="style-body"><p class="style-name">🧠 Psicología & Mente</p><p class="style-desc">Siluetas y sombras sutiles</p></div>
+          </div>
+          <div class="style-card">
+            <img class="style-img" src="[suspicious link removed]" alt="Óleo">
+            <div class="style-body"><p class="style-name">🎨 Óleo Renacentista</p><p class="style-desc">Pintura clásica al óleo</p></div>
+          </div>
+          <div class="style-card">
+            <img class="style-img" src="[suspicious link removed]" alt="Pergamino">
+            <div class="style-body"><p class="style-name">📜 Archivo Histórico</p><p class="style-desc">Mapas antiguos y manuscritos</p></div>
+          </div>
+          <div class="style-card">
+            <img class="style-img" src="[suspicious link removed]" alt="Minimal">
+            <div class="style-body"><p class="style-name">🕳️ Silueta Minimal</p><p class="style-desc">Contraste blanco y negro</p></div>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- PESTAÑAS DE TRABAJO -->
-    <div class="pt-8">
-      <nav class="flex border-b border-zinc-900 space-x-8 text-sm">
-        <button class="pb-3 text-zinc-500 hover:text-white transition">1. Radar de Nichos & Outliers</button>
-        <button class="pb-3 border-b-2 border-white text-white font-semibold">2. Laboratorio de Guiones (20-25m)</button>
-        <button class="pb-3 text-zinc-500 hover:text-white transition">3. Motor de Voz (Edge / Colab)</button>
-        <button class="pb-3 text-zinc-500 hover:text-white transition">4. Prompts & B-Roll</button>
-        <button class="pb-3 text-zinc-500 hover:text-white transition">5. Packaging (Miniatura & SEO)</button>
-      </nav>
+    <nav class="tabs-nav">
+      <button class="tab-btn">1. Radar de Nichos & Outliers</button>
+      <button class="tab-btn active">2. Laboratorio de Guiones (20-25m)</button>
+      <button class="tab-btn">3. Motor de Voz (Edge / Colab)</button>
+      <button class="tab-btn">4. Prompt Studio (Nano Banana / Flux)</button>
+      <button class="tab-btn">5. Packaging (Miniatura & SEO)</button>
+    </nav>
 
-      <!-- CONTENEDOR DE PESTAÑA: GUION -->
-      <div class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="grid-workspace">
+      <div class="panel-box">
+        <h3 class="input-label" style="text-transform:uppercase; color:#fff; margin-bottom:12px;">Parámetros de Producción</h3>
         
-        <!-- Panel Izquierdo: Configuración de Guion -->
-        <div class="bg-zinc-950 border border-zinc-900 p-5 rounded-lg space-y-4">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-400">Modelar Video o Tema Original</h3>
-          
-          <div>
-            <label class="text-xs text-zinc-400 block mb-1">Pegar URL de YouTube a Modelar (Ingeniería Inversa):</label>
-            <input type="text" placeholder="[suspicious link removed]..." class="w-full bg-zinc-900 border border-zinc-800 rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-white transition">
-          </div>
-
-          <div>
-            <label class="text-xs text-zinc-400 block mb-1">Tono Narrativo:</label>
-            <select class="w-full bg-zinc-900 border border-zinc-800 rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-white">
-              <option selected>Confrontativo / Firme (Ser Estoico)</option>
-              <option>Solemne / Filosófico Profundo</option>
-              <option>Intrigante / Misterio Histórico</option>
-              <option>Analítico / Alto RPM</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="text-xs text-zinc-400 block mb-1">Duración Calibrada:</label>
-            <select class="w-full bg-zinc-900 border border-zinc-800 rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-white">
-              <option selected>20 a 25 minutos (~2,600 a 3,100 palabras)</option>
-              <option>10 a 15 minutos (~1,300 a 1,800 palabras)</option>
-              <option>Short / Reel (45 a 60 segundos)</option>
-            </select>
-          </div>
-
-          <button class="w-full bg-white text-black font-bold py-2.5 rounded text-xs hover:bg-zinc-200 transition">
-            ⚡ GENERAR GUION POR ESCENAS
-          </button>
+        <div class="input-group">
+          <label class="input-label">Pegar URL de Video a Modelar:</label>
+          <input type="text" class="input-field" placeholder="[suspicious link removed]...">
         </div>
 
-        <!-- Panel Derecho: Visor de Guion y Escenas -->
-        <div class="lg:col-span-2 bg-zinc-950 border border-zinc-900 p-5 rounded-lg flex flex-col justify-between">
-          <div>
-            <div class="flex justify-between items-center mb-3">
-              <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-400">Estructura por Escenas (10% Video / 90% Ken Burns)</h3>
-              <span class="text-xs text-zinc-500 font-mono">2,780 palabras | ~22 min</span>
-            </div>
-            <div class="bg-zinc-900/60 border border-zinc-800/80 rounded p-4 h-64 overflow-y-auto text-xs space-y-3 font-mono leading-relaxed text-zinc-300">
-              <p><span class="text-emerald-400 font-bold">[00:00 - 01:30] HOOK:</span> "Sigues esperando que la vida te pida perdón. Sigues creyendo que tu debilidad es sensibilidad..."</p>
-              <p class="text-zinc-500 italic pl-4">Visual: B-Roll video clip (Pexels) - Estatua de Marco Aurelio bajo lluvia torrencial, relámpagos tenues.</p>
-              <hr class="border-zinc-800">
-              <p><span class="text-emerald-400 font-bold">[01:30 - 04:15] CLAVE 1:</span> "La ilusión del control externo. Epicteto no te tuvo lástima cuando era esclavo..."</p>
-              <p class="text-zinc-500 italic pl-4">Visual: Imagen fija generada con IA - Busto de mármol de Epicteto en claroscuro, zoom lento hacia los ojos (Efecto Ken Burns).</p>
-            </div>
-          </div>
-
-          <div class="flex gap-3 mt-4">
-            <button class="flex-1 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 py-2 rounded text-xs font-medium text-white transition">Copiar Guion Completo</button>
-            <button class="flex-1 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 py-2 rounded text-xs font-medium text-white transition">Exportar Prompts de Escena</button>
-            <button class="flex-1 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 py-2 rounded text-xs font-medium text-emerald-400 transition">Enviar a Locución Continua</button>
-          </div>
+        <div class="input-group">
+          <label class="input-label">Tono Narrativo:</label>
+          <select class="input-field">
+            <option selected>Confrontativo / Firme (Ser Estoico)</option>
+            <option>Solemne / Filosófico Profundo</option>
+            <option>Intrigante / Misterio Histórico</option>
+            <option>Analítico / Alto RPM</option>
+          </select>
         </div>
 
+        <div class="input-group">
+          <label class="input-label">Duración Calibrada:</label>
+          <select class="input-field">
+            <option selected>20 a 25 minutos (~2,600 a 3,100 palabras)</option>
+            <option>10 a 15 minutos (~1,300 a 1,800 palabras)</option>
+            <option>Short / Reel (45 a 60 segundos)</option>
+          </select>
+        </div>
+
+        <button class="btn-main">⚡ GENERAR GUION POR ESCENAS</button>
+      </div>
+
+      <div class="panel-box">
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+          <span class="input-label" style="color:#fff; text-transform:uppercase;">Estructura por Escenas (Regla 10/90)</span>
+          <span style="font-family:monospace; font-size:11px; color:#10b981;">2,740 palabras | ~22 min</span>
+        </div>
+        <div class="console-out">
+          <p style="color:#10b981;"><strong>[00:00 - 01:30] GANCHO PSICOLÓGICO:</strong> "Sigues esperando que el mundo se adapte a ti. Sigues buscando aprobación de personas que ni siquiera se respetan a sí mismas..."</p>
+          <p style="color:#71717a; margin-top:4px;">↳ Escena Visual: Animación de entrada o B-Roll oscuro — Busto romano bajo lluvia torrencial con truenos lejanos (10% animación de entrada).</p>
+          <hr style="border:none; border-top:1px solid #18181b; margin:12px 0;">
+          <p style="color:#10b981;"><strong>[01:30 - 04:15] LECCIÓN 1:</strong> "La trampa de la compasión ajena: por qué mostrar debilidad te convierte en un objetivo fácil..."</p>
+          <p style="color:#71717a; margin-top:4px;">↳ Escena Visual: Imagen original IA (Nano Banana / Recraft) — Busto de Séneca en claroscuro con efecto Ken Burns (zoom suave hacia la mirada).</p>
+        </div>
       </div>
     </div>
   </main>
 
-  <!-- SCRIPT FECHA Y HORA EN TIEMPO REAL -->
   <script>
     function updateClock() {
       const now = new Date();
@@ -219,12 +399,9 @@
         hour12: false 
       };
       const formatted = now.toLocaleDateString('es-ES', options).toUpperCase().replace(',', ' |');
-      const clockElement = document.getElementById('live-clock');
-      if (clockElement) {
-        clockElement.textContent = formatted;
-      }
+      const el = document.getElementById('live-clock');
+      if (el) el.textContent = formatted;
     }
-
     updateClock();
     setInterval(updateClock, 1000);
   </script>
