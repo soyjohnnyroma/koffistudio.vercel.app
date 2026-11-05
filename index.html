@@ -1,422 +1,151 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Koffi Studio — Autonomous Media Engine</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background-color: #050505;
-      color: #f4f4f5;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      min-height: 100vh;
-      line-height: 1.5;
-    }
-    header {
-      border-bottom: 1px solid #18181b;
-      padding: 14px 20px;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      background: #09090b;
-    }
-    .brand-wrap { display: flex; align-items: center; gap: 12px; }
-    .brand-logo {
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      background: #000000;
-      border: 1.5px solid #ffffff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      flex-shrink: 0;
-    }
-    .brand-title { font-size: 13px; font-weight: 900; letter-spacing: 1.5px; }
-    .brand-sub { color: #71717a; font-size: 11px; margin-left: 6px; }
-    .header-meta { display: flex; align-items: center; gap: 14px; font-size: 11px; font-family: monospace; }
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: #18181b;
-      padding: 4px 10px;
-      border-radius: 20px;
-      border: 1px solid #27272a;
-      color: #a1a1aa;
-    }
-    .pulse-dot { width: 7px; height: 7px; border-radius: 50%; background: #10b981; }
-    .container { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
-    .hero {
-      border-bottom: 1px solid #18181b;
-      padding-bottom: 24px;
-      margin-bottom: 24px;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: flex-end;
-      gap: 16px;
-    }
-    .hero-pre { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #71717a; font-weight: 700; }
-    .hero-title { font-size: 26px; font-weight: 300; margin-top: 4px; }
-    .hero-title strong { font-weight: 700; color: #ffffff; }
-    .niche-badge {
-      background: #09090b;
-      border: 1px solid #27272a;
-      padding: 8px 14px;
-      border-radius: 8px;
-      color: #fff;
-      font-size: 12px;
-      font-weight: 600;
-    }
-    .section-title {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      color: #a1a1aa;
-      font-weight: 700;
-      margin-bottom: 12px;
-      display: flex;
-      justify-content: space-between;
-    }
-    .visual-pills {
-      display: flex;
-      gap: 10px;
-      overflow-x: auto;
-      padding-bottom: 8px;
-      margin-bottom: 20px;
-    }
-    .pill {
-      background: #09090b;
-      border: 1px solid #18181b;
-      padding: 10px 14px;
-      border-radius: 8px;
-      white-space: nowrap;
-      cursor: pointer;
-      font-size: 12px;
-      transition: all 0.2s;
-    }
-    .pill:hover, .pill.active { border-color: #ffffff; background: #121214; }
-    .pill strong { display: block; color: #ffffff; font-size: 12px; }
-    .pill span { color: #71717a; font-size: 10px; }
-    .tabs-nav {
-      display: flex;
-      overflow-x: auto;
-      border-bottom: 1px solid #18181b;
-      gap: 20px;
-      padding-bottom: 10px;
-      margin-top: 10px;
-    }
-    .tab-btn {
-      background: none;
-      border: none;
-      color: #71717a;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      padding-bottom: 8px;
-      white-space: nowrap;
-      transition: color 0.2s;
-    }
-    .tab-btn.active { color: #ffffff; border-bottom: 2px solid #ffffff; }
-    .tab-content { display: none; margin-top: 20px; }
-    .tab-content.active { display: block; }
-    .grid-workspace {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 16px;
-    }
-    @media(min-width: 900px) {
-      .grid-workspace { grid-template-columns: 360px 1fr; }
-    }
-    .panel-box {
-      background: #09090b;
-      border: 1px solid #18181b;
-      border-radius: 8px;
-      padding: 16px;
-    }
-    .input-group { margin-bottom: 14px; }
-    .input-label { display: block; font-size: 11px; color: #a1a1aa; margin-bottom: 6px; font-weight: 500; }
-    .input-field {
-      width: 100%;
-      background: #121214;
-      border: 1px solid #27272a;
-      border-radius: 6px;
-      padding: 8px 10px;
-      color: #fff;
-      font-size: 12px;
-      outline: none;
-    }
-    .input-field:focus { border-color: #71717a; }
-    .btn-main {
-      width: 100%;
-      background: #ffffff;
-      color: #000000;
-      border: none;
-      padding: 10px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .btn-main:hover { background: #e4e4e7; }
-    .console-out {
-      background: #030303;
-      border: 1px solid #18181b;
-      border-radius: 6px;
-      padding: 14px;
-      font-family: monospace;
-      font-size: 11px;
-      line-height: 1.6;
-      color: #d4d4d8;
-      height: 320px;
-      overflow-y: auto;
-    }
-    .resource-card {
-      background: #121214;
-      border: 1px solid #18181b;
-      border-radius: 6px;
-      padding: 12px;
-      margin-bottom: 10px;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Koffi Studio</title>
+<style>
+:root{--bg:#050505;--panel:#0b0b0d;--field:#131316;--line:#222226;--tx:#f4f4f5;--mut:#8b8b93;--ok:#10b981;--btn:#fff;--btnt:#000;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:dark}
+@media(prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#f6f6f7;--panel:#fff;--field:#f0f0f2;--line:#dcdce0;--tx:#111;--mut:#666;--ok:#047857;--btn:#111;--btnt:#fff;color-scheme:light}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5;font-size:14px}
+header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--panel);gap:10px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:1.5px;font-size:13px}
+.logo{width:34px;height:34px;border-radius:50%;background:#000;border:1.5px solid #fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.live{font:11px monospace;color:var(--mut);display:flex;gap:6px;align-items:center}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--ok)}
+main{max-width:900px;margin:0 auto;padding:18px 14px 40px}
+h1{font-size:22px;font-weight:300;margin-bottom:12px}h1 b{font-weight:700}
+label{display:block;font-size:11px;color:var(--mut);margin:12px 0 5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+input,select,textarea{width:100%;background:var(--field);border:1px solid var(--line);border-radius:8px;padding:10px;color:var(--tx);font:inherit;font-size:14px;outline:none}
+textarea{min-height:90px;resize:vertical}
+.tabs{display:flex;gap:16px;overflow-x:auto;border-bottom:1px solid var(--line);margin:16px 0 4px}
+.tabs button{background:none;border:0;border-bottom:2px solid transparent;color:var(--mut);padding:8px 0;font:600 13px inherit;white-space:nowrap;cursor:pointer}
+.tabs button.on{color:var(--tx);border-color:var(--tx)}
+.tab{display:none}.tab.on{display:block}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;margin-top:12px}
+.btn{width:100%;background:var(--btn);color:var(--btnt);border:0;border-radius:8px;padding:12px;font:700 13px inherit;margin-top:12px;cursor:pointer}
+.btn.alt{background:none;color:var(--tx);border:1px solid var(--line)}
+.out{font:12px/1.5 monospace;white-space:pre-wrap;background:var(--field);border:1px solid var(--line);border-radius:8px;padding:12px;margin-top:12px;min-height:60px;color:var(--mut)}
+.pills{display:flex;gap:8px;overflow-x:auto;padding:4px 0}
+.pill{border:1px solid var(--line);background:var(--panel);color:var(--tx);border-radius:8px;padding:8px 12px;white-space:nowrap;font-size:12px;cursor:pointer}
+.pill.on{border-color:var(--tx)}
+.hint{font-size:12px;color:var(--mut);margin-top:8px}
+.chk{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)}
+.chk:last-child{border:0}.chk input{width:20px;height:20px;margin-top:2px;flex-shrink:0}
+.chk b{display:block;font-size:13px}.chk span{font-size:12px;color:var(--mut)}
+.stat{font:700 20px monospace;color:var(--ok)}
+</style>
 </head>
 <body>
+<header>
+  <div class="brand"><div class="logo"><svg width="24" height="24" viewBox="0 0 100 100" fill="none" stroke="#fff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="50" cy="50" r="45" stroke-width="4"/><polyline points="32,38 38,48 44,40"/><polyline points="68,38 62,48 56,40"/><polygon points="44,40 56,40 60,54 53,74 47,74 40,54"/><rect x="42" y="44" width="6" height="6"/><rect x="52" y="44" width="6" height="6"/><polygon points="47,56 53,56 50,61"/><rect x="47" y="64" width="6" height="10"/></svg></div>KOFFI STUDIO</div>
+  <div class="live"><span class="dot"></span><span id="clock">--:--</span></div>
+</header>
+<main>
+  <h1>Hola, <b>Johnny</b>. ¿Qué vamos a crear hoy?</h1>
+  <label for="niche">Canal o nicho de hoy</label>
+  <input id="niche" placeholder="Ej.: Estoicismo y filosofía" oninput="save()">
 
-  <header>
-    <div class="brand-wrap">
-      <div class="brand-logo" title="Koffi Studio">
-        <svg width="24" height="24" viewBox="0 0 100 100" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="50" cy="50" r="45" stroke-width="4"/>
-          <polyline points="32,38 38,48 44,40"/>
-          <polyline points="68,38 62,48 56,40"/>
-          <polygon points="44,40 56,40 60,54 53,74 47,74 40,54"/>
-          <rect x="42" y="44" width="6" height="6"/>
-          <rect x="52" y="44" width="6" height="6"/>
-          <polygon points="47,56 53,56 50,61"/>
-          <rect x="47" y="64" width="6" height="10"/>
-          <line x1="50" y1="64" x2="50" y2="74"/>
-        </svg>
-      </div>
-      <div>
-        <span class="brand-title">KOFFI STUDIO</span>
-        <span class="brand-sub">/ Ser Estoico v1.0</span>
-      </div>
-    </div>
+  <div class="tabs" id="tabs">
+    <button class="on" data-t="t1">1. Guion</button>
+    <button data-t="t2">2. Imágenes</button>
+    <button data-t="t3">3. Voz</button>
+    <button data-t="t4">4. Montaje</button>
+    <button data-t="t5">5. Packaging</button>
+  </div>
 
-    <div class="header-meta">
-      <div class="status-badge">
-        <span class="pulse-dot"></span>
-        <span>SYS_LIVE</span>
-      </div>
-      <span id="live-clock">--:--:--</span>
-    </div>
-  </header>
+  <!-- 1 GUION -->
+  <section class="tab on" id="t1"><div class="box">
+    <label for="url">Enlace del video ganador a modelar</label>
+    <input id="url" placeholder="https://youtube.com/..." oninput="save()">
+    <label for="trans">Transcripción del video (opcional, pégala aquí)</label>
+    <textarea id="trans" placeholder="La IA no puede ver el video: si pegas la transcripción, el resultado mejora mucho." oninput="save()"></textarea>
+    <label for="topic">Tema de tu video nuevo</label>
+    <input id="topic" placeholder="Ej.: Nadie te debe nada" oninput="save()">
+    <label for="tone">Tono narrativo</label>
+    <select id="tone" onchange="save()">
+      <option>Confrontativo y firme</option><option>Solemne y filosófico</option><option>Revelador, de despertar mental</option><option>Cercano y educativo</option><option>Inspirador y motivador</option>
+    </select>
+    <label for="fmt">Formato y duración</label>
+    <select id="fmt" onchange="save()">
+      <option value="reel">Reel / Short (30–60 s, vertical)</option>
+      <option value="corto">Video corto (3–5 min)</option>
+      <option value="medio">Video medio (10–15 min)</option>
+      <option value="largo" selected>Video largo (20–25 min)</option>
+    </select>
+    <button class="btn" onclick="buildScript()">Armar prompt del guion</button>
+    <div class="out" id="o1">Aquí aparecerá tu prompt listo para pegar en Claude, Gemini (AI Studio) o Grok.</div>
+    <button class="btn alt" onclick="copy('o1')">Copiar prompt</button>
+  </div></section>
 
-  <main class="container">
-    <div class="hero">
-      <div>
-        <p class="hero-pre">Centro de Mando Modular</p>
-        <h1 class="hero-title">Hola, <strong>Johnny</strong>. ¿Qué vamos a conquistar hoy?</h1>
-      </div>
-      <div class="niche-badge">
-        🏛️ Canal: Ser Estoico (Meta AdSense: $100)
-      </div>
-    </div>
+  <!-- 2 IMAGENES -->
+  <section class="tab" id="t2"><div class="box">
+    <label>Estilo visual</label>
+    <div class="pills" id="styles"></div>
+    <label for="scene">Escena (en español, tal como la cuenta el guion)</label>
+    <textarea id="scene" placeholder="Ej.: busto de Marco Aurelio bajo lluvia intensa" oninput="save()"></textarea>
+    <button class="btn" onclick="buildImg()">Armar prompt de imagen</button>
+    <div class="out" id="o2">Aquí aparecerá el prompt en inglés (los generadores lo entienden mejor).</div>
+    <button class="btn alt" onclick="copy('o2')">Copiar prompt</button>
+    <p class="hint">Orden de uso: 1.º Nano Banana (AI Studio) · 2.º Grok si quieres rostros intensos · 3.º Krea para subir la resolución. Truco: genera 1 imagen y recórtala en 3 tomas (general, medio, detalle) en CapCut.</p>
+  </div></section>
 
-    <section>
-      <div class="section-title">
-        <span>Estilos Visuales (Foco en Filosofía y Claroscuro)</span>
-        <span style="color:#52525b;">3 planos por imagen (Regla de escala)</span>
-      </div>
+  <!-- 3 VOZ -->
+  <section class="tab" id="t3"><div class="box">
+    <label for="vtxt">Pega aquí el texto final de la locución</label>
+    <textarea id="vtxt" style="min-height:140px" oninput="count()"></textarea>
+    <p class="hint">Palabras: <span class="stat" id="wc">0</span> · Duración aprox.: <span class="stat" id="dur">0 min</span></p>
+    <p class="hint">Ritmo calculado: 130 palabras por minuto, ritmo grave y pausado.</p>
+    <div class="out" style="color:var(--tx)">Opciones gratis para la voz
+1) Edge-TTS (voces neurales de Microsoft): es-MX-JorgeNeural o es-ES-AlvaroNeural. Se usa desde Google Colab o un computador.
+2) Voz clonada con F5-TTS en Google Colab (muestra de 10–15 s).
+Pega el texto de arriba y exporta un solo audio continuo.</div>
+  </div></section>
 
-      <div class="visual-pills">
-        <div class="pill active">
-          <strong>🏛️ Estatua de Mármol</strong>
-          <span>Claroscuro romano & lluvia</span>
-        </div>
-        <div class="pill">
-          <strong>🎞️ Grano Analógico 35mm</strong>
-          <span>Textura de película clásica</span>
-        </div>
-        <div class="pill">
-          <strong>🕯️ Claroscuro Barroco</strong>
-          <span>Luz tenue & sombras densas</span>
-        </div>
-        <div class="pill">
-          <strong>📜 Manuscrito Histórico</strong>
-          <span>Mapas antiguos & pergamino</span>
-        </div>
-        <div class="pill">
-          <strong>🕳️ Silueta Minimal</strong>
-          <span>Alto contraste blanco y negro</span>
-        </div>
-      </div>
-    </section>
+  <!-- 4 MONTAJE -->
+  <section class="tab" id="t4"><div class="box">
+    <p class="hint" style="margin:0 0 6px">Tu plantilla de CapCut ya lleva música, polvo y suscríbete. Marca cada paso al terminarlo.</p>
+    <div id="checks"></div>
+    <button class="btn alt" onclick="resetChecks()">Reiniciar lista para un video nuevo</button>
+    <p class="hint">Aviso: «Galactic Bass» de John Patitucci es música comercial. Si te llega un reclamo de Content ID, cambia a pistas de la Biblioteca de Audio de YouTube.</p>
+  </div></section>
 
-    <nav class="tabs-nav">
-      <button class="tab-btn active" onclick="openTab('tab-guion', this)">1. Laboratorio de Guiones (20-25m)</button>
-      <button class="tab-btn" onclick="openTab('tab-prompts', this)">2. Prompts IA (Nano Banana / Grok)</button>
-      <button class="tab-btn" onclick="openTab('tab-recursos', this)">3. Recursos Locales & Montaje</button>
-      <button class="tab-btn" onclick="openTab('tab-seo', this)">4. Packaging (Miniatura & SEO)</button>
-    </nav>
+  <!-- 5 PACKAGING -->
+  <section class="tab" id="t5"><div class="box">
+    <label for="sum">Resumen del video o capítulos con minutos</label>
+    <textarea id="sum" placeholder="Pega el guion o un resumen con los minutos de cada parte." oninput="save()"></textarea>
+    <button class="btn" onclick="buildPack()">Armar prompt de título, miniatura y descripción</button>
+    <div class="out" id="o5">Aquí aparecerá el prompt de packaging.</div>
+    <button class="btn alt" onclick="copy('o5')">Copiar prompt</button>
+  </div></section>
+</main>
 
-    <!-- PESTAÑA 1: GUION -->
-    <div id="tab-guion" class="tab-content active">
-      <div class="grid-workspace">
-        <div class="panel-box">
-          <h3 class="input-label" style="text-transform:uppercase; color:#fff; margin-bottom:12px;">Parámetros del Video</h3>
-          
-          <div class="input-group">
-            <label class="input-label">URL del Video Ganador a Modelar:</label>
-            <input type="text" class="input-field" placeholder="[suspicious link removed]...">
-          </div>
-
-          <div class="input-group">
-            <label class="input-label">Tono Narrativo:</label>
-            <select class="input-field">
-              <option selected>Confrontativo / Firme (Ser Estoico)</option>
-              <option>Solemne / Filosófico Profundo</option>
-              <option>Revelador / Despertar Mental</option>
-            </select>
-          </div>
-
-          <div class="input-group">
-            <label class="input-label">Duración Calibrada:</label>
-            <select class="input-field">
-              <option selected>20 a 25 minutos (~2,600 a 3,100 palabras)</option>
-              <option>10 a 15 minutos (~1,300 a 1,800 palabras)</option>
-            </select>
-          </div>
-
-          <button class="btn-main" onclick="alert('Generador activado. Pega la transcripción en el chat para estructurar el guion por escenas.')">
-            ⚡ GENERAR GUION POR ESCENAS
-          </button>
-        </div>
-
-        <div class="panel-box">
-          <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-            <span class="input-label" style="color:#fff; text-transform:uppercase;">Visor de Estructura Narrativa</span>
-            <span style="font-family:monospace; font-size:11px; color:#10b981;">2,740 palabras | ~22 min</span>
-          </div>
-          <div class="console-out">
-            <p style="color:#10b981;"><strong>[00:00 - 01:30] HOOK DE RETENCIÓN (PRIMEROS 15s):</strong></p>
-            <p>"Sigues esperando que la vida te pida disculpas. Sigues creyendo que tu debilidad es sensibilidad..."</p>
-            <p style="color:#71717a; margin-top:4px;">↳ Visual: Busto de Marco Aurelio bajo lluvia pesada. Plano general (00:00) y zoom cerrado a los ojos (00:08).</p>
-            <hr style="border:none; border-top:1px solid #18181b; margin:12px 0;">
-            <p style="color:#10b981;"><strong>[01:30 - 04:30] LECCIÓN 1: La Trampa de la Aprobación Ajena:</strong></p>
-            <p>"Epicteto fue esclavo antes de ser maestro. No tuvo tiempo para quejarse de su amo ni de su destino..."</p>
-            <p style="color:#71717a; margin-top:4px;">↳ Visual: Estatua de Epicteto en claroscuro. Efecto Ken Burns suave hacia la derecha.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- PESTAÑA 2: PROMPTS IA -->
-    <div id="tab-prompts" class="tab-content">
-      <div class="panel-box">
-        <h3 class="input-label" style="text-transform:uppercase; color:#fff; margin-bottom:12px;">Fábrica de Prompts (Regla de 3 Planos por Imagen)</h3>
-        <p style="font-size:12px; color:#a1a1aa; margin-bottom:16px;">
-          Copia estos prompts directamente en <strong>Nano Banana (Google AI Studio)</strong> o <strong>Grok</strong>. Genera 1 sola imagen en 16:9 y usa el recorte de CapCut para obtener 3 tomas:
-        </p>
-
-        <div class="resource-card">
-          <span style="color:#10b981; font-weight:700; font-size:11px;">PROMPT ESCENA HOOK (00:00 - 01:30)</span>
-          <p style="font-family:monospace; font-size:11px; color:#d4d4d8; margin-top:6px;">
-            Cinematic weathered marble bust of Marcus Aurelius in heavy pouring rain, dramatic chiaroscuro lighting, deep black background, moody atmospheric mist, 8k resolution, cinematic 16:9, hyper-realistic stone texture.
-          </p>
-        </div>
-
-        <div class="resource-card">
-          <span style="color:#10b981; font-weight:700; font-size:11px;">PROMPT LECCIÓN 1 (01:30 - 04:30)</span>
-          <p style="font-family:monospace; font-size:11px; color:#d4d4d8; margin-top:6px;">
-            Cinematic stone sculpture of Epicteto looking forward with determination, cracked stone details, single warm side-light, dark shadows, smoky background, historical stoic atmosphere, 16:9.
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <!-- PESTAÑA 3: RECURSOS LOCALES -->
-    <div id="tab-recursos" class="tab-content">
-      <div class="panel-box">
-        <h3 class="input-label" style="text-transform:uppercase; color:#fff; margin-bottom:12px;">Lista de Verificación de Archivos en el Celular</h3>
-        
-        <div class="resource-card">
-          <p style="font-size:12px; font-weight:700; color:#fff;">🎙️ 1. Pista de Voz Clonada</p>
-          <p style="font-size:11px; color:#71717a;">Audio largo continuo exportado (~22 min) listo para colocar en la pista principal.</p>
-        </div>
-
-        <div class="resource-card">
-          <p style="font-size:12px; font-weight:700; color:#fff;">🎵 2. Música de Fondo (Galactic Bass)</p>
-          <p style="font-size:11px; color:#71717a;">Configurar volumen al 12% - 15% en CapCut con bucle continuo por debajo de la voz.</p>
-        </div>
-
-        <div class="resource-card">
-          <p style="font-size:12px; font-weight:700; color:#fff;">✨ 3. Overlay de Polvo y Ruido</p>
-          <p style="font-size:11px; color:#71717a;">Poner en pista de superposición y activar Modo de Fusión: "Pantalla" (Screen) para quitar el fondo negro.</p>
-        </div>
-
-        <div class="resource-card">
-          <p style="font-size:12px; font-weight:700; color:#fff;">👆 4. Botón de Suscríbete Interactivo</p>
-          <p style="font-size:11px; color:#71717a;">Insertar en el minuto 02:00 y en el minuto 18:00 en la esquina inferior.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- PESTAÑA 4: SEO -->
-    <div id="tab-seo" class="tab-content">
-      <div class="panel-box">
-        <h3 class="input-label" style="text-transform:uppercase; color:#fff; margin-bottom:12px;">Metadatos Listos para YouTube Studio</h3>
-        
-        <div class="input-group">
-          <label class="input-label">Título Psicológico de Alto CTR:</label>
-          <input type="text" class="input-field" value="Nadie Te Debe Nada (La Cruda Verdad Que Cambiará Tu Mente) — Estoicismo">
-        </div>
-
-        <div class="input-group">
-          <label class="input-label">Capítulos de Retención:</label>
-          <textarea class="input-field" rows="5">00:00 - La trampa de la compasión
-01:30 - Epicteto y el control absoluto
-05:15 - El silencio como poder
-10:40 - Forja tu mente ante la queja
-16:20 - Marco Aurelio: Nadie te debe nada
-21:10 - Conclusión</textarea>
-        </div>
-      </div>
-    </div>
-  </main>
-
-  <script>
-    function updateClock() {
-      const now = new Date();
-      const options = { 
-        day: '2-digit', 
-        month: 'short', 
-        year: 'numeric', 
-        hour: '2-digit', 
-        minute: '2-digit', 
-        second: '2-digit', 
-        hour12: false 
-      };
-      const formatted = now.toLocaleDateString('es-ES', options).toUpperCase().replace(',', ' |');
-      const el = document.getElementById('live-clock');
-      if (el) el.textContent = formatted;
-    }
-    updateClock();
-    setInterval(updateClock, 1000);
-
-    function openTab(tabId, btn) {
-      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById(tabId).classList.add('active');
-      btn.classList.add('active');
-    }
-  </script>
+<script>
+var FM={reel:{n:'Reel/Short vertical',w:'110 a 150',a:'9:16'},corto:{n:'video corto de 3 a 5 minutos',w:'450 a 700',a:'16:9'},medio:{n:'video de 10 a 15 minutos',w:'1300 a 1800',a:'16:9'},largo:{n:'video largo de 20 a 25 minutos',w:'2600 a 3100',a:'16:9'}};
+var ST=[['Estatua de mármol','weathered marble statue, dramatic chiaroscuro, deep black background, rain and mist'],['Grano analógico 35mm','35mm analog film grain, muted colors, vintage documentary look'],['Claroscuro barroco','baroque chiaroscuro, candlelight, dense shadows, oil painting feel'],['Manuscrito histórico','aged parchment, ancient maps, sepia ink, historical manuscript'],['Silueta minimal','minimal high-contrast black and white silhouette']];
+var CK=[['Guion final revisado','Léelo en voz alta una vez.'],['Audio de voz exportado','Un solo archivo continuo.'],['Imágenes generadas','Una por escena, recortes en 3 tomas.'],['Imágenes en CapCut','Sobre la pista de voz.'],['Música de fondo al 12–15 %','Bucle por debajo de la voz.'],['Overlay de polvo en modo Pantalla','Quita el fondo negro.'],['Botón suscríbete con manito','Minuto 2:00 y minuto 18:00.'],['Subtítulos automáticos','Revisa nombres propios.'],['Exportar y subir a YouTube','Título, descripción y capítulos del paso 5.']];
+var S={};var sty=0;
+function $(i){return document.getElementById(i)}
+function load(){try{S=JSON.parse(localStorage.getItem('koffi')||'{}')}catch(e){S={}}
+ ['niche','url','trans','topic','tone','fmt','scene','sum'].forEach(function(k){if(S[k]!=null)$(k).value=S[k]});sty=S.sty||0}
+function save(){['niche','url','trans','topic','tone','fmt','scene','sum'].forEach(function(k){S[k]=$(k).value});S.sty=sty;try{localStorage.setItem('koffi',JSON.stringify(S))}catch(e){}}
+function copy(id){var t=$(id).textContent;try{navigator.clipboard.writeText(t)}catch(e){var r=document.createRange();r.selectNode($(id));getSelection().removeAllRanges();getSelection().addRange(r)}}
+function buildScript(){var f=FM[$('fmt').value],n=$('niche').value||'(sin definir)';
+ var p='Actúa como guionista experto de YouTube. Nicho: '+n+'.\nTema del video: '+($('topic').value||'(propón 3 temas)')+'.\nTono: '+$('tone').value+'.\nFormato: '+f.n+', unas '+f.w+' palabras.\n';
+ if($('url').value)p+='Video ganador de referencia: '+$('url').value+'. Analiza su estructura y mejora la idea sin copiar sus frases.\n';
+ if($('trans').value)p+='Transcripción de referencia:\n'+$('trans').value+'\n';
+ p+='\nEntrega:\n1) 3 ganchos para los primeros 15 segundos.\n2) Guion completo para locución, en frases cortas, por escenas con marca de tiempo.\n3) Tras cada escena, una línea «Visual:» con la imagen a mostrar.\nUsa solo hechos verificables. Si falta un dato, pregúntame antes. Responde en español.';
+ $('o1').textContent=p;$('o1').style.color='var(--tx)'}
+function buildImg(){var f=FM[$('fmt').value];var p=($('scene').value||'describe tu escena')+', '+ST[sty][1]+', cinematic, hyper-realistic, '+f.a+' aspect ratio, no text, no watermark';$('o2').textContent=p;$('o2').style.color='var(--tx)'}
+function buildPack(){var p='Dame el empaquetado de mi video de YouTube. Nicho: '+($('niche').value||'(sin definir)')+'.\nResumen:\n'+($('sum').value||'(pégalo aquí)')+'\n\nEntrega:\n1) 5 títulos de menos de 60 caracteres, con lo importante al principio.\n2) Para cada uno, texto de miniatura de 2 a 4 palabras que complete el título sin repetirlo.\n3) Las 2 primeras líneas de la descripción con palabras que la gente busca.\n4) Capítulos: el primero en 0:00, mínimo 3, cada uno de 10 s o más.\nNo exageres lo que el video no contiene. Responde en español.';$('o5').textContent=p;$('o5').style.color='var(--tx)'}
+function count(){var w=($('vtxt').value.trim().match(/\S+/g)||[]).length;$('wc').textContent=w;$('dur').textContent=(w/130).toFixed(1)+' min'}
+function drawStyles(){$('styles').innerHTML='';ST.forEach(function(s,i){var b=document.createElement('button');b.className='pill'+(i==sty?' on':'');b.textContent=s[0];b.onclick=function(){sty=i;save();drawStyles()};$('styles').appendChild(b)})}
+function drawChecks(){var d=S.chk||{};$('checks').innerHTML='';CK.forEach(function(c,i){var r=document.createElement('label');r.className='chk';r.style.cssText='text-transform:none;letter-spacing:0;margin:0;color:var(--tx)';r.innerHTML='<input type="checkbox"'+(d[i]?' checked':'')+'><div><b>'+c[0]+'</b><span>'+c[1]+'</span></div>';r.firstChild.onchange=function(){S.chk=S.chk||{};S.chk[i]=this.checked;save()};$('checks').appendChild(r)})}
+function resetChecks(){S.chk={};save();drawChecks()}
+document.querySelectorAll('#tabs button').forEach(function(b){b.onclick=function(){document.querySelectorAll('#tabs button,.tab').forEach(function(e){e.classList.remove('on')});b.classList.add('on');$(b.dataset.t).classList.add('on')}});
+function tick(){$('clock').textContent=new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}
+load();drawStyles();drawChecks();tick();setInterval(tick,30000);
+</script>
 </body>
 </html>
-
