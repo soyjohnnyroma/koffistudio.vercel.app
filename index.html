@@ -38,7 +38,7 @@
     }
     .brand-title { font-size: 13px; font-weight: 900; letter-spacing: 1.5px; }
     .brand-sub { color: #71717a; font-size: 11px; margin-left: 6px; }
-    .header-meta { display: flex; align-items: center; gap: 10px; font-size: 11px; font-family: monospace; }
+    .header-meta { display: flex; align-items: center; gap: 12px; font-size: 11px; font-family: monospace; }
     .status-badge {
       display: inline-flex;
       align-items: center;
@@ -208,6 +208,7 @@
     </div>
 
     <div class="header-meta">
+      <span id="live-datetime" style="color:#71717a; border-right:1px solid #27272a; padding-right:10px;">--:--:--</span>
       <button onclick="toggleConfig()" style="background:#18181b; border:1px solid #27272a; color:#fff; font-size:10px; padding:4px 8px; border-radius:4px; cursor:pointer;">⚙️ CONFIG</button>
       <div class="status-badge">
         <span class="pulse-dot" id="dot-status"></span>
@@ -395,6 +396,21 @@
   </main>
 
   <script>
+    function updateDateTime() {
+      const el = document.getElementById('live-datetime');
+      if (!el) return;
+      const now = new Date();
+      const d = String(now.getDate()).padStart(2, '0');
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const y = now.getFullYear();
+      const h = String(now.getHours()).padStart(2, '0');
+      const min = String(now.getMinutes()).padStart(2, '0');
+      const s = String(now.getSeconds()).padStart(2, '0');
+      el.textContent = `${d}/${m}/${y} ${h}:${min}:${s}`;
+    }
+    setInterval(updateDateTime, 1000);
+    updateDateTime();
+
     function checkKey() {
       const k = localStorage.getItem('koffi_gemini_key');
       const st = document.getElementById('api-status');
