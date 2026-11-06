@@ -1,658 +1,273 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#030303">
-  <title>Koffi Studio — Autonomous Media Engine</title>
-  <link rel="icon" href="Isotipo.png" type="image/png">
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background-color: #030303;
-      color: #f4f4f5;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      min-height: 100vh;
-      line-height: 1.5;
-    }
-    header {
-      border-bottom: 1px solid #18181b;
-      padding: 10px 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #09090b;
-      position: sticky;
-      top: 0;
-      z-index: 50;
-    }
-    .brand-wrap { display: flex; align-items: center; gap: 10px; }
-    .brand-logo-img {
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      background: #000;
-      border: 1px solid #27272a;
-      object-fit: cover;
-    }
-    .brand-title { font-size: 13px; font-weight: 800; letter-spacing: 1px; }
-    .brand-sub { color: #71717a; font-size: 11px; margin-left: 4px; }
-    .header-meta { display: flex; align-items: center; gap: 10px; font-size: 11px; font-family: monospace; }
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: #18181b;
-      padding: 4px 8px;
-      border-radius: 14px;
-      border: 1px solid #27272a;
-      color: #a1a1aa;
-    }
-    .pulse-dot { width: 7px; height: 7px; border-radius: 50%; background: #10b981; }
-    .pulse-dot.warn { background: #f59e0b; }
-    .container { max-width: 1200px; margin: 0 auto; padding: 14px 16px; }
-    .hero-strip {
-      border-bottom: 1px solid #18181b;
-      padding-bottom: 10px;
-      margin-bottom: 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 11px;
-      color: #71717a;
-    }
-
-    /* CARRUSEL DOBLE */
-    .marquee-wrapper {
-      overflow: hidden;
-      position: relative;
-      margin-bottom: 8px;
-      mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
-      -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
-    }
-    .marquee-track { display: flex; width: max-content; gap: 10px; }
-    .marquee-left { animation: scroll-left 40s linear infinite; }
-    .marquee-right { animation: scroll-right 40s linear infinite; }
-    .marquee-wrapper:hover .marquee-track { animation-play-state: paused; }
-    @keyframes scroll-left { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-    @keyframes scroll-right { 0% { transform: translateX(-50%); } 100% { transform: translateX(0); } }
-    .style-card {
-      width: 180px;
-      background: #09090b;
-      border: 1px solid #18181b;
-      border-radius: 6px;
-      padding: 8px 10px;
-      text-align: left;
-    }
-    .style-name { font-size: 11px; font-weight: 700; color: #fff; }
-    .style-desc { font-size: 10px; color: #71717a; margin-top: 2px; }
-
-    /* PESTAÑAS */
-    .tabs-nav {
-      display: flex;
-      overflow-x: auto;
-      border-bottom: 1px solid #18181b;
-      gap: 14px;
-      padding-bottom: 8px;
-      margin-top: 12px;
-    }
-    .tab-btn {
-      background: none;
-      border: none;
-      color: #71717a;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      padding-bottom: 6px;
-      white-space: nowrap;
-    }
-    .tab-btn.active { color: #ffffff; border-bottom: 2px solid #ffffff; }
-    .tab-content { display: none; margin-top: 14px; }
-    .tab-content.active { display: block; }
-
-    .grid-workspace {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 16px;
-    }
-    @media(min-width: 900px) {
-      .grid-workspace { grid-template-columns: 380px 1fr; }
-    }
-    .panel-box {
-      background: #09090b;
-      border: 1px solid #18181b;
-      border-radius: 8px;
-      padding: 14px;
-    }
-    .input-group { margin-bottom: 10px; }
-    .input-label { display: block; font-size: 11px; color: #a1a1aa; margin-bottom: 4px; font-weight: 600; text-transform: uppercase; }
-    .input-field {
-      width: 100%;
-      background: #121214;
-      border: 1px solid #27272a;
-      border-radius: 6px;
-      padding: 8px 10px;
-      color: #fff;
-      font-size: 12px;
-      outline: none;
-    }
-    .input-field:focus { border-color: #71717a; }
-    .btn-main {
-      width: 100%;
-      background: #ffffff;
-      color: #000000;
-      border: none;
-      padding: 10px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .btn-main:hover { background: #e4e4e7; }
-    .btn-secondary {
-      background: #18181b;
-      color: #ffffff;
-      border: 1px solid #27272a;
-      padding: 8px 12px;
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
-      width: 100%;
-      margin-top: 8px;
-    }
-    .console-out {
-      background: #030303;
-      border: 1px solid #18181b;
-      border-radius: 6px;
-      padding: 12px;
-      font-family: monospace;
-      font-size: 11px;
-      line-height: 1.6;
-      color: #d4d4d8;
-      height: 380px;
-      overflow-y: auto;
-      white-space: pre-wrap;
-    }
-    .card-item {
-      background: #121214;
-      border: 1px solid #18181b;
-      border-radius: 6px;
-      padding: 12px;
-      margin-bottom: 10px;
-    }
-    .image-preview {
-      width: 100%;
-      border-radius: 6px;
-      border: 1px solid #27272a;
-      margin-top: 10px;
-      display: none;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#030303">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://image.pollinations.ai; connect-src 'self' https://generativelanguage.googleapis.com; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>Koffi Studio — Media Engine</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#030303;color:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;min-height:100vh;line-height:1.5}
+header{border-bottom:1px solid #18181b;padding:8px 12px;display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center;background:#09090b;position:sticky;top:0;z-index:50}
+.brand{display:flex;align-items:center;gap:10px}
+.logo{width:36px;height:36px;border-radius:50%;background:#000}
+.t1{font-size:13px;font-weight:800;letter-spacing:1px}.t2{color:#71717a;font-size:11px;margin-left:4px}
+.meta{display:flex;align-items:center;gap:6px;font-size:10px;font-family:monospace;flex-wrap:wrap}
+#clock{color:#d4d4d8;font-weight:600;white-space:nowrap}
+.chip{display:inline-flex;align-items:center;gap:5px;background:#18181b;padding:4px 8px;border-radius:14px;border:1px solid #27272a;color:#a1a1aa}
+.dot{width:7px;height:7px;border-radius:50%;background:#f59e0b}.dot.ok{background:#10b981}
+.hbtn{background:#18181b;border:1px solid #27272a;color:#fff;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer}
+#pwa-btn{display:none;background:#10b981;color:#000;border:0;font-weight:700}
+.wrap{max-width:1200px;margin:0 auto;padding:14px 16px}
+.strip{border-bottom:1px solid #18181b;padding-bottom:10px;margin-bottom:14px;font-size:11px;color:#71717a}
+.mq{overflow:hidden;margin-bottom:8px;-webkit-mask-image:linear-gradient(to right,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(to right,transparent,#000 8%,#000 92%,transparent)}
+.trk{display:flex;width:max-content;gap:10px;animation:l 40s linear infinite}
+.trk.r{animation-name:r}
+@keyframes l{to{transform:translateX(-50%)}}@keyframes r{from{transform:translateX(-50%)}to{transform:translateX(0)}}
+.sc{width:180px;background:#09090b;border:1px solid #18181b;border-radius:6px;padding:8px 10px}
+.sn{font-size:11px;font-weight:700}.sd{font-size:10px;color:#71717a}
+.tabs{display:flex;overflow-x:auto;border-bottom:1px solid #18181b;gap:14px;padding-bottom:8px;margin-top:12px}
+.tb{background:none;border:0;color:#71717a;font-size:12px;font-weight:600;cursor:pointer;padding-bottom:6px;white-space:nowrap}
+.tb.on{color:#fff;border-bottom:2px solid #fff}
+.tc{display:none;margin-top:14px}.tc.on{display:block}
+.grid{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:900px){.grid{grid-template-columns:380px 1fr}}
+.box{background:#09090b;border:1px solid #18181b;border-radius:8px;padding:14px}
+.ig{margin-bottom:10px}
+.lb{display:block;font-size:11px;color:#a1a1aa;margin-bottom:4px;font-weight:600;text-transform:uppercase}
+.in{width:100%;background:#121214;border:1px solid #27272a;border-radius:6px;padding:8px 10px;color:#fff;font-size:13px;outline:0}
+.in:focus{border-color:#71717a}
+.bm{width:100%;background:#fff;color:#000;border:0;padding:10px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer}
+.bm:disabled{opacity:.5}
+.bs{background:#18181b;color:#fff;border:1px solid #27272a;padding:8px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;width:100%;margin-top:8px}
+.con{background:#030303;border:1px solid #18181b;border-radius:6px;padding:12px;font-family:monospace;font-size:12px;line-height:1.6;color:#d4d4d8;height:380px;overflow-y:auto;white-space:pre-wrap}
+.card{background:#121214;border:1px solid #18181b;border-radius:6px;padding:12px;margin-bottom:10px;font-size:11px;color:#a1a1aa}
+.card strong{color:#fff;font-size:12px}
+#img-out{width:100%;border-radius:6px;border:1px solid #27272a;margin-top:10px;display:none}
+#cfg{display:none;background:#0e0e11;border-bottom:1px solid #27272a;padding:12px 16px}
+</style>
 </head>
 <body>
-
-  <header>
-    <div class="brand-wrap">
-      <img src="Isotipo.png" alt="Logo" class="brand-logo-img" onerror="this.src='Isotipo'">
-      <div>
-        <span class="brand-title">KOFFI STUDIO</span>
-        <span class="brand-sub">/ Media Engine</span>
-      </div>
-    </div>
-
-    <div class="header-meta">
-      <span id="live-datetime" style="color:#d4d4d8; font-weight:600; letter-spacing:0.5px;">--:--:--</span>
-      <button id="pwa-install-btn" style="display:none; background:#10b981; border:none; color:#000; font-size:10px; font-weight:700; padding:4px 8px; border-radius:4px; cursor:pointer;" onclick="installPWA()">📲 INSTALAR</button>
-      <button onclick="toggleConfig()" style="background:#18181b; border:1px solid #27272a; color:#fff; font-size:10px; padding:4px 8px; border-radius:4px; cursor:pointer;">⚙️ CONFIG</button>
-      <div class="status-badge">
-        <span class="pulse-dot" id="dot-status"></span>
-        <span id="api-status">API: PENDIENTE</span>
-      </div>
-    </div>
-  </header>
-
-  <!-- MODAL CONFIG -->
-  <div id="config-box" style="display:none; background:#0e0e11; border-bottom:1px solid #27272a; padding:12px 16px;">
-    <div style="max-width:600px; margin:0 auto;">
-      <label class="input-label">Clave Gratuita de Google Gemini (AI Studio):</label>
-      <div style="display:flex; gap:8px;">
-        <input type="password" id="gemini-key" class="input-field" placeholder="AIzaSy...">
-        <button class="btn-main" style="width:auto; padding:0 14px;" onclick="guardarKey()">GUARDAR</button>
-      </div>
-      <div style="display:flex; gap:12px; margin-top:8px;">
-        <label style="font-size:11px; color:#a1a1aa;"><input type="radio" name="gem_model" value="gemini-1.5-flash" checked> Flash (Rápido)</label>
-        <label style="font-size:11px; color:#a1a1aa;"><input type="radio" name="gem_model" value="gemini-1.5-pro"> Pro (Profundo)</label>
-      </div>
-      <p style="font-size:10px; color:#71717a; margin-top:4px;">Almacenamiento 100% local y privado en el navegador de tu móvil.</p>
-    </div>
+<header>
+  <div class="brand">
+    <img class="logo" alt="Koffi Studio" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABABAMAAABYR2ztAAAAGFBMVEXi4d94d3YMDAwBAQIBAQEBAQAAAQEAAAA6nRd3AAAEyUlEQVR42m2W328UVRTHP/futtnC0rlTapsIJEu1kEBCS4BEu5ItYdMY0sjyw8TEGloN8GbCg/4RvoiP8NDyUF/aCCVpYiIVOpVt1CBslYBG2bYY0RbbucMOsO1ue33Y3dmVcJ8m53zn3Pnec+73OyJJZblJrrkaYZ9kwgalbRcQSYQp50eXNQCi7eSEDdhGQ6gNAYBOjsyuNL165q3nEfP3/XfvNUA+j8qLpBIu4CYv6KbT8BP7YGRWfDphlzYWSWEAs/+CtyM1ATYuJAuDTz75VpUBAOQW5nf0TtqVzw3HB+XADACyFOma29HrVPLY0fSHy8NuFWCah1p7HRUQRkTT5xYPaYBQG+B7D886ijIfAFH/IPxDTJQrmC2ZdkcBprbG8SVPlwE6K3uVcalZLiIdu2NKABPOtDuEk7qaN8lOosfXu0snyf4fT3lm6XpqIQD43zyJiD/Ct60IEvyhdgcSy+NBCbfLzWmixxcTIDEFr1eBUb8nKhuEh2wNMm2NaSQk6h3wx5rWKyV0l9f/2MIU+32Q+Fe2Aei2WLmEaR5qcUwnKPk4gWRt/qgCvD1t68MawF/w3q+zAJFuBGkOikkwcSH2xRYTruu68UxLeo1xDWtqWEvMKwIwdTcvn7CGk8lk8rLsK3THlgDrmCbsj20CMNGuLzLbM6PA3M7xhb923QeYKSQk+qgCf6x5yHT0WNlsNitTsLi3kADx1CCjXgZAH/GoGxmwbdve/llKW1+aDLBmOeGOG50zgDfUsrI6N30GKH51SQyctzpnIKRyoTduP49gDny/cvaOqH+7eD37sG3n7fy6r5dNhPrELWlK32haxnlUGL0q7I2jY/0iPoAGEFpOhgCM6FOqmM3mMHuyszcQ06p07kWpFcBMiwO+iAE0Wd2C6IACEEaWR7BPrccQx0BQB2FHTH+gUEC5QtGhsTOYlzsKopOgkUZyUAFCgdDrQwCLurMcQXxHuGaUCzZF1ziKsZrxDddMujlTfrrQ+jKASHPNzAFNQn80E4Qld4NZtbyE67qu3ygylZBCqrkArHyHtjaiCVEhZHYLWd0tmuKZevqOPIp0qlGpqhdK/Lt1YOF8+5TZXL1iQnav1dDorI/J1Ob/sQyLXJC/acxFrIstusrSKCkKiQBhZVzXddG9FS3xx5TEZKo05sTekCpUdWRNI9NW0KRNMY/uZlQVEPJ6JepqhYfZ6/LLNhJ1DigAs1EgN6VyNTToCHGlqmYddY60xONKP8UUULnhAPqKQoop0106dQhZhFPooEJYb1VSh62ruvKKYvVSlaXZ6HUjifb/GXRDgabayz0tDhKmVoOjOsRkkaCX/qUoSESdFciXoDuMKE+LiXsphYToQCBfMLTK62W4f7nFKSntdCBfGG2Cx/h8X0nMxbPW++8tAIh/xPYNtiqR8G/l8k0lpY28Ob1sIiV7eW3X7pJomwNf7xORsuPkVn4+V7ILF7ABjL+Q66zYAdHWxuGEBrBtu5zvmu/3AkMRy6mJ5Z7fItVB8uOfty7bAYCGB3XZpZ5fGypiXowPbjjlUQVQ33P30dKRe/l8A24+n9wy6H18I1Jri4Gx3vIO1xqr0hUA+vDIrLCbTnDNdXXT6YrxBhVeZu4vAF78PSiv/wCk0wTzouEoaAAAAABJRU5ErkJggg==">
+    <div><span class="t1">KOFFI STUDIO</span><span class="t2">/ Media Engine</span></div>
   </div>
+  <div class="meta">
+    <span id="clock">--/--/---- --:--:--</span>
+    <button id="pwa-btn" class="hbtn">📲 INSTALAR</button>
+    <button class="hbtn" id="cfg-btn">⚙️</button>
+    <span class="chip"><span class="dot" id="dot"></span><span id="api-st">API: PENDIENTE</span></span>
+  </div>
+</header>
 
-  <main class="container">
-    <div class="hero-strip">
-      <span>SISTEMA ACTIVO — OPERACIÓN MULTI-NICHO & FORMATOS</span>
-      <span style="color:#10b981;">SER ESTOICO ($51.13 / $100.00)</span>
+<div id="cfg">
+  <div style="max-width:600px;margin:0 auto">
+    <label class="lb" for="key">Clave gratuita de Google Gemini (AI Studio)</label>
+    <div style="display:flex;gap:8px">
+      <input type="password" id="key" class="in" placeholder="AIza..." autocomplete="off">
+      <button class="bm" style="width:auto;padding:0 14px" id="save-key">GUARDAR</button>
+      <button class="bs" style="width:auto;margin:0" id="del-key">BORRAR</button>
     </div>
-
-    <!-- DOBLE CARRUSEL -->
-    <div class="marquee-wrapper">
-      <div class="marquee-track marquee-left">
-        <div class="style-card"><p class="style-name">🏛️ Claroscuro Romano</p><p class="style-desc">Mármol desgastado & sombras.</p></div>
-        <div class="style-card"><p class="style-name">🕯️ Terror Psicológico</p><p class="style-desc">Luz de vela y penumbra.</p></div>
-        <div class="style-card"><p class="style-name">🎞️ Documental 35mm</p><p class="style-desc">Grano analógico retro.</p></div>
-        <div class="style-card"><p class="style-name">📈 Finanzas & Alto RPM</p><p class="style-desc">Estética sobria y ejecutiva.</p></div>
-        <div class="style-card"><p class="style-name">🏛️ Claroscuro Romano</p><p class="style-desc">Mármol desgastado & sombras.</p></div>
-        <div class="style-card"><p class="style-name">🕯️ Terror Psicológico</p><p class="style-desc">Luz de vela y penumbra.</p></div>
-      </div>
+    <div style="display:flex;gap:14px;margin-top:8px">
+      <label style="font-size:11px;color:#a1a1aa"><input type="radio" name="gm" value="gemini-2.5-flash" checked> Flash (rápido)</label>
+      <label style="font-size:11px;color:#a1a1aa"><input type="radio" name="gm" value="gemini-2.5-pro"> Pro (profundo)</label>
     </div>
-    <div class="marquee-wrapper">
-      <div class="marquee-track marquee-right">
-        <div class="style-card"><p class="style-name">📜 Archivo Histórico</p><p class="style-desc">Mapas y pergaminos antiguos.</p></div>
-        <div class="style-card"><p class="style-name">🧠 Conducta Humana</p><p class="style-desc">Siluetas y psicología oscura.</p></div>
-        <div class="style-card"><p class="style-name">🎨 Pintura al Óleo</p><p class="style-desc">Pincelada renacentista.</p></div>
-        <div class="style-card"><p class="style-name">⚔️ Épica Legendaria</p><p class="style-desc">Niebla, armaduras y batallas.</p></div>
-        <div class="style-card"><p class="style-name">📜 Archivo Histórico</p><p class="style-desc">Mapas y pergaminos antiguos.</p></div>
-        <div class="style-card"><p class="style-name">🧠 Conducta Humana</p><p class="style-desc">Siluetas y psicología oscura.</p></div>
-      </div>
+    <p style="font-size:10px;color:#71717a;margin-top:4px">La clave se guarda solo en este teléfono. Nunca la compartas ni la subas a GitHub.</p>
+  </div>
+</div>
+
+<main class="wrap">
+  <div class="strip">SISTEMA ACTIVO — OPERACIÓN MULTI-NICHO Y MULTI-FORMATO</div>
+  <div class="mq"><div class="trk" id="m1"></div></div>
+  <div class="mq"><div class="trk r" id="m2"></div></div>
+
+  <nav class="tabs">
+    <button class="tb on" data-tab="t1">1. Guiones</button>
+    <button class="tb" data-tab="t2">2. Generador Visual</button>
+    <button class="tb" data-tab="t3">3. Motor Vocal</button>
+    <button class="tb" data-tab="t4">4. Montaje y Subtítulos</button>
+  </nav>
+
+  <section id="t1" class="tc on"><div class="grid">
+    <div class="box">
+      <div class="ig"><label class="lb" for="niche">Nicho</label>
+        <select id="niche" class="in">
+          <option>Estoicismo y Filosofía Práctica</option>
+          <option>Psicología Oscura y Conducta Humana</option>
+          <option>Terror y Misterio Real</option>
+          <option>Finanzas, Economía y Riqueza</option>
+          <option>Historia Bélica y Civilizaciones</option>
+        </select></div>
+      <div class="ig"><label class="lb" for="tone">Tono</label>
+        <select id="tone" class="in">
+          <option>Confrontativo, firme, sobrio y penetrante</option>
+          <option>Cínico, irreverente y desafiante de las convenciones sociales</option>
+          <option>Bofetada de realidad, directo y desmitificador</option>
+          <option>Académico, filosófico, riguroso y analítico</option>
+          <option>Enigmático, oscuro, pausado y con tensión psicológica</option>
+          <option>Informal, cercano, como charla honesta entre amigos</option>
+          <option>Épico, heroico y solemne</option>
+          <option>Conciliador, comprensivo y reflexivo</option>
+          <option>Sarcástico, mordaz e incisivo</option>
+          <option>Motivacional e inspirador</option>
+          <option>Documental, narrador sereno y objetivo</option>
+          <option>Humor ligero e ingenioso</option>
+        </select></div>
+      <div class="ig"><label class="lb" for="topic">Tema o ángulo</label>
+        <input id="topic" class="in" value="Nadie te debe nada: la verdad brutal que nadie quiere escuchar"></div>
+      <div class="ig"><label class="lb" for="ref">Referencia (ingeniería inversa)</label>
+        <input id="ref" class="in" placeholder="Título o tema de un video de referencia"></div>
+      <div class="ig"><label class="lb" for="fmt">Formato</label>
+        <select id="fmt" class="in">
+          <option value="long">Horizontal 16:9 — YouTube largo (20–25 min)</option>
+          <option value="short">Vertical 9:16 — Shorts / Reels / TikTok (60 s)</option>
+          <option value="square">Cuadrado 1:1 — Facebook Video</option>
+        </select></div>
+      <button class="bm" id="gen">⚡ GENERAR GUION</button>
+      <button class="bs" id="copy">📋 COPIAR GUION</button>
     </div>
-
-    <!-- NAVEGACIÓN -->
-    <nav class="tabs-nav">
-      <button class="tab-btn active" onclick="openTab('tab-guion', this)">1. Laboratorio de Guiones</button>
-      <button class="tab-btn" onclick="openTab('tab-imagenes', this)">2. Generador Visual</button>
-      <button class="tab-btn" onclick="openTab('tab-audio', this)">3. Motor Vocal</button>
-      <button class="tab-btn" onclick="openTab('tab-edicion', this)">4. Pautas de Montaje & Subtítulos</button>
-    </nav>
-
-    <!-- PESTAÑA 1: GUION -->
-    <div id="tab-guion" class="tab-content active">
-      <div class="grid-workspace">
-        <div class="panel-box">
-          <div class="input-group">
-            <label class="input-label">Nicho Objetivo:</label>
-            <select id="script-niche" class="input-field">
-              <option value="Estoicismo y Filosofía Práctica">🏛️ Estoicismo & Filosofía Práctica</option>
-              <option value="Psicología Oscura y Conducta Humana">🧠 Psicología Oscura & Conducta Humana</option>
-              <option value="Terror y Misterio Real">🕯️ Historias de Terror & Misterio</option>
-              <option value="Finanzas y Riqueza">📈 Finanzas, Economía & Alto RPM</option>
-              <option value="Historia Bélica y Civilizaciones">📜 Historia Bélica & Civilizaciones</option>
-            </select>
-          </div>
-
-          <div class="input-group">
-            <label class="input-label">Tono de Comunicación:</label>
-            <select id="script-tone" class="input-field">
-              <option value="Confrontativo, firme, sobrio y penetrante (Estilo Ser Estoico)">🔥 Confrontativo & Firme (Ser Estoico)</option>
-              <option value="Cínico, irreverente y desafiante de las convenciones sociales (Estilo Diógenes)">🏺 Cínico & Irreverente (Diógenes)</option>
-              <option value="Bofetada de realidad, directo al grano y desmitificador">⚡ Bofetada de Realidad / Despertador</option>
-              <option value="Académico, filosófico, riguroso y analítico">🎓 Académico & Filosófico</option>
-              <option value="Enigmático, oscuro, pausado y con tensión psicológica">🕯️ Misterioso & Enigmático</option>
-              <option value="Informal, cercano, como una charla honesta entre amigos">☕ Informal & Conversacional</option>
-              <option value="Épico, heroico y solemne">⚔️ Épico & Solemne</option>
-              <option value="Conciliador, comprensivo y reflexivo">🤝 Conciliador & Reflexivo</option>
-              <option value="Sarcástico, mordaz e incisivo">😏 Sarcástico & Mordaz</option>
-            </select>
-          </div>
-
-          <div class="input-group">
-            <label class="input-label">Tema o Ángulo Principal:</label>
-            <input type="text" id="script-topic" class="input-field" value="Nadie te debe nada: la verdad brutal que nadie quiere escuchar">
-          </div>
-
-          <div class="input-group">
-            <label class="input-label">Video de Referencia (Ingeniería Inversa):</label>
-            <input type="text" id="script-ref" class="input-field" placeholder="Pega URL o título de referencia (ej: Diógenes de Benny)">
-          </div>
-
-          <div class="input-group">
-            <label class="input-label">Formato de Video:</label>
-            <select id="script-format" class="input-field" onchange="actualizarRelacionAspecto()">
-              <option value="youtube_long">Horizontal (16:9) — YouTube Largo (20 a 25 min)</option>
-              <option value="vertical_short">Vertical (9:16) — Shorts / TikTok / Reels (60 seg)</option>
-              <option value="facebook_square">Cuadrado (1:1 / 4:3) — Facebook Video</option>
-            </select>
-          </div>
-
-          <button class="btn-main" id="btn-generate-script" onclick="ejecutarGemini()">⚡ GENERAR GUION CON GEMINI</button>
-          <button class="btn-secondary" onclick="copiarGuion()">📋 COPIAR TODO EL GUION</button>
-        </div>
-
-        <div class="panel-box">
-          <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-            <label class="input-label" style="color:#fff;">Guion en Tiempo Real:</label>
-            <span id="script-counter" style="font-family:monospace; font-size:11px; color:#10b981;">0 palabras</span>
-          </div>
-          <div id="script-console" class="console-out">Toca ⚙️ CONFIG arriba para guardar tu API Key de Gemini y presiona 'Generar Guion'. El texto se estructurará con el tono y formato seleccionados.</div>
-        </div>
-      </div>
+    <div class="box">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+        <span class="lb" style="color:#fff">Guion</span><span id="wc" style="font-family:monospace;font-size:11px;color:#10b981">0 palabras</span></div>
+      <div id="out" class="con">Toca ⚙️ para guardar tu clave de Gemini y luego presiona «Generar guion».</div>
     </div>
+  </div></section>
 
-    <!-- PESTAÑA 2: VISUAL -->
-    <div id="tab-imagenes" class="tab-content">
-      <div class="grid-workspace">
-        <div class="panel-box">
-          <label class="input-label">Relación de Aspecto:</label>
-          <select id="img-ratio" class="input-field" style="margin-bottom:10px;">
-            <option value="16:9">16:9 Panorámico (YouTube Largo)</option>
-            <option value="9:16">9:16 Vertical (Shorts / Reels / TikTok)</option>
-            <option value="1:1">1:1 Cuadrado (Facebook / Instagram)</option>
-          </select>
-
-          <label class="input-label">Motor de Inferencia:</label>
-          <select id="img-engine" class="input-field" style="margin-bottom:10px;">
-            <option value="flux">⚡ Flux Schnell (Render Inmediato a $0)</option>
-            <option value="banana">🍌 Nano Banana (Google Imagen 3)</option>
-            <option value="leonardo">🎨 Leonardo AI (Preset Cinemático)</option>
-            <option value="midjourney">🌌 Midjourney v6 (Prompt Optimizado)</option>
-          </select>
-
-          <label class="input-label">Prompt Visual:</label>
-          <textarea id="img-prompt" class="input-field" rows="4">Cinematic weathered dark marble bust of Marcus Aurelius in heavy pouring dark rain, dramatic side chiaroscuro lighting, deep black background, moody atmospheric mist, 8k resolution</textarea>
-
-          <button class="btn-main" style="margin-top:10px;" onclick="generarImagen()">🎨 RENDERIZAR IMAGEN</button>
-        </div>
-
-        <div class="panel-box">
-          <label class="input-label">Resultado Visual:</label>
-          <div id="img-loading" style="display:none; color:#10b981; font-family:monospace; font-size:11px; margin-bottom:8px;">Renderizando en alta definición...</div>
-          <img id="img-result" class="image-preview" alt="Preview Visual">
-          <div id="img-info" class="console-out" style="height:140px; margin-top:10px;">Toca 'Renderizar Imagen' para generar tantas tomas como desees (6, 12 o 18 imágenes). Mantén presionada la imagen para guardarla en tu móvil.</div>
-        </div>
-      </div>
+  <section id="t2" class="tc"><div class="grid">
+    <div class="box">
+      <label class="lb" for="ratio">Relación de aspecto</label>
+      <select id="ratio" class="in" style="margin-bottom:10px">
+        <option value="16:9">16:9 Panorámico</option><option value="9:16">9:16 Vertical</option><option value="1:1">1:1 Cuadrado</option>
+      </select>
+      <label class="lb" for="engine">Motor</label>
+      <select id="engine" class="in" style="margin-bottom:10px">
+        <option value="flux">⚡ Flux (render directo, gratis)</option>
+        <option value="mj">🌌 Midjourney v6 (prompt para copiar)</option>
+        <option value="leo">🎨 Leonardo AI (prompt para copiar)</option>
+      </select>
+      <label class="lb" for="prompt">Prompt visual</label>
+      <textarea id="prompt" class="in" rows="4">Cinematic weathered dark marble bust of a Roman philosopher in heavy dark rain, dramatic side chiaroscuro lighting, deep black background, moody mist, 8k</textarea>
+      <button class="bm" style="margin-top:10px" id="img-go">🎨 GENERAR</button>
     </div>
-
-    <!-- PESTAÑA 3: VOZ -->
-    <div id="tab-audio" class="tab-content">
-      <div class="panel-box">
-        <label class="input-label">Opciones para tu Voz Clonada</label>
-        
-        <div class="card-item">
-          <strong style="color:#fff; font-size:12px;">Vía 1: Google Colab (25 Minutos Continuos de un Tirón)</strong>
-          <p style="font-size:11px; color:#a1a1aa; margin-top:4px;">
-            Copia el guion con el botón inferior, abre VoiceStudio en Colab en una pestaña nueva, pega el texto y descarga el MP3 completo.
-          </p>
-          <a href="https://colab.research.google.com/" target="_blank" style="text-decoration:none;">
-            <button class="btn-main" style="margin-top:8px;">🚀 ABRIR GOOGLE COLAB (VOICESTUDIO)</button>
-          </a>
-        </div>
-
-        <div class="card-item">
-          <strong style="color:#fff; font-size:12px;">Vía 2: Divisor Seguro para A2E.AI (~950 caracteres)</strong>
-          <p style="font-size:11px; color:#a1a1aa; margin-top:4px;">
-            Divide el texto por oraciones completas respetando los puntos seguidos para no cortar ideas.
-          </p>
-          <button class="btn-secondary" onclick="trocearGuionA2E()">✂️ FRAGMENTAR GUION PARA A2E</button>
-          <div id="chunks-container" style="margin-top:10px;"></div>
-        </div>
-      </div>
+    <div class="box">
+      <span class="lb">Resultado</span>
+      <div id="img-load" style="display:none;color:#10b981;font-family:monospace;font-size:11px">Renderizando…</div>
+      <img id="img-out" alt="Resultado visual">
+      <div id="img-info" class="con" style="height:140px;margin-top:10px">Genera tantas tomas como necesites (mínimo 6; ideal 12 a 18). Mantén presionada la imagen para guardarla.</div>
     </div>
+  </div></section>
 
-    <!-- PESTAÑA 4: MONTAJE Y SUBTÍTULOS -->
-    <div id="tab-edicion" class="tab-content">
-      <div class="panel-box">
-        <label class="input-label">Pautas de Edición en CapCut Móvil</label>
-        
-        <div class="card-item">
-          <strong style="color:#10b981; font-size:12px;">📝 Configuración de Subtítulos Automáticos:</strong>
-          <ul style="margin-left:18px; margin-top:6px; font-size:11px; color:#d4d4d8; line-height:1.7;">
-            <li><strong>Posición:</strong> Centro exacto vertical de la pantalla (evita la barra de tiempo inferior y las zonas ciegas de Shorts/Reels).</li>
-            <li><strong>Tipografía y Color:</strong> Letra blanca pura (#FFFFFF), peso Bold, tamaño mediano (legible sin tapar el fondo).</li>
-            <li><strong>Sombra:</strong> Sombra negra sutil al 40% para legibilidad instantánea sobre claroscuro.</li>
-          </ul>
-        </div>
+  <section id="t3" class="tc"><div class="box">
+    <div class="card"><strong>Vía 1 — Google Colab (audio continuo)</strong>
+      <p style="margin-top:4px">Copia el guion, abre tu cuaderno de voz en Colab, pega el texto y descarga el MP3 completo.</p>
+      <a href="https://colab.research.google.com/" target="_blank" rel="noopener noreferrer"><button class="bm" style="margin-top:8px">🚀 ABRIR GOOGLE COLAB</button></a></div>
+    <div class="card"><strong>Vía 2 — Divisor por oraciones (~950 caracteres)</strong>
+      <button class="bs" id="split">✂️ FRAGMENTAR GUION</button>
+      <div id="chunks" style="margin-top:10px"></div></div>
+  </div></section>
 
-        <div class="card-item">
-          <strong style="color:#fff; font-size:12px;">🎞️ Cantidad de Imágenes y Dinamismo:</strong>
-          <p style="font-size:11px; color:#a1a1aa; margin-top:4px;">
-            El mínimo son <strong>6 imágenes maestras</strong> aplicando la regla de los 3 planos (Plano general, medio y primer plano a la mirada de la escultura con zoom lento de 30-50 segundos). Si deseas mayor dinamismo, genera <strong>12 a 18 imágenes</strong> para cambiar de plano cada 15 a 20 segundos.
-          </p>
-        </div>
-      </div>
-    </div>
-  </main>
+  <section id="t4" class="tc"><div class="box">
+    <div class="card"><strong style="color:#10b981">📝 Subtítulos automáticos (CapCut)</strong>
+      <ul style="margin:6px 0 0 18px;line-height:1.7;color:#d4d4d8">
+        <li>Posición: centro vertical de la pantalla.</li>
+        <li>Letra blanca #FFFFFF, Bold, tamaño mediano.</li>
+        <li>Sombra negra suave al 40%.</li></ul></div>
+    <div class="card"><strong>🎞️ Imágenes y dinamismo</strong>
+      <p style="margin-top:4px">Mínimo 6 imágenes maestras (plano general, medio y primer plano) con zoom lento. Para más ritmo, 12 a 18 imágenes cambiando de plano cada 15–20 s. Aplica paneo/zoom lento (Ken Burns) y arrastra el audio continuo a la línea de tiempo.</p></div>
+  </div></section>
+</main>
 
-  <script>
-    // RELOJ COMPACTO
-    function updateClock() {
-      const el = document.getElementById('live-datetime');
-      if (!el) return;
-      const n = new Date();
-      const pad = (v) => String(v).padStart(2, '0');
-      el.textContent = `${pad(n.getDate())}/${pad(n.getMonth()+1)} ${pad(n.getHours())}:${pad(n.getMinutes())}:${pad(n.getSeconds())}`;
-    }
-    setInterval(updateClock, 1000);
-    updateClock();
+<script>
+const $=id=>document.getElementById(id);
+const KEY='koffi_gemini_key';
+const safeGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
+const safeSet=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
 
-    // PWA INSTALACIÓN
-    let deferredPrompt;
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      const btn = document.getElementById('pwa-install-btn');
-      if (btn) btn.style.display = 'inline-block';
-    });
+/* Reloj DD/MM/AAAA HH:MM:SS */
+const p=v=>String(v).padStart(2,'0');
+function clock(){const n=new Date();$('clock').textContent=`${p(n.getDate())}/${p(n.getMonth()+1)}/${n.getFullYear()} ${p(n.getHours())}:${p(n.getMinutes())}:${p(n.getSeconds())}`}
+setInterval(clock,1000);clock();
 
-    function installPWA() {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then(() => {
-          deferredPrompt = null;
-          document.getElementById('pwa-install-btn').style.display = 'none';
-        });
-      }
-    }
+/* Carruseles */
+const A=[['🏛️ Claroscuro Romano','Mármol y sombras'],['🕯️ Terror Psicológico','Luz de vela y penumbra'],['🎞️ Documental 35mm','Grano analógico'],['📈 Finanzas','Estética sobria y ejecutiva']];
+const B=[['📜 Archivo Histórico','Mapas y pergaminos'],['🧠 Conducta Humana','Siluetas y psicología'],['🎨 Pintura al Óleo','Pincelada renacentista'],['⚔️ Épica Legendaria','Niebla y armaduras']];
+function fill(id,arr){const t=$(id);for(let i=0;i<4;i++)arr.forEach(([n,d])=>{const c=document.createElement('div');c.className='sc';const a=document.createElement('p');a.className='sn';a.textContent=n;const b=document.createElement('p');b.className='sd';b.textContent=d;c.append(a,b);t.appendChild(c)})}
+fill('m1',A);fill('m2',B);
 
-    // MANIFEST DINÁMICO
-    const manifestJson = {
-      name: "Koffi Studio",
-      short_name: "Koffi",
-      start_url: "./index.html",
-      display: "standalone",
-      background_color: "#030303",
-      theme_color: "#030303",
-      icons: [{ src: "Isotipo.png", sizes: "192x192", type: "image/png" }]
-    };
-    const stringManifest = JSON.stringify(manifestJson);
-    const blob = new Blob([stringManifest], {type: 'application/json'});
-    const manifestURL = URL.createObjectURL(blob);
-    const linkTag = document.createElement('link');
-    linkTag.rel = 'manifest';
-    linkTag.href = manifestURL;
-    document.head.appendChild(linkTag);
+/* Pestañas y config */
+document.querySelectorAll('.tb').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.tb').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.tc').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');$(b.dataset.tab).classList.add('on')});
+$('cfg-btn').onclick=()=>{const c=$('cfg');c.style.display=c.style.display==='block'?'none':'block'};
+function estado(){const ok=!!safeGet(KEY);$('dot').className='dot'+(ok?' ok':'');$('api-st').textContent=ok?'API: LISTA':'API: PENDIENTE'}
+$('save-key').onclick=()=>{const v=$('key').value.trim();if(v.length<20){alert('La clave parece incompleta.');return}
+  if(safeSet(KEY,v)){$('key').value='';estado();$('cfg').style.display='none'}else alert('No se pudo guardar en este navegador.')};
+$('del-key').onclick=()=>{try{localStorage.removeItem(KEY)}catch(e){}estado()};
+estado();
 
-    // CONFIG LOCALSTORAGE
-    function checkKey() {
-      const k = localStorage.getItem('koffi_gemini_key');
-      const st = document.getElementById('api-status');
-      const dot = document.getElementById('dot-status');
-      if (k && k.length > 10) {
-        st.textContent = "API: CONECTADA";
-        st.style.color = "#10b981";
-        dot.className = "pulse-dot";
-      } else {
-        st.textContent = "API: PENDIENTE";
-        st.style.color = "#f59e0b";
-        dot.className = "pulse-dot warn";
-      }
-    }
-    checkKey();
+/* Gemini (clave por cabecera, nunca en la URL) */
+function promptGuion(){
+  const f=$('fmt').value,N=$('niche').value,T=$('tone').value,tema=$('topic').value.trim(),ref=$('ref').value.trim();
+  const fm={long:'YouTube horizontal 16:9 de 20 a 25 minutos (~3500-4500 palabras), con capítulos titulados y un gancho psicológico en los primeros 15 segundos, sin saludos vacíos.',
+    short:'video vertical 9:16 de 60 segundos (~160 palabras) con gancho de 3 segundos que corte el scroll.',
+    square:'video cuadrado para Facebook de 60 a 90 segundos, de alta resonancia en el feed.'}[f];
+  return `Eres guionista experto. Escribe en español un guion original para ${fm}\nNicho: ${N}\nTono: ${T}\nTema: ${tema}\n`+
+   (ref?`Referencia solo para analizar su estructura y tensión dramática (no copies ni plagies nada): ${ref}\n`:'')+
+   `Entrega solo el texto del guion para narrar, sin acotaciones técnicas ni emojis.`}
+$('gen').onclick=async()=>{
+  const k=safeGet(KEY);if(!k){alert('Primero guarda tu clave en ⚙️');return}
+  const m=document.querySelector('input[name=gm]:checked').value,btn=$('gen'),out=$('out');
+  btn.disabled=true;out.textContent='Generando…';
+  try{
+    const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`,{
+      method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':k},
+      body:JSON.stringify({contents:[{parts:[{text:promptGuion()}]}],generationConfig:{maxOutputTokens:16000}})});
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.error&&d.error.message||('Error '+r.status));
+    const t=(d.candidates&&d.candidates[0]&&d.candidates[0].content.parts||[]).map(x=>x.text||'').join('');
+    out.textContent=t||'Respuesta vacía. Intenta de nuevo.';
+    $('wc').textContent=(t.trim()?t.trim().split(/\s+/).length:0)+' palabras';
+  }catch(e){out.textContent='Error: '+e.message}
+  btn.disabled=false};
+$('copy').onclick=async()=>{try{await navigator.clipboard.writeText($('out').textContent);$('copy').textContent='✅ COPIADO'}catch(e){$('copy').textContent='No se pudo copiar'}
+  setTimeout(()=>$('copy').textContent='📋 COPIAR GUION',1800)};
 
-    function toggleConfig() {
-      const b = document.getElementById('config-box');
-      b.style.display = b.style.display === 'none' ? 'block' : 'none';
-      const k = localStorage.getItem('koffi_gemini_key');
-      if (k) document.getElementById('gemini-key').value = k;
-    }
+/* Divisor por oraciones */
+$('split').onclick=()=>{
+  const txt=$('out').textContent.trim(),box=$('chunks');box.replaceChildren();
+  const s=txt.match(/[^.!?…]+[.!?…]+["»)]*\s*|[^.!?…]+$/g)||[];let cur='';const parts=[];
+  s.forEach(x=>{if((cur+x).length>950&&cur){parts.push(cur.trim());cur=x}else cur+=x});if(cur.trim())parts.push(cur.trim());
+  parts.forEach((t,i)=>{const d=document.createElement('div');d.className='card';
+    const h=document.createElement('strong');h.textContent=`Parte ${i+1} (${t.length} car.)`;
+    const b=document.createElement('button');b.className='bs';b.textContent='📋 Copiar';
+    b.onclick=async()=>{try{await navigator.clipboard.writeText(t);b.textContent='✅'}catch(e){}};
+    d.append(h,b);box.appendChild(d)})};
 
-    function guardarKey() {
-      const k = document.getElementById('gemini-key').value.trim();
-      if (k) {
-        localStorage.setItem('koffi_gemini_key', k);
-        alert('API Key de Gemini guardada.');
-        toggleConfig();
-        checkKey();
-      }
-    }
+/* Imágenes */
+const RES={'16:9':[1280,720],'9:16':[720,1280],'1:1':[1024,1024]};
+$('img-go').onclick=()=>{
+  const r=$('ratio').value,e=$('engine').value,t=$('prompt').value.trim(),inf=$('img-info'),im=$('img-out');
+  if(!t)return;
+  if(e!=='flux'){im.style.display='none';
+    inf.textContent=e==='mj'?`${t} --ar ${r} --v 6 --style raw`:`${t}\n\nLeonardo: preset Cinematic, formato ${r}, Alchemy activado.`;return}
+  const [w,h]=RES[r];$('img-load').style.display='block';im.style.display='none';
+  im.onload=()=>{$('img-load').style.display='none';im.style.display='block';inf.textContent=`Listo (${w}x${h}). Mantén presionada la imagen para guardarla.`};
+  im.onerror=()=>{$('img-load').style.display='none';inf.textContent='No se pudo generar. Intenta de nuevo en unos segundos.'};
+  im.src=`https://image.pollinations.ai/prompt/${encodeURIComponent(t)}?model=flux&width=${w}&height=${h}&nologo=true&seed=${Date.now()%100000}`};
 
-    function openTab(id, btn) {
-      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-      btn.classList.add('active');
-    }
-
-    function actualizarRelacionAspecto() {
-      const fmt = document.getElementById('script-format').value;
-      const ratio = document.getElementById('img-ratio');
-      if (fmt === 'vertical_short') ratio.value = '9:16';
-      else if (fmt === 'facebook_square') ratio.value = '1:1';
-      else ratio.value = '16:9';
-    }
-
-    // GENERADOR GEMINI
-    async function ejecutarGemini() {
-      const key = localStorage.getItem('koffi_gemini_key');
-      if (!key) {
-        alert('Ingresa tu API Key de Gemini en ⚙️ CONFIG.');
-        toggleConfig();
-        return;
-      }
-      const topic = document.getElementById('script-topic').value;
-      const niche = document.getElementById('script-niche').value;
-      const tone = document.getElementById('script-tone').value;
-      const ref = document.getElementById('script-ref').value;
-      const formatVal = document.getElementById('script-format').value;
-      const c = document.getElementById('script-console');
-      const btn = document.getElementById('btn-generate-script');
-      const counter = document.getElementById('script-counter');
-
-      const modelRadio = document.querySelector('input[name="gem_model"]:checked');
-      const model = modelRadio ? modelRadio.value : 'gemini-1.5-flash';
-
-      btn.disabled = true;
-      btn.textContent = "⏳ REDACTANDO GUION...";
-      c.textContent = `Conectando con ${model.toUpperCase()}...\nEstructurando guion para ${niche} en tono: ${tone}...`;
-
-      let promptRules = "";
-      if (formatVal === 'vertical_short') {
-        promptRules = `Formato: Short / Reel / TikTok (60 segundos). Gancho de 3 segundos que corte el scroll, argumento veloz sin pausas y remate final claro. Máximo 160 palabras.`;
-      } else if (formatVal === 'facebook_square') {
-        promptRules = `Formato: Video para Facebook. Estructura reflexiva cotidiana, párrafos breves, alta resonancia emocional sobre relaciones y conducta.`;
-      } else {
-        promptRules = `Formato: YouTube Largo (20 a 25 min). Gancho psicológico en los primeros 15 segundos sin saludos formales. 6 capítulos encadenados con marcas de tiempo. Narración continua y fluida para el locutor.`;
-      }
-
-      let refInstruction = ref ? `Usa como referencia de retención e ingeniería inversa el siguiente video/tema: "${ref}". Extrae su psicología pero escribe un guion 100% original.` : "";
-
-      const prompt = `Actúa como guionista senior para 'Ser Estoico Canal' y Koffi Studio.
-Nicho: ${niche}
-Tema principal: ${topic}
-Tono de voz obligatorio: ${tone}
-${refInstruction}
-${promptRules}
-No agregues introducciones meta ni explicaciones técnicas. Entrega directamente el guion listo para ser locutado.`;
-
-      try {
-        const res = await fetch(`[suspicious link removed]{model}:generateContent?key=${key}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-        });
-        const data = await res.json();
-        if (data.candidates && data.candidates.content.parts.text) {
-          const resultText = data.candidates.content.parts.text;
-          c.textContent = resultText;
-          const words = resultText.trim().split(/\s+/).length;
-          counter.textContent = `${words} palabras`;
-        } else {
-          c.textContent = "Error en respuesta: " + JSON.stringify(data);
-        }
-      } catch (err) {
-        c.textContent = "Error al conectar con la API: " + err.message;
-      } finally {
-        btn.disabled = false;
-        btn.textContent = "⚡ GENERAR GUION CON GEMINI";
-      }
-    }
-
-    function copiarGuion() {
-      const text = document.getElementById('script-console').textContent;
-      navigator.clipboard.writeText(text).then(() => alert('Guion copiado al portapapeles.'));
-    }
-
-    // GENERADOR IMÁGENES
-    function generarImagen() {
-      const engine = document.getElementById('img-engine').value;
-      const ratio = document.getElementById('img-ratio').value;
-      const prompt = document.getElementById('img-prompt').value.trim();
-      const img = document.getElementById('img-result');
-      const info = document.getElementById('img-info');
-      const loader = document.getElementById('img-loading');
-
-      loader.style.display = 'block';
-      img.style.display = 'none';
-
-      let w = 1280, h = 720;
-      if (ratio === '9:16') { w = 720; h = 1280; }
-      else if (ratio === '1:1') { w = 1024; h = 1024; }
-
-      if (engine === 'flux' || engine === 'banana') {
-        const cleanPrompt = encodeURIComponent(prompt + `, ${ratio} aspect ratio`);
-        const url = `[suspicious link removed]{cleanPrompt}?width=${w}&height=${h}&model=flux&nologo=true`;
-        img.src = url;
-        img.onload = () => {
-          loader.style.display = 'none';
-          img.style.display = 'block';
-          info.textContent = `✓ Imagen (${ratio}) generada vía ${engine.toUpperCase()}.\nMantén presionada la imagen para descargarla.`;
-        };
-      } else if (engine === 'midjourney') {
-        loader.style.display = 'none';
-        info.textContent = `[PROMPT MIDJOURNEY v6]:\n/imagine prompt: ${prompt} --ar ${ratio.replace(':', ':')} --style raw --v 6.0`;
-      } else {
-        loader.style.display = 'none';
-        info.textContent = `[CONFIGURACIÓN LEONARDO AI]:\nPrompt: ${prompt}\nRatio: ${ratio} | Resolución: ${w}x${h}`;
-      }
-    }
-
-    // DIVISOR A2E
-    function trocearGuionA2E() {
-      const fullText = document.getElementById('script-console').textContent;
-      const container = document.getElementById('chunks-container');
-      container.innerHTML = "";
-
-      if (!fullText || fullText.length < 50) {
-        alert('Primero genera un guion en la Pestaña 1.');
-        return;
-      }
-
-      const sentences = fullText.split(/(?<=[.?!])\s+/);
-      let chunks = [];
-      let currentChunk = "";
-
-      sentences.forEach(s => {
-        if ((currentChunk + s).length < 900) {
-          currentChunk += (currentChunk ? " " : "") + s;
-        } else {
-          if (currentChunk) chunks.push(currentChunk);
-          currentChunk = s;
-        }
-      });
-      if (currentChunk) chunks.push(currentChunk);
-
-      chunks.forEach((chunk, i) => {
-        const div = document.createElement('div');
-        div.style = "background:#09090b; border:1px solid #27272a; padding:8px; border-radius:6px; margin-bottom:8px;";
-        div.innerHTML = `
-          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-            <span style="font-size:10px; color:#10b981; font-weight:700;">BLOQUE ${i+1} (${chunk.length} CARACTERES)</span>
-            <button style="background:#fff; color:#000; border:none; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:700; cursor:pointer;" onclick="navigator.clipboard.writeText(this.dataset.text); alert('Bloque ${i+1} copiado.');" data-text="${chunk.replace(/"/g, '&quot;')}">COPIAR</button>
-          </div>
-          <p style="font-size:10px; color:#a1a1aa; line-height:1.4;">${chunk.substring(0, 100)}...</p>
-        `;
-        container.appendChild(div);
-      });
-    }
-  </script>
+/* PWA */
+let dp=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e;$('pwa-btn').style.display='inline-block'});
+$('pwa-btn').onclick=async()=>{if(!dp)return;dp.prompt();await dp.userChoice;dp=null;$('pwa-btn').style.display='none'};
+window.addEventListener('appinstalled',()=>{$('pwa-btn').style.display='none'});
+if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+</script>
 </body>
 </html>
