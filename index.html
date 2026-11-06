@@ -348,6 +348,7 @@
           </div>
 
           <button class="btn-main" id="btn-generate-script" onclick="ejecutarGemini()">⚡ GENERAR GUION COMPLETO</button>
+          <button class="btn-secondary" id="btn-stop" style="display:none;" onclick="detenerGuion()">⏹ DETENER (conserva lo avanzado)</button>
           <div style="display:flex; gap:8px;">
             <button class="btn-secondary" onclick="copiarGuion()">📋 COPIAR TODO</button>
             <button class="btn-secondary" onclick="descargarGuionTxt()">💾 DESCARGAR TXT</button>
@@ -357,7 +358,7 @@
         <div class="panel-box">
           <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
             <label class="input-label" style="color:#fff;">Guion en Tiempo Real:</label>
-            <span id="script-counter" style="font-family:monospace; font-size:11px; color:#10b981;">0 palabras</span>
+            <span id="script-counter" style="font-family:monospace; font-size:11px; color:#10b981;">0 palabras · 0 min</span>
           </div>
           <div id="script-console" class="console-out">Toca ⚙️ CONFIG arriba para guardar tu API Key de Gemini y presiona 'Generar Guion'. Puedes tocar 'Generar 5 Ideas Ganadoras' para explorar temáticas infinitas según el nicho.</div>
         </div>
@@ -378,7 +379,7 @@
           <label class="input-label">Motor de Inferencia:</label>
           <select id="img-engine" class="input-field" style="margin-bottom:10px;">
             <option value="flux">⚡ Flux Schnell (Render Inmediato a $0)</option>
-            <option value="banana">🍌 Flux alterno (misma vía gratis)</option>
+            <option value="banana">🍌 Nano Banana (Google · usa tu llave Gemini)</option>
             <option value="leonardo">🎨 Leonardo AI (Preset Cinemático)</option>
             <option value="midjourney">🌌 Midjourney v6 (Prompt Optimizado)</option>
           </select>
@@ -513,6 +514,12 @@
           const data = await res.json();
           if (data.error) {
             lastErr = data.error.message || 'Error de la API';
+            if (res.status === 429) {
+              const er = new Error(lastErr);
+              er.rateLimited = true;
+              er.daily = /per ?day|daily/i.test(lastErr);
+              throw er;
+            }
             if (res.status === 400 || res.status === 401 || res.status === 403) break; // clave mala: no tiene sentido reintentar
             continue;
           }
@@ -521,10 +528,31 @@
           if (text) return { text, model: m };
           lastErr = 'La respuesta vino vacía (posible bloqueo de seguridad). Cambia el tema.';
         } catch (e) {
+          if (e.rateLimited) throw e;
           lastErr = 'Sin conexión o bloqueo de red: ' + e.message;
         }
       }
       throw new Error(lastErr);
+    }
+
+    // BARANDILLA: reintenta con pausa si Google dice "vas muy rápido" (error 429)
+    const PAUSA_ENTRE_LLAMADAS_MS = 6000;
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+    async function callGeminiSafe(prompt, onWait) {
+      const esperas = [35, 65];
+      for (let intento = 0; ; intento++) {
+        try {
+          return await callGemini(prompt);
+        } catch (e) {
+          if (!e.rateLimited) throw e;
+          if (e.daily) throw new Error('Se agotó el límite DIARIO gratis de Gemini. Tu avance quedó guardado: vuelve a tocar el botón mañana (o cuando se renueve) y continúa donde quedó.');
+          if (intento >= esperas.length) throw new Error('Google sigue pidiendo calma. Tu avance quedó guardado: espera unos minutos y toca el botón para continuar.');
+          for (let t = esperas[intento]; t > 0; t--) {
+            if (onWait) onWait(t);
+            await sleep(1000);
+          }
+        }
+      }
     }
 
     // CONFIG LOCALSTORAGE
@@ -630,7 +658,19 @@ Devuelve ÚNICAMENTE un arreglo JSON válido con el siguiente formato exacto, si
       }
     }
 
-    // GENERADOR GEMINI
+    // GENERADOR GEMINI (por capítulos para llegar a 20-25 min)
+    const PALABRAS_POR_MIN = 145;
+    let detener = false;
+    let avance = null; // guarda capítulos ya escritos para poder continuar
+
+    function detenerGuion() { detener = true; }
+
+    function actualizarContador(texto) {
+      const w = texto.trim() ? texto.trim().split(/\s+/).length : 0;
+      document.getElementById('script-counter').textContent = `${w} palabras · ≈ ${(w / PALABRAS_POR_MIN).toFixed(1)} min`;
+      return w;
+    }
+
     async function ejecutarGemini() {
       const key = localStorage.getItem('koffi_gemini_key');
       if (!key) {
@@ -638,48 +678,103 @@ Devuelve ÚNICAMENTE un arreglo JSON válido con el siguiente formato exacto, si
         toggleConfig();
         return;
       }
-      const topic = document.getElementById('script-topic').value;
+      const topic = document.getElementById('script-topic').value.trim();
       const niche = document.getElementById('script-niche').value;
       const tone = document.getElementById('script-tone').value;
       const ref = document.getElementById('script-ref').value;
       const formatVal = document.getElementById('script-format').value;
       const c = document.getElementById('script-console');
       const btn = document.getElementById('btn-generate-script');
-      const counter = document.getElementById('script-counter');
+      const stopBtn = document.getElementById('btn-stop');
+      if (!topic) { alert('Escribe o elige un tema primero.'); return; }
 
+      const refInstruction = ref ? `Usa como referencia de retención e ingeniería inversa el siguiente video/tema: "${ref}". Extrae su psicología pero escribe un guion 100% original.` : "";
+      const base = `Nicho: ${niche}\nTema principal: ${topic}\nTono de voz obligatorio: ${tone}\n${refInstruction}`;
+
+      detener = false;
       btn.disabled = true;
-      btn.textContent = "⏳ REDACTANDO GUION...";
-      c.textContent = `Conectando con Gemini...\nEstructurando guion para ${niche} en tono: ${tone}...`;
-
-      let promptRules = "";
-      if (formatVal === 'vertical_short') {
-        promptRules = `Formato: Short / Reel / TikTok (60 segundos). Gancho de 3 segundos que corte el scroll, argumento veloz sin pausas y remate final claro. Máximo 160 palabras.`;
-      } else if (formatVal === 'facebook_square') {
-        promptRules = `Formato: Video para Facebook. Estructura reflexiva cotidiana, párrafos breves, alta resonancia emocional sobre relaciones y conducta.`;
-      } else {
-        promptRules = `Formato: YouTube Largo (20 a 25 min). Gancho psicológico en los primeros 15 segundos sin saludos formales. 6 capítulos encadenados con marcas de tiempo. Narración continua y fluida para el locutor.`;
-      }
-
-      let refInstruction = ref ? `Usa como referencia de retención e ingeniería inversa el siguiente video/tema: "${ref}". Extrae su psicología pero escribe un guion 100% original.` : "";
-
-      const prompt = `Actúa como guionista senior y productor audiovisual de Koffi Studio.
-Nicho: ${niche}
-Tema principal: ${topic}
-Tono de voz obligatorio: ${tone}
-${refInstruction}
-${promptRules}
-No agregues introducciones meta ni explicaciones técnicas. Entrega directamente el guion listo para ser locutado.`;
+      stopBtn.style.display = 'block';
+      c.dataset.ready = '';
 
       try {
-        const r = await callGemini(prompt);
-        c.textContent = r.text;
-        counter.textContent = `${r.text.trim().split(/\s+/).length} palabras`;
-        c.dataset.ready = '1';
+        // ---- Formatos cortos: una sola llamada
+        if (formatVal !== 'youtube_long') {
+          btn.textContent = "⏳ REDACTANDO GUION...";
+          c.textContent = "Conectando con Gemini...";
+          const reglas = formatVal === 'vertical_short'
+            ? `Formato: Short / Reel / TikTok (60 segundos). Gancho de 3 segundos que corte el scroll, argumento veloz sin pausas y remate final claro. Máximo 160 palabras.`
+            : `Formato: Video para Facebook. Estructura reflexiva cotidiana, párrafos breves, alta resonancia emocional sobre relaciones y conducta.`;
+          const r = await callGeminiSafe(`Actúa como guionista senior y productor audiovisual de Koffi Studio.\n${base}\n${reglas}\nNo agregues introducciones meta ni explicaciones técnicas. Entrega directamente el guion listo para ser locutado, sin títulos ni marcas, solo texto corrido.`,
+            (t) => { c.textContent = `Google pidió calma. Reintentando en ${t} s...`; });
+          c.textContent = r.text;
+          actualizarContador(r.text);
+          c.dataset.ready = '1';
+          return;
+        }
+
+        // ---- YouTube largo: esquema + 6 capítulos con pausa
+        const llave = `${niche}|${topic}|${tone}`;
+        if (!avance || avance.llave !== llave) avance = { llave, esquema: null, capitulos: [] };
+        const esperando = (t) => { c.textContent = (avance.capitulos.join('\n\n') + `\n\n⏳ Google pidió calma. Reintentando en ${t} s...`).trim(); };
+
+        // 1) Esquema
+        if (!avance.esquema) {
+          btn.textContent = "⏳ DISEÑANDO ESQUEMA (1/7)...";
+          c.textContent = "Diseñando el esquema de 6 capítulos...";
+          const r = await callGeminiSafe(`Actúa como guionista senior de YouTube.\n${base}\nDiseña el esquema de un video de 22 minutos en exactamente 6 capítulos que se encadenan, cada uno con un giro o tensión que obligue a seguir viendo. Devuelve ÚNICAMENTE un arreglo JSON válido, sin markdown: [{"titulo":"...","resumen":"qué se cuenta en este capítulo, en 2 frases"}]`, esperando);
+          const t = r.text.replace(/```json/gi, '').replace(/```/g, '');
+          const i1 = t.indexOf('['), i2 = t.lastIndexOf(']');
+          if (i1 === -1 || i2 === -1) throw new Error('No pude armar el esquema. Intenta de nuevo.');
+          let esq = JSON.parse(t.slice(i1, i2 + 1));
+          if (!Array.isArray(esq) || esq.length < 3) throw new Error('El esquema vino incompleto. Intenta de nuevo.');
+          avance.esquema = esq.slice(0, 6);
+          await sleep(PAUSA_ENTRE_LLAMADAS_MS);
+        }
+
+        // 2) Capítulos
+        const total = avance.esquema.length;
+        const listaEsquema = avance.esquema.map((e, k) => `${k + 1}. ${e.titulo}: ${e.resumen}`).join('\n');
+        for (let n = avance.capitulos.length; n < total; n++) {
+          if (detener) { c.textContent = avance.capitulos.join('\n\n') + '\n\n⏹ Detenido. Toca GENERAR para continuar desde el capítulo ' + (n + 1) + '.'; break; }
+          btn.textContent = `⏳ CAPÍTULO ${n + 1} DE ${total} (${n + 2}/${total + 1})...`;
+          c.textContent = (avance.capitulos.join('\n\n') + `\n\n✍️ Escribiendo capítulo ${n + 1} de ${total}: ${avance.esquema[n].titulo}...`).trim();
+
+          const previo = avance.capitulos.length ? avance.capitulos[avance.capitulos.length - 1].split(/\s+/).slice(-70).join(' ') : '';
+          const esPrimero = n === 0, esUltimo = n === total - 1;
+          const prompt = `Actúa como guionista senior de YouTube y productor de Koffi Studio.
+${base}
+ESQUEMA COMPLETO DEL VIDEO:
+${listaEsquema}
+
+Escribe SOLO el capítulo ${n + 1} de ${total}: "${avance.esquema[n].titulo}".
+Reglas:
+- Longitud OBLIGATORIA: entre 600 y 700 palabras. Desarrolla con ejemplos, escenas y reflexiones; no resumas.
+- ${esPrimero ? 'Abre con un gancho psicológico en los primeros 15 segundos, sin saludos formales.' : 'Continúa de forma natural desde el final del capítulo anterior, sin saludar ni repetir lo ya dicho. Final del capítulo anterior: "' + previo + '"'}
+- ${esUltimo ? 'Cierra el video con un remate contundente y una invitación breve a suscribirse.' : 'Termina con un gancho que abra el siguiente capítulo. NO cierres ni te despidas.'}
+- Entrega solo texto corrido listo para locutar: sin títulos, sin números de capítulo, sin viñetas, sin acotaciones entre corchetes.`;
+          const r = await callGeminiSafe(prompt, esperando);
+          avance.capitulos.push(r.text.trim());
+          c.textContent = avance.capitulos.join('\n\n');
+          actualizarContador(c.textContent);
+          if (n < total - 1) await sleep(PAUSA_ENTRE_LLAMADAS_MS);
+        }
+
+        if (avance.capitulos.length) {
+          c.dataset.ready = '1';
+          const w = actualizarContador(avance.capitulos.join('\n\n'));
+          if (avance.capitulos.length === total) {
+            if (w < 3000) c.textContent += `\n\n[Nota: quedó en ${w} palabras. Para 20-25 min se necesitan 3000 a 3700.]`;
+            avance = null; // listo: el próximo clic empieza un guion nuevo
+          }
+        }
       } catch (err) {
-        c.textContent = "Error al conectar con la API: " + err.message;
+        const parcial = avance && avance.capitulos.length ? avance.capitulos.join('\n\n') + '\n\n' : '';
+        c.textContent = parcial + '⚠️ ' + err.message;
+        if (parcial) { c.dataset.ready = '1'; actualizarContador(parcial); }
       } finally {
         btn.disabled = false;
-        btn.textContent = "⚡ GENERAR GUION COMPLETO";
+        stopBtn.style.display = 'none';
+        btn.textContent = (avance && avance.capitulos.length) ? "▶ CONTINUAR GUION" : "⚡ GENERAR GUION COMPLETO";
       }
     }
 
@@ -699,39 +794,101 @@ No agregues introducciones meta ni explicaciones técnicas. Entrega directamente
     }
 
     // GENERADOR IMÁGENES
-    function generarImagen() {
+    function mostrarImagen(src, info) {
+      const img = document.getElementById('img-result');
+      const loader = document.getElementById('img-loading');
+      const inf = document.getElementById('img-info');
+      return new Promise((resolve, reject) => {
+        img.onload = () => { loader.style.display = 'none'; img.style.display = 'block'; inf.textContent = info; resolve(); };
+        img.onerror = () => reject(new Error('La imagen no cargó'));
+        img.src = src;
+      });
+    }
+
+    async function imagenFlux(prompt, ratio, w, h) {
+      const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + ', ' + ratio + ' aspect ratio')}?width=${w}&height=${h}&model=flux&nologo=true&seed=${Math.floor(Math.random() * 1e6)}`;
+      await Promise.race([
+        mostrarImagen(url, `✓ Imagen (${ratio}) generada con FLUX.\nMantén presionada la imagen para descargarla.`),
+        new Promise((_, rej) => setTimeout(() => rej(new Error('Flux tardó demasiado')), 60000))
+      ]);
+    }
+
+    async function imagenNanoBanana(prompt, ratio) {
+      const key = localStorage.getItem('koffi_gemini_key');
+      if (!key) throw new Error('Falta tu llave de Gemini en ⚙️ CONFIG');
+      const modelos = ['gemini-2.5-flash-image', 'gemini-2.5-flash-image-preview'];
+      let ultimo = 'Sin respuesta';
+      for (const m of modelos) {
+        try {
+          const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + m + ':generateContent', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: `${prompt}. Aspect ratio ${ratio}.` }] }],
+              generationConfig: { responseModalities: ['TEXT', 'IMAGE'] }
+            })
+          });
+          const data = await res.json();
+          if (data.error) { ultimo = data.error.message || 'Error de la API'; if (res.status === 429) break; continue; }
+          const parts = (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) || [];
+          const p = parts.find(x => x.inlineData || x.inline_data);
+          if (p) {
+            const d = p.inlineData || p.inline_data;
+            await mostrarImagen(`data:${d.mimeType || d.mime_type || 'image/png'};base64,${d.data}`, `✓ Imagen (${ratio}) generada con NANO BANANA.\nMantén presionada la imagen para descargarla.`);
+            return;
+          }
+          ultimo = 'Google no devolvió imagen (puede que tu plan gratis no la incluya o el prompt fue bloqueado).';
+        } catch (e) { ultimo = e.message; }
+      }
+      throw new Error(ultimo);
+    }
+
+    async function generarImagen() {
       const engine = document.getElementById('img-engine').value;
       const ratio = document.getElementById('img-ratio').value;
       const prompt = document.getElementById('img-prompt').value.trim();
-      if (!prompt) { alert('Escribe un prompt visual primero.'); return; }
       const img = document.getElementById('img-result');
       const info = document.getElementById('img-info');
       const loader = document.getElementById('img-loading');
-
-      loader.style.display = 'block';
-      img.style.display = 'none';
+      if (!prompt) { alert('Escribe un prompt visual primero.'); return; }
 
       let w = 1280, h = 720;
       if (ratio === '9:16') { w = 720; h = 1280; }
       else if (ratio === '1:1') { w = 1024; h = 1024; }
 
-      if (engine === 'flux' || engine === 'banana') {
-        const cleanPrompt = encodeURIComponent(prompt + `, ${ratio} aspect ratio`);
-        const url = `https://image.pollinations.ai/prompt/${cleanPrompt}?width=${w}&height=${h}&model=flux&nologo=true&seed=${Math.floor(Math.random()*1e6)}`;
-        img.onerror = () => { loader.style.display = 'none'; info.textContent = 'No se pudo generar la imagen. Revisa tu conexión o intenta de nuevo en unos segundos.'; };
-        img.src = url;
-        img.onload = () => {
-          loader.style.display = 'none';
-          img.style.display = 'block';
-          info.textContent = `✓ Imagen (${ratio}) generada vía ${engine.toUpperCase()}.\nMantén presionada la imagen para descargarla.`;
-        };
-      } else if (engine === 'midjourney') {
-        loader.style.display = 'none';
-        info.textContent = `[PROMPT MIDJOURNEY v6]:\n/imagine prompt: ${prompt} --ar ${ratio.replace(':', ':')} --style raw --v 6.0`;
-      } else {
-        loader.style.display = 'none';
-        info.textContent = `[CONFIGURACIÓN LEONARDO AI]:\nPrompt: ${prompt}\nRatio: ${ratio} | Resolución: ${w}x${h}`;
+      if (engine === 'midjourney') {
+        img.style.display = 'none';
+        info.textContent = `[PROMPT MIDJOURNEY v6]:\n/imagine prompt: ${prompt} --ar ${ratio} --style raw --v 6.0\n\nCópialo y pégalo en Midjourney.`;
+        return;
       }
+      if (engine === 'leonardo') {
+        img.style.display = 'none';
+        info.textContent = `[CONFIGURACIÓN LEONARDO AI]:\nPrompt: ${prompt}\nRatio: ${ratio} | Resolución: ${w}x${h}\n\nCópialo y pégalo en Leonardo.`;
+        return;
+      }
+
+      loader.style.display = 'block';
+      loader.textContent = 'Renderizando...';
+      img.style.display = 'none';
+      info.textContent = '';
+
+      // Motor elegido primero; el otro queda como plan B automático
+      const orden = engine === 'banana' ? ['banana', 'flux'] : ['flux', 'banana'];
+      const nombres = { flux: 'Flux', banana: 'Nano Banana' };
+      const errores = [];
+      for (let k = 0; k < orden.length; k++) {
+        const m = orden[k];
+        try {
+          loader.textContent = (k ? `Plan B: ${nombres[m]}...` : `Renderizando con ${nombres[m]}...`);
+          if (m === 'flux') await imagenFlux(prompt, ratio, w, h);
+          else await imagenNanoBanana(prompt, ratio);
+          return;
+        } catch (e) {
+          errores.push(`${nombres[m]}: ${e.message}`);
+        }
+      }
+      loader.style.display = 'none';
+      info.textContent = '⚠️ No se pudo generar la imagen.\n' + errores.join('\n') + '\n\nPuedes copiar el prompt y usarlo en Leonardo o Midjourney.';
     }
 
     // DIVISOR A2E
