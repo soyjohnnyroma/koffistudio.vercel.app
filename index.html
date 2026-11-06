@@ -15,29 +15,70 @@
       min-height: 100vh;
       line-height: 1.5;
     }
+    /* ENCABEZADO: marca centrada y controles ordenados en todas las pantallas */
     header {
+      width: 100%;
       border-bottom: 1px solid #18181b;
-      padding: 10px 16px;
+      padding: 11px 16px;
       display: flex;
-      justify-content: space-between;
+      flex-direction: column;
+      justify-content: center;
       align-items: center;
+      gap: 10px;
       background: #09090b;
       position: sticky;
       top: 0;
       z-index: 50;
     }
-    .brand-wrap { display: flex; align-items: center; gap: 10px; }
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 11px;
+      min-width: 0;
+      text-align: left;
+    }
     .brand-logo-img {
-      width: 34px;
-      height: 34px;
+      display: block;
+      flex: 0 0 38px;
+      width: 38px;
+      height: 38px;
       border-radius: 50%;
       background: #000;
       border: 1px solid #27272a;
       object-fit: cover;
     }
-    .brand-title { font-size: 13px; font-weight: 800; letter-spacing: 1px; }
-    .brand-sub { color: #71717a; font-size: 11px; margin-left: 4px; }
-    .header-meta { display: flex; align-items: center; gap: 10px; font-size: 11px; font-family: monospace; }
+    .brand-copy { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
+    .brand-title {
+      display: block;
+      color: #f4f4f5;
+      font-size: 14px;
+      line-height: 1.15;
+      font-weight: 800;
+      letter-spacing: 1.7px;
+      white-space: nowrap;
+    }
+    .brand-sub {
+      display: block;
+      color: #85858e;
+      font-size: 9px;
+      line-height: 1.3;
+      letter-spacing: 1.15px;
+      margin: 4px 0 0;
+      white-space: nowrap;
+    }
+    .header-meta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 7px;
+      font-size: 10px;
+      font-family: monospace;
+    }
+    #live-datetime { color: #85858e !important; font-size: 10px; font-weight: 500 !important; letter-spacing: .2px !important; padding: 0 3px; white-space: nowrap; }
+    .header-meta button { min-height: 28px; }
+    .status-badge { padding: 4px 7px; font-size: 9px; white-space: nowrap; }
     .status-badge {
       display: inline-flex;
       align-items: center;
@@ -214,23 +255,47 @@
       margin-top: 10px;
       display: none;
     }
+
+    /* Mejor aprovechamiento del espacio al girar el teléfono a horizontal */
+    @media (min-width: 700px) {
+      header { flex-direction: row; flex-wrap: wrap; gap: 18px 28px; padding: 10px 20px; }
+      .grid-workspace { grid-template-columns: minmax(280px, 360px) minmax(0, 1fr); }
+      .container { padding-left: 20px; padding-right: 20px; }
+    }
+    @media (max-width: 380px) {
+      header { padding: 9px 10px; gap: 8px; }
+      .brand-logo-img { flex-basis: 34px; width: 34px; height: 34px; }
+      .brand-title { font-size: 13px; letter-spacing: 1.35px; }
+      .brand-sub { font-size: 8px; letter-spacing: .9px; }
+      .header-meta { gap: 5px; }
+      .container { padding-left: 10px; padding-right: 10px; }
+      .hero-strip { font-size: 9px; }
+    }
+    @media (orientation: landscape) and (max-height: 500px) {
+      header { position: relative; padding-top: 7px; padding-bottom: 7px; gap: 14px; }
+      .brand-logo-img { width: 32px; height: 32px; flex-basis: 32px; }
+      .brand-title { font-size: 12px; }
+      .brand-sub { font-size: 8px; margin-top: 2px; }
+      .container { padding-top: 10px; }
+      .console-out { height: 260px; }
+    }
   </style>
 </head>
 <body>
 
   <header>
     <div class="brand-wrap">
-      <img src="icon-192.png" alt="Logo" class="brand-logo-img">
-      <div>
+      <img src="icon-192.png" alt="Isotipo de Koffi Studio" class="brand-logo-img">
+      <div class="brand-copy">
         <span class="brand-title">KOFFI STUDIO</span>
-        <span class="brand-sub">/ Autonomous Media Engine</span>
+        <span class="brand-sub">AUTONOMOUS MEDIA ENGINE</span>
       </div>
     </div>
 
     <div class="header-meta">
-      <span id="live-datetime" style="color:#d4d4d8; font-weight:600; letter-spacing:0.5px;">--:--:--</span>
-      <button id="pwa-install-btn" style="display:none; background:#10b981; border:none; color:#000; font-size:10px; font-weight:700; padding:4px 8px; border-radius:4px; cursor:pointer;" onclick="installPWA()">📲 INSTALAR</button>
-      <button onclick="toggleConfig()" style="background:#18181b; border:1px solid #27272a; color:#fff; font-size:10px; padding:4px 8px; border-radius:4px; cursor:pointer;">⚙️ CONFIG</button>
+      <span id="live-datetime">--:--:--</span>
+      <button id="pwa-install-btn" style="display:none; background:#10b981; border:none; color:#000; font-size:10px; font-weight:700; padding:4px 8px; border-radius:4px; cursor:pointer;" onclick="installPWA()">INSTALAR</button>
+      <button onclick="toggleConfig()" style="background:#18181b; border:1px solid #27272a; color:#fff; font-size:10px; padding:4px 9px; border-radius:4px; cursor:pointer;">CONFIG</button>
       <div class="status-badge">
         <span class="pulse-dot" id="dot-status"></span>
         <span id="api-status">API: PENDIENTE</span>
@@ -257,7 +322,6 @@
   <main class="container">
     <div class="hero-strip">
       <span>CENTRO DE PRODUCCIÓN MULTI-NICHO & MULTI-PLATAFORMA</span>
-      <span style="color:#10b981;">ESTADO: OPERATIVO</span>
     </div>
 
     <!-- DOBLE CARRUSEL -->
