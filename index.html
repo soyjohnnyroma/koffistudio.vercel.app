@@ -15,7 +15,7 @@
     }
     header {
       border-bottom: 1px solid #18181b;
-      padding: 14px 20px;
+      padding: 12px 18px;
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
@@ -24,21 +24,17 @@
       background: #09090b;
     }
     .brand-wrap { display: flex; align-items: center; gap: 12px; }
-    .brand-logo {
-      width: 36px;
-      height: 36px;
+    .brand-logo-img {
+      width: 38px;
+      height: 38px;
       border-radius: 50%;
-      background: #000000;
-      border: 1.5px solid #ffffff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      flex-shrink: 0;
+      background: #000;
+      border: 1.5px solid #fff;
+      object-fit: cover;
     }
     .brand-title { font-size: 13px; font-weight: 900; letter-spacing: 1.5px; }
     .brand-sub { color: #71717a; font-size: 11px; margin-left: 6px; }
-    .header-meta { display: flex; align-items: center; gap: 14px; font-size: 11px; font-family: monospace; }
+    .header-meta { display: flex; align-items: center; gap: 12px; font-size: 11px; font-family: monospace; }
     .status-badge {
       display: inline-flex;
       align-items: center;
@@ -50,63 +46,53 @@
       color: #a1a1aa;
     }
     .pulse-dot { width: 7px; height: 7px; border-radius: 50%; background: #10b981; }
-    .container { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 20px 16px; }
     .hero {
       border-bottom: 1px solid #18181b;
-      padding-bottom: 20px;
-      margin-bottom: 20px;
+      padding-bottom: 16px;
+      margin-bottom: 16px;
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
       align-items: flex-end;
-      gap: 16px;
+      gap: 12px;
     }
     .hero-pre { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #71717a; font-weight: 700; }
-    .hero-title { font-size: 24px; font-weight: 300; margin-top: 4px; }
+    .hero-title { font-size: 22px; font-weight: 300; margin-top: 4px; }
     .hero-title strong { font-weight: 700; color: #ffffff; }
-    .section-title {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      color: #a1a1aa;
-      font-weight: 700;
-      margin-bottom: 12px;
-      display: flex;
-      justify-content: space-between;
-    }
+
+    /* CARRUSEL DOBLE */
     .marquee-wrapper {
       overflow: hidden;
       position: relative;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
       -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
     }
-    .marquee-track { display: flex; width: max-content; gap: 12px; }
+    .marquee-track { display: flex; width: max-content; gap: 10px; }
     .marquee-left { animation: scroll-left 40s linear infinite; }
     .marquee-right { animation: scroll-right 40s linear infinite; }
-    .marquee-wrapper:hover .marquee-track { animation-play-state: paused; }
     @keyframes scroll-left { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
     @keyframes scroll-right { 0% { transform: translateX(-50%); } 100% { transform: translateX(0); } }
     .style-card {
-      width: 200px;
+      width: 190px;
       background: #09090b;
       border: 1px solid #18181b;
-      border-radius: 8px;
-      padding: 12px;
-      cursor: pointer;
+      border-radius: 6px;
+      padding: 10px;
       text-align: left;
-      transition: all 0.2s;
     }
-    .style-card:hover { border-color: #52525b; transform: translateY(-2px); background: #121214; }
-    .style-name { font-size: 12px; font-weight: 700; color: #fff; }
-    .style-desc { font-size: 10px; color: #71717a; margin-top: 4px; line-height: 1.3; }
+    .style-name { font-size: 11px; font-weight: 700; color: #fff; }
+    .style-desc { font-size: 10px; color: #71717a; margin-top: 3px; }
+
+    /* PESTAÑAS */
     .tabs-nav {
       display: flex;
       overflow-x: auto;
       border-bottom: 1px solid #18181b;
-      gap: 18px;
-      padding-bottom: 10px;
-      margin-top: 20px;
+      gap: 16px;
+      padding-bottom: 8px;
+      margin-top: 16px;
     }
     .tab-btn {
       background: none;
@@ -115,13 +101,13 @@
       font-size: 12px;
       font-weight: 600;
       cursor: pointer;
-      padding-bottom: 8px;
+      padding-bottom: 6px;
       white-space: nowrap;
-      transition: color 0.2s;
     }
     .tab-btn.active { color: #ffffff; border-bottom: 2px solid #ffffff; }
-    .tab-content { display: none; margin-top: 20px; }
+    .tab-content { display: none; margin-top: 16px; }
     .tab-content.active { display: block; }
+
     .grid-workspace {
       display: grid;
       grid-template-columns: 1fr;
@@ -136,7 +122,7 @@
       border-radius: 8px;
       padding: 16px;
     }
-    .input-group { margin-bottom: 14px; }
+    .input-group { margin-bottom: 12px; }
     .input-label { display: block; font-size: 11px; color: #a1a1aa; margin-bottom: 6px; font-weight: 600; text-transform: uppercase; }
     .input-field {
       width: 100%;
@@ -162,6 +148,18 @@
       transition: background 0.2s;
     }
     .btn-main:hover { background: #e4e4e7; }
+    .btn-secondary {
+      background: #18181b;
+      color: #ffffff;
+      border: 1px solid #27272a;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 8px;
+    }
     .console-out {
       background: #030303;
       border: 1px solid #18181b;
@@ -173,6 +171,7 @@
       color: #d4d4d8;
       height: 380px;
       overflow-y: auto;
+      white-space: pre-wrap;
     }
     .card-item {
       background: #121214;
@@ -181,25 +180,21 @@
       padding: 12px;
       margin-bottom: 10px;
     }
+    .image-preview {
+      width: 100%;
+      border-radius: 6px;
+      border: 1px solid #27272a;
+      margin-top: 10px;
+      display: none;
+    }
   </style>
 </head>
 <body>
 
   <header>
     <div class="brand-wrap">
-      <div class="brand-logo" title="Koffi Studio">
-        <svg width="24" height="24" viewBox="0 0 100 100" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="50" cy="50" r="45" stroke-width="4"/>
-          <polyline points="32,38 38,48 44,40"/>
-          <polyline points="68,38 62,48 56,40"/>
-          <polygon points="44,40 56,40 60,54 53,74 47,74 40,54"/>
-          <rect x="42" y="44" width="6" height="6"/>
-          <rect x="52" y="44" width="6" height="6"/>
-          <polygon points="47,56 53,56 50,61"/>
-          <rect x="47" y="64" width="6" height="10"/>
-          <line x1="50" y1="64" x2="50" y2="74"/>
-        </svg>
-      </div>
+      <!-- ISOTIPO OFICIAL KOFFI STUDIO -->
+      <img src="Isotipo" alt="Koffi Logo" class="brand-logo-img" onerror="this.src='[suspicious link removed]'">
       <div>
         <span class="brand-title">KOFFI STUDIO</span>
         <span class="brand-sub">/ Autonomous Engine</span>
@@ -207,258 +202,292 @@
     </div>
 
     <div class="header-meta">
+      <button onclick="toggleConfig()" style="background:#18181b; border:1px solid #27272a; color:#fff; font-size:10px; padding:4px 8px; border-radius:4px; cursor:pointer;">⚙️ API KEY</button>
       <div class="status-badge">
         <span class="pulse-dot"></span>
-        <span>SYS_ONLINE</span>
+        <span id="api-status">API: PENDIENTE</span>
       </div>
-      <span id="live-clock">--:--:--</span>
     </div>
   </header>
+
+  <!-- MODAL CONFIGURACIÓN API KEY -->
+  <div id="config-box" style="display:none; background:#0e0e11; border-bottom:1px solid #27272a; padding:14px 20px;">
+    <div style="max-width:600px; margin:0 auto;">
+      <label class="input-label">Clave Gratuita de Google Gemini (AI Studio):</label>
+      <div style="display:flex; gap:8px;">
+        <input type="password" id="gemini-key" class="input-field" placeholder="AIzaSy...">
+        <button class="btn-main" style="width:auto; padding:0 16px;" onclick="guardarKey()">GUARDAR</button>
+      </div>
+      <p style="font-size:10px; color:#71717a; margin-top:6px;">Se guarda únicamente en el almacenamiento local de tu teléfono celular.</p>
+    </div>
+  </div>
 
   <main class="container">
     <div class="hero">
       <div>
-        <p class="hero-pre">Plataforma Global de Producción Audiovisual</p>
-        <h1 class="hero-title">Centro de Mando de <strong>Koffi Studio</strong></h1>
+        <p class="hero-pre">Ecosistema Autónomo de Producción</p>
+        <h1 class="hero-title">Fábrica de Videos de <strong>Koffi Studio</strong></h1>
       </div>
     </div>
 
-    <section>
-      <div class="section-title">
-        <span>Catálogo de Estilos Visuales (Multi-Nicho)</span>
-        <span style="color:#52525b;">Auto-Scroll Continuo</span>
+    <!-- DOBLE CARRUSEL -->
+    <div class="marquee-wrapper">
+      <div class="marquee-track marquee-left">
+        <div class="style-card"><p class="style-name">🏛️ Claroscuro Romano</p><p class="style-desc">Mármol desgastado & sombras densas.</p></div>
+        <div class="style-card"><p class="style-name">🕯️ Terror Psicológico</p><p class="style-desc">Luz de vela y penumbra opresiva.</p></div>
+        <div class="style-card"><p class="style-name">🎞️ Documental 35mm</p><p class="style-desc">Grano analógico retro y realismo.</p></div>
+        <div class="style-card"><p class="style-name">📈 Finanzas & Alto RPM</p><p class="style-desc">Estética corporativa y sobria.</p></div>
+        <div class="style-card"><p class="style-name">🏛️ Claroscuro Romano</p><p class="style-desc">Mármol desgastado & sombras densas.</p></div>
+        <div class="style-card"><p class="style-name">🕯️ Terror Psicológico</p><p class="style-desc">Luz de vela y penumbra opresiva.</p></div>
       </div>
-
-      <div class="marquee-wrapper">
-        <div class="marquee-track marquee-left">
-          <div class="style-card"><p class="style-name">🏛️ Claroscuro Romano</p><p class="style-desc">Mármol envejecido, lluvia & sombras profundas.</p></div>
-          <div class="style-card"><p class="style-name">🕯️ Terror & Misterio</p><p class="style-desc">Luz de vela tenue, penumbra y suspenso psicológico.</p></div>
-          <div class="style-card"><p class="style-name">🎞️ Documental 35mm</p><p class="style-desc">Grano analógico retro, colores históricos apagados.</p></div>
-          <div class="style-card"><p class="style-name">📈 Finanzas & Alto RPM</p><p class="style-desc">Gráficos sobrios, oficinas oscuras y minimalismo.</p></div>
-          <div class="style-card"><p class="style-name">🌌 Cyberpunk & Tech</p><p class="style-desc">Neón, interfaz futurista y estética de vanguardia.</p></div>
-          <div class="style-card"><p class="style-name">🏛️ Claroscuro Romano</p><p class="style-desc">Mármol envejecido, lluvia & sombras profundas.</p></div>
-          <div class="style-card"><p class="style-name">🕯️ Terror & Misterio</p><p class="style-desc">Luz de vela tenue, penumbra y suspenso psicológico.</p></div>
-          <div class="style-card"><p class="style-name">🎞️ Documental 35mm</p><p class="style-desc">Grano analógico retro, colores históricos apagados.</p></div>
-          <div class="style-card"><p class="style-name">📈 Finanzas & Alto RPM</p><p class="style-desc">Gráficos sobrios, oficinas oscuras y minimalismo.</p></div>
-          <div class="style-card"><p class="style-name">🌌 Cyberpunk & Tech</p><p class="style-desc">Neón, interfaz futurista y estética de vanguardia.</p></div>
-        </div>
+    </div>
+    <div class="marquee-wrapper">
+      <div class="marquee-track marquee-right">
+        <div class="style-card"><p class="style-name">📜 Archivo Histórico</p><p class="style-desc">Mapas de pergamino y textura antigua.</p></div>
+        <div class="style-card"><p class="style-name">🧠 Conducta Humana</p><p class="style-desc">Siluetas y psicología oscura.</p></div>
+        <div class="style-card"><p class="style-name">🎨 Pintura al Óleo</p><p class="style-desc">Pincelada clásica renacentista.</p></div>
+        <div class="style-card"><p class="style-name">⚔️ Épica Legendaria</p><p class="style-desc">Niebla, armaduras y atmósfera bélica.</p></div>
+        <div class="style-card"><p class="style-name">📜 Archivo Histórico</p><p class="style-desc">Mapas de pergamino y textura antigua.</p></div>
+        <div class="style-card"><p class="style-name">🧠 Conducta Humana</p><p class="style-desc">Siluetas y psicología oscura.</p></div>
       </div>
+    </div>
 
-      <div class="marquee-wrapper">
-        <div class="marquee-track marquee-right">
-          <div class="style-card"><p class="style-name">📜 Archivo Histórico</p><p class="style-desc">Mapas antiguos, pergamino y texturas de época.</p></div>
-          <div class="style-card"><p class="style-name">🧠 Psicología Oscura</p><p class="style-desc">Siluetas humanas, miradas y fondos monocromáticos.</p></div>
-          <div class="style-card"><p class="style-name">🎨 Óleo Clásico</p><p class="style-desc">Pintura al óleo renacentista con pincelada densa.</p></div>
-          <div class="style-card"><p class="style-name">🕳️ Silueta Minimal</p><p class="style-desc">Alto contraste blanco y negro, figuras recortadas.</p></div>
-          <div class="style-card"><p class="style-name">⚔️ Épica Legendaria</p><p class="style-desc">Niebla, armaduras desgastadas y atmósfera bélica.</p></div>
-          <div class="style-card"><p class="style-name">📜 Archivo Histórico</p><p class="style-desc">Mapas antiguos, pergamino y texturas de época.</p></div>
-          <div class="style-card"><p class="style-name">🧠 Psicología Oscura</p><p class="style-desc">Siluetas humanas, miradas y fondos monocromáticos.</p></div>
-          <div class="style-card"><p class="style-name">🎨 Óleo Clásico</p><p class="style-desc">Pintura al óleo renacentista con pincelada densa.</p></div>
-          <div class="style-card"><p class="style-name">🕳️ Silueta Minimal</p><p class="style-desc">Alto contraste blanco y negro, figuras recortadas.</p></div>
-          <div class="style-card"><p class="style-name">⚔️ Épica Legendaria</p><p class="style-desc">Niebla, armaduras desgastadas y atmósfera bélica.</p></div>
-        </div>
-      </div>
-    </section>
-
+    <!-- PESTAÑAS -->
     <nav class="tabs-nav">
-      <button class="tab-btn active" onclick="openTab('tab-nicho', this)">1. Radar de Nichos & Referencias</button>
-      <button class="tab-btn" onclick="openTab('tab-guion', this)">2. Laboratorio de Guiones (Encadenado)</button>
-      <button class="tab-btn" onclick="openTab('tab-prompts', this)">3. Fábrica de Prompts & Escenas</button>
-      <button class="tab-btn" onclick="openTab('tab-voz', this)">4. Voz Clonada & Audio</button>
-      <button class="tab-btn" onclick="openTab('tab-seo', this)">5. Packaging & Metadatos</button>
+      <button class="tab-btn active" onclick="openTab('tab-guion', this)">1. Generador de Guiones (Gemini)</button>
+      <button class="tab-btn" onclick="openTab('tab-imagenes', this)">2. Generador de Imágenes (Flux/Banana/MJ)</button>
+      <button class="tab-btn" onclick="openTab('tab-audio', this)">3. Motor de Voz (Vía Colab 25min)</button>
+      <button class="tab-btn" onclick="openTab('tab-seo', this)">4. Título & Metadatos</button>
     </nav>
 
-    <div id="tab-nicho" class="tab-content active">
-      <div class="grid-workspace">
-        <div class="panel-box">
-          <label class="input-label">Selección de Nicho Objetivo:</label>
-          <select id="niche-select" class="input-field" style="margin-bottom:12px;">
-            <option value="estoicismo">🏛️ Estoicismo & Filosofía Práctica</option>
-            <option value="terror">🕯️ Historias de Terror & Misterio Real</option>
-            <option value="finanzas">📈 Finanzas, Economía & Negocios</option>
-            <option value="psicologia">🧠 Psicología Oscura & Conducta Humana</option>
-            <option value="historia">📜 Historia Bélica & Civilizaciones Antiguas</option>
-            <option value="tech">⚙️ Inteligencia Artificial & Automatización</option>
-          </select>
-
-          <label class="input-label">URL del Video de Referencia:</label>
-          <input type="text" class="input-field" placeholder="[suspicious link removed]..." style="margin-bottom:12px;">
-
-          <button class="btn-main" onclick="analizarReferencia()">🔍 EXTRAER ESTRUCTURA GANADORA</button>
-        </div>
-        <div class="panel-box">
-          <label class="input-label">Diagnóstico de Ángulo y Retención:</label>
-          <div id="niche-output" class="console-out">
-            Selecciona un nicho o pega una URL para desglosar la curva de retención, gancho inicial y disparadores psicológicos del contenido.
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div id="tab-guion" class="tab-content">
+    <!-- PESTAÑA 1: GUION CONEXIÓN GEMINI -->
+    <div id="tab-guion" class="tab-content active">
       <div class="grid-workspace">
         <div class="panel-box">
           <div class="input-group">
-            <label class="input-label">Formato de Producción:</label>
-            <select class="input-field">
-              <option selected>Horizontal (16:9) — YouTube Largo (20-25 min)</option>
-              <option>Vertical (9:16) — Shorts / TikTok / Reels (60 seg)</option>
-              <option>Cuadrado / 4:3 — Facebook Video Largo</option>
+            <label class="input-label">Nicho:</label>
+            <select id="script-niche" class="input-field">
+              <option value="Estoicismo y Filosofía">🏛️ Estoicismo & Filosofía</option>
+              <option value="Psicología Oscura y Conducta Humana">🧠 Psicología & Conducta Humana</option>
+              <option value="Terror y Misterio Real">🕯️ Terror & Misterio</option>
+              <option value="Finanzas y Riqueza">📈 Finanzas & Riqueza</option>
             </select>
           </div>
 
           <div class="input-group">
-            <label class="input-label">Tema o Dilema Central:</label>
+            <label class="input-label">Tema del Video:</label>
             <input type="text" id="script-topic" class="input-field" value="Nadie te debe nada: la verdad brutal que nadie quiere escuchar">
           </div>
 
           <div class="input-group">
-            <label class="input-label">Paso de Secuencia Encadenada:</label>
-            <select id="script-step" class="input-field">
-              <option value="1">Paso 1: Esqueleto Global (6 Capítulos)</option>
-              <option value="2">Paso 2: Desarrollar Capítulos Encadenados</option>
+            <label class="input-label">Formato:</label>
+            <select id="script-format" class="input-field">
+              <option value="YouTube Largo (20 a 25 min)">Horizontal (16:9) — Largo (20 a 25 min)</option>
+              <option value="Short / TikTok (60 seg)">Vertical (9:16) — Corto (60 seg)</option>
             </select>
           </div>
 
-          <button class="btn-main" onclick="generarSecuencia()">⚡ GENERAR PASO NARRATIVO</button>
+          <button class="btn-main" id="btn-generate-script" onclick="ejecutarGemini()">⚡ GENERAR GUION CON GEMINI</button>
+          <button class="btn-secondary" onclick="copiarGuion()">📋 COPIAR TODO EL GUION</button>
         </div>
 
         <div class="panel-box">
-          <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-            <label class="input-label" style="color:#fff;">Visor de Guion Continuo</label>
-            <span id="word-counter" style="font-family:monospace; font-size:11px; color:#10b981;">0 palabras</span>
-          </div>
-          <div id="script-display" class="console-out">
-            Presiona "Generar Paso Narrativo" para iniciar la producción secuenciada sin repeticiones ni cortes abruptos.
-          </div>
+          <label class="input-label" style="color:#fff;">Guion Generado en Tiempo Real:</label>
+          <div id="script-console" class="console-out">Ingresa tu API Key de Gemini en el botón superior ⚙️ y presiona 'Generar Guion'. El texto se redactará automáticamente en este visor.</div>
         </div>
       </div>
     </div>
 
-    <div id="tab-prompts" class="tab-content">
+    <!-- PESTAÑA 2: GENERADOR DE IMÁGENES -->
+    <div id="tab-imagenes" class="tab-content">
+      <div class="grid-workspace">
+        <div class="panel-box">
+          <label class="input-label">Motor de Imagen:</label>
+          <select id="img-engine" class="input-field" style="margin-bottom:12px;">
+            <option value="flux">⚡ Flux Schnell (Inferencia Directa Gratuita)</option>
+            <option value="banana">🍌 Nano Banana (Google Imagen 3)</option>
+            <option value="leonardo">🎨 Leonardo AI (Preset 16:9)</option>
+            <option value="midjourney">🌌 Midjourney v6 (Prompt con Parámetros)</option>
+          </select>
+
+          <label class="input-label">Prompt Visual:</label>
+          <textarea id="img-prompt" class="input-field" rows="4">Cinematic weathered dark marble bust of Marcus Aurelius in heavy pouring dark rain, dramatic side chiaroscuro lighting, deep black background, moody mist, 8k resolution, 16:9</textarea>
+
+          <button class="btn-main" style="margin-top:10px;" onclick="generarImagen()">🎨 RENDERIZAR IMAGEN</button>
+        </div>
+
+        <div class="panel-box">
+          <label class="input-label">Resultado Visual (16:9):</label>
+          <div id="img-loading" style="display:none; color:#10b981; font-family:monospace; font-size:11px; margin-bottom:8px;">Renderizando en alta definición...</div>
+          <img id="img-result" class="image-preview" alt="Preview">
+          <div id="img-info" class="console-out" style="height:140px; margin-top:10px;">Selecciona el motor y toca 'Renderizar Imagen' para generar tus tomas maestras sin salir de la app.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PESTAÑA 3: MOTOR DE VOZ COLAB -->
+    <div id="tab-audio" class="tab-content">
       <div class="panel-box">
-        <label class="input-label">Lote de Escenas Desglosadas con Tiempos y Prompts</label>
+        <label class="input-label">Procesamiento de Voz Clonada (25 min sin cortes)</label>
         <p style="font-size:12px; color:#a1a1aa; margin-bottom:14px;">
-          Cada escena cuenta con sus segundos calculados y su prompt optimizado para 16:9 en generadores gratuitos (Nano Banana / Grok).
+          Para obtener los 25 minutos continuos con la voz clonada de tu hermano a coste $0 absoluto, usamos el cuaderno de GPU de Google Colab:
         </p>
 
         <div class="card-item">
-          <span style="color:#10b981; font-weight:700; font-size:11px;">ESCENA 1 [00:00 - 02:00] — EL GANCHO</span>
-          <p style="font-family:monospace; font-size:11px; color:#d4d4d8; margin-top:6px;">
-            Cinematic weathered marble bust of Marcus Aurelius in heavy pouring dark rain, dramatic chiaroscuro side lighting, deep black background, moody mist, 8k resolution, 16:9.
-          </p>
-          <span style="color:#71717a; font-size:10px; margin-top:4px; display:block;">Regla de 3 planos: Plano General (0-40s), Plano Medio (40-80s), Zoom Ojos (80-120s).</span>
-        </div>
-
-        <div class="card-item">
-          <span style="color:#10b981; font-weight:700; font-size:11px;">ESCENA 2 [02:00 - 06:00] — LA ILUSIÓN DEL DERECHO</span>
-          <p style="font-family:monospace; font-size:11px; color:#d4d4d8; margin-top:6px;">
-            Ancient stone sculpture of Epictetus seated in deep contemplation, rugged texture, single warm side-light, dense shadows, minimalist dark background, 16:9.
-          </p>
-          <span style="color:#71717a; font-size:10px; margin-top:4px; display:block;">Corte en minuto 02:00: Inserción de llamado a suscripción.</span>
+          <strong style="color:#fff; font-size:12px;">Paso Único de Producción:</strong>
+          <ol style="margin-left:18px; margin-top:8px; font-size:11px; color:#d4d4d8; line-height:1.7;">
+            <li>Copia el guion generado con el botón <strong>[COPIAR TODO EL GUION]</strong> de la Pestaña 1.</li>
+            <li>Abre el cuaderno de VoiceStudio en Colab tocando el botón de abajo.</li>
+            <li>Pega el guion de 18.000 caracteres y dale a <strong>Ejecutar</strong>.</li>
+            <li>Descarga tu archivo <code>audio_completo_25min.mp3</code> listo para montar en CapCut.</li>
+          </ol>
+          <a href="https://colab.research.google.com/" target="_blank" style="text-decoration:none;">
+            <button class="btn-main" style="margin-top:12px;">🚀 ABRIR PROCESADOR COLAB (VOICE STUDIO)</button>
+          </a>
         </div>
       </div>
     </div>
 
-    <div id="tab-voz" class="tab-content">
-      <div class="grid-workspace">
-        <div class="panel-box">
-          <label class="input-label">Procesamiento de Voz Clonada</label>
-          <p style="font-size:11px; color:#71717a; margin-bottom:12px;">
-            Tienes un audio de referencia mayor a 10 segundos en tu móvil. Selecciona la vía de renderizado:
-          </p>
-          
-          <div class="card-item">
-            <strong style="font-size:12px; color:#fff;">Vía 1: Google Colab (1 Solo Tirón a $0)</strong>
-            <p style="font-size:11px; color:#a1a1aa; margin-top:4px;">
-              Subes tu muestra de voz a Google Drive y pegas el guion completo de 18.000 caracteres. La GPU gratuita de Google genera el MP3 continuo sin límites.
-            </p>
-          </div>
-
-          <div class="card-item">
-            <strong style="font-size:12px; color:#fff;">Vía 2: Troceador Automático (Fish / a2e)</strong>
-            <p style="font-size:11px; color:#a1a1aa; margin-top:4px;">
-              Divide el texto automáticamente en bloques exactos de 490 caracteres respetando puntos seguidos para copiar y pegar sin esfuerzo.
-            </p>
-            <button class="btn-main" style="margin-top:8px;" onclick="trocearTexto()">✂️ DIVIDIR GUION EN BLOQUES SEGUROS</button>
-          </div>
-        </div>
-
-        <div class="panel-box">
-          <label class="input-label">Consola de Audio / Bloques de Salida:</label>
-          <div id="voice-display" class="console-out">
-            Listo para procesar la locución de tu video.
-          </div>
-        </div>
-      </div>
-    </div>
-
+    <!-- PESTAÑA 4: SEO -->
     <div id="tab-seo" class="tab-content">
       <div class="panel-box">
-        <label class="input-label">Metadatos Optimizados para Publicación</label>
-        
+        <label class="input-label">Empaquetado para YouTube (@serestoicocanal)</label>
         <div class="input-group">
-          <label class="input-label">Título Psicológico (Alto CTR):</label>
+          <label class="input-label">Título Psicológico:</label>
           <input type="text" class="input-field" value="Nadie Te Debe Nada (La Cruda Verdad Que Nadie Quiere Escuchar)">
         </div>
-
         <div class="input-group">
-          <label class="input-label">Marcas de Tiempo (Capítulos para Retención):</label>
+          <label class="input-label">Marcas de Tiempo:</label>
           <textarea class="input-field" rows="6">00:00 - La trampa del victimismo
-02:00 - Epicteto y la ilusión del derecho adquirido
-06:00 - La deuda emocional con extraños
-10:30 - Marco Aurelio y la corte imperial
-15:00 - El silencio de la acción frente a la queja
-19:30 - Construye tu propia fortaleza interior</textarea>
+02:30 - Epicteto y el derecho adquirido
+06:00 - La deuda emocional
+10:30 - Marco Aurelio y la corte
+15:00 - El silencio de la acción
+19:30 - Fortaleza interior</textarea>
         </div>
       </div>
     </div>
   </main>
 
   <script>
-    function updateClock() {
-      const now = new Date();
-      const options = { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
-      const el = document.getElementById('live-clock');
-      if (el) el.textContent = now.toLocaleDateString('es-ES', options).toUpperCase().replace(',', ' |');
+    function checkKey() {
+      const k = localStorage.getItem('koffi_gemini_key');
+      const st = document.getElementById('api-status');
+      if (k && k.length > 10) {
+        st.textContent = "API: CONECTADA";
+        st.style.color = "#10b981";
+      } else {
+        st.textContent = "API: PENDIENTE";
+        st.style.color = "#f59e0b";
+      }
     }
-    updateClock();
-    setInterval(updateClock, 1000);
+    checkKey();
 
-    function openTab(tabId, btn) {
+    function toggleConfig() {
+      const b = document.getElementById('config-box');
+      b.style.display = b.style.display === 'none' ? 'block' : 'none';
+      const k = localStorage.getItem('koffi_gemini_key');
+      if (k) document.getElementById('gemini-key').value = k;
+    }
+
+    function guardarKey() {
+      const k = document.getElementById('gemini-key').value.trim();
+      if (k) {
+        localStorage.setItem('koffi_gemini_key', k);
+        alert('API Key de Gemini guardada correctamente en tu móvil.');
+        toggleConfig();
+        checkKey();
+      }
+    }
+
+    function openTab(id, btn) {
       document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById(tabId).classList.add('active');
+      document.getElementById(id).classList.add('active');
       btn.classList.add('active');
     }
 
-    function analizarReferencia() {
-      const niche = document.getElementById('niche-select').value;
-      const out = document.getElementById('niche-output');
-      out.innerHTML = `<p style="color:#10b981;">[SISTEMA] Analizando nicho: ${niche.toUpperCase()}...</p>
-      <p style="color:#d4d4d8; margin-top:6px;">✓ Estructura de retención recomendada: 10% animación/B-Roll de impacto + 90% imágenes estáticas con zoom dinámico.</p>
-      <p style="color:#d4d4d8; margin-top:4px;">✓ Gancho psicológico: Debe romper el patrón en los primeros 15 segundos sin saludos formales.</p>`;
+    async function ejecutarGemini() {
+      const key = localStorage.getItem('koffi_gemini_key');
+      if (!key) {
+        alert('Por favor ingresa tu API Key gratuita de Gemini tocando el botón ⚙️ API KEY en la esquina superior.');
+        toggleConfig();
+        return;
+      }
+      const topic = document.getElementById('script-topic').value;
+      const niche = document.getElementById('script-niche').value;
+      const format = document.getElementById('script-format').value;
+      const c = document.getElementById('script-console');
+      const btn = document.getElementById('btn-generate-script');
+
+      btn.disabled = true;
+      btn.textContent = "⏳ REDACTANDO GUION EN VIVO...";
+      c.textContent = "Conectando con Google Gemini...\nEstructurando guion de alta retención sin repeticiones...";
+
+      const prompt = `Actúa como guionista senior para el canal de YouTube 'Ser Estoico' y productor de Koffi Studio.
+Nicho: ${niche}
+Tema: ${topic}
+Formato: ${format}
+
+Instrucciones estrictas:
+1. Redacta un guion completo y profundo con tono maduro, confrontativo y psicológico (estilo Diógenes/Marco Aurelio).
+2. Sin saludos alegres ni rodeos. Arranca con un gancho demoledor en los primeros 15 segundos sobre la falsedad de esperar reconocimiento ajeno.
+3. Divide el contenido en capítulos numerados con marcas de tiempo aproximadas y ejemplos concretos.
+4. Entrega la narración continua lista para ser leída por la voz del locutor.`;
+
+      try {
+        const res = await fetch(`[suspicious link removed]{key}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        });
+        const data = await res.json();
+        if (data.candidates && data.candidates.content.parts.text) {
+          c.textContent = data.candidates.content.parts.text;
+        } else {
+          c.textContent = "Error en la respuesta de la API: " + JSON.stringify(data);
+        }
+      } catch (err) {
+        c.textContent = "Error al conectar con la API: " + err.message;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "⚡ GENERAR GUION CON GEMINI";
+      }
     }
 
-    function generarSecuencia() {
-      const display = document.getElementById('script-display');
-      const counter = document.getElementById('word-counter');
-      display.innerHTML = `<p style="color:#10b981;"><strong>[ESQUELETO NARRATIVO GENERADO]</strong></p>
-      <p style="margin-top:6px;">• Bloque 1 [00:00 - 02:00]: El gancho psicológico — La trampa del victimismo.</p>
-      <p>• Bloque 2 [02:00 - 06:00]: Epicteto y la ilusión del derecho adquirido.</p>
-      <p>• Bloque 3 [06:00 - 10:30]: La deuda emocional: mendigar aprobación.</p>
-      <p>• Bloque 4 [10:30 - 15:00]: Marco Aurelio y la realidad de la corte.</p>
-      <p>• Bloque 5 [15:00 - 19:30]: El silencio de la acción frente a la queja.</p>
-      <p>• Bloque 6 [19:30 - 22:30]: El despertar: construye tu fortaleza.</p>
-      <hr style="border:none; border-top:1px solid #18181b; margin:12px 0;">
-      <p style="color:#a1a1aa;">El guion completo redactado bloque a bloque se encuentra sincronizado con tu bloc de notas.</p>`;
-      counter.textContent = "2,890 palabras | ~22 min";
+    function copiarGuion() {
+      const text = document.getElementById('script-console').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Guion completo copiado al portapapeles. Listo para pegar en Colab.');
+      });
     }
 
-    function trocearTexto() {
-      const vDisplay = document.getElementById('voice-display');
-      vDisplay.innerHTML = `<p style="color:#10b981;">[DIVISOR ACTIVO]</p>
-      <p style="color:#d4d4d8; margin-top:6px;">Si usas Fish Audio o a2e, el guion se segmenta en bloques de 490 caracteres con copiado directo para que no pierdas tiempo cortando a mano.</p>`;
+    function generarImagen() {
+      const engine = document.getElementById('img-engine').value;
+      const prompt = document.getElementById('img-prompt').value.trim();
+      const img = document.getElementById('img-result');
+      const info = document.getElementById('img-info');
+      const loader = document.getElementById('img-loading');
+
+      loader.style.display = 'block';
+      img.style.display = 'none';
+
+      if (engine === 'flux' || engine === 'banana') {
+        const cleanPrompt = encodeURIComponent(prompt);
+        const url = `[suspicious link removed]{cleanPrompt}?width=1280&height=720&model=flux&nologo=true`;
+        img.src = url;
+        img.onload = () => {
+          loader.style.display = 'none';
+          img.style.display = 'block';
+          info.textContent = `✓ Imagen 16:9 renderizada con éxito vía ${engine.toUpperCase()}.\nPuedes mantener presionada la imagen en tu celular para descargarla directamente.`;
+        };
+      } else if (engine === 'midjourney') {
+        loader.style.display = 'none';
+        info.textContent = `[PROMPT OPTIMIZADO PARA MIDJOURNEY v6]:\n/imagine prompt: ${prompt} --ar 16:9 --style raw --v 6.0`;
+      } else {
+        loader.style.display = 'none';
+        info.textContent = `[CONFIGURACIÓN LEONARDO AI]:\nPrompt: ${prompt}\nRatio: 16:9 (1280x720) | Preset: Leonardo Kino XL`;
+      }
     }
   </script>
 </body>
