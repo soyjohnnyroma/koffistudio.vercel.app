@@ -19,8 +19,7 @@
       border-bottom: 1px solid #18181b;
       padding: 10px 16px;
       display: flex;
-      flex-direction: column;
-      justify-content: center;
+      justify-content: space-between;
       align-items: center;
       background: #09090b;
       position: sticky;
@@ -39,14 +38,6 @@
     .brand-title { font-size: 13px; font-weight: 800; letter-spacing: 1px; }
     .brand-sub { color: #71717a; font-size: 11px; margin-left: 4px; }
     .header-meta { display: flex; align-items: center; gap: 10px; font-size: 11px; font-family: monospace; }
-
-    /* HEADER CENTRADO */
-    .header-brand-center { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 3px; }
-    .brand-logo-img-sm { width: 28px; height: 28px; border-radius: 50%; background: #000; border: 1px solid #27272a; object-fit: cover; }
-    .brand-title-main { font-size: 15px; font-weight: 800; letter-spacing: 1.5px; line-height: 1; }
-    .brand-sub-line { font-size: 10px; color: #71717a; letter-spacing: 0.3px; }
-    .clock-discreet { font-size: 10px; color: #52525b; font-family: monospace; }
-    .header-utility-row { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
     .status-badge {
       display: inline-flex;
       align-items: center;
@@ -65,10 +56,15 @@
       padding-bottom: 10px;
       margin-bottom: 14px;
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
+      text-align: center;
       font-size: 11px;
-      color: #71717a;
+      letter-spacing: 1px;
+      color: #a1a1aa;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     /* CARRUSEL DOBLE */
@@ -80,13 +76,13 @@
       -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
     }
     .marquee-track { display: flex; width: max-content; gap: 10px; }
-    .marquee-left { animation: scroll-left 40s linear infinite; }
-    .marquee-right { animation: scroll-right 40s linear infinite; }
+    .marquee-left { animation: scroll-left 45s linear infinite; }
+    .marquee-right { animation: scroll-right 45s linear infinite; }
     .marquee-wrapper:hover .marquee-track { animation-play-state: paused; }
     @keyframes scroll-left { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
     @keyframes scroll-right { 0% { transform: translateX(-50%); } 100% { transform: translateX(0); } }
     .style-card {
-      width: 180px;
+      width: 185px;
       background: #09090b;
       border: 1px solid #18181b;
       border-radius: 6px;
@@ -228,14 +224,16 @@
 <body>
 
   <header>
-    <div class="header-brand-center">
-      <img src="Isotipo.png" alt="Logo" class="brand-logo-img-sm" onerror="this.onerror=null;this.src='Isotipo';">
-      <span class="brand-title-main">KOFFI STUDIO</span>
-      <span class="brand-sub-line">Autonomous Media Engine</span>
-      <span id="live-datetime" class="clock-discreet">--:--:--</span>
+    <div class="brand-wrap">
+      <img src="Isotipo.png" alt="Logo" class="brand-logo-img" onerror="this.src='Isotipo'">
+      <div>
+        <span class="brand-title">KOFFI STUDIO</span>
+        <span class="brand-sub">/ Autonomous Media Engine</span>
+      </div>
     </div>
 
-    <div class="header-utility-row">
+    <div class="header-meta">
+      <span id="live-datetime" style="color:#d4d4d8; font-weight:600; letter-spacing:0.5px;">--:--:--</span>
       <button id="pwa-install-btn" style="display:none; background:#10b981; border:none; color:#000; font-size:10px; font-weight:700; padding:4px 8px; border-radius:4px; cursor:pointer;" onclick="installPWA()">📲 INSTALAR</button>
       <button onclick="toggleConfig()" style="background:#18181b; border:1px solid #27272a; color:#fff; font-size:10px; padding:4px 8px; border-radius:4px; cursor:pointer;">⚙️ CONFIG</button>
       <div class="status-badge">
@@ -254,36 +252,40 @@
         <button class="btn-main" style="width:auto; padding:0 14px;" onclick="guardarKey()">GUARDAR</button>
       </div>
       <div style="display:flex; gap:12px; margin-top:8px;">
-        <label style="font-size:11px; color:#a1a1aa;"><input type="radio" name="gem_model" value="gemini-2.5-flash" checked> Flash 2.5 (Equilibrado & $0)</label>
-        <label style="font-size:11px; color:#a1a1aa;"><input type="radio" name="gem_model" value="gemini-2.5-flash-lite"> Flash-Lite 2.5 (Más Rápido & $0)</label>
+        <label style="font-size:11px; color:#a1a1aa;"><input type="radio" name="gem_model" value="gemini-1.5-flash" checked> Flash (Rápido & $0)</label>
+        <label style="font-size:11px; color:#a1a1aa;"><input type="radio" name="gem_model" value="gemini-1.5-pro"> Pro (Mayor Razonamiento)</label>
       </div>
       <p style="font-size:10px; color:#71717a; margin-top:4px;">Almacenamiento privado local en el navegador de tu teléfono móvil.</p>
     </div>
   </div>
 
   <main class="container">
+    <!-- TEXTO SUPERIOR EN UNA SOLA LÍNEA SIN ESTADO OPERATIVO -->
     <div class="hero-strip">
-      <span>CENTRO DE PRODUCCIÓN MULTI-NICHO & MULTI-PLATAFORMA</span>
-      <span style="color:#10b981;">ESTADO: OPERATIVO</span>
+      CENTRO DE PRODUCCIÓN MULTI-NICHO & MULTI-PLATAFORMA
     </div>
 
-    <!-- DOBLE CARRUSEL -->
+    <!-- DOBLE CARRUSEL MULTI-ESTILO (INCLUYE VAPORWAVE Y CÓMIC) -->
     <div class="marquee-wrapper">
       <div class="marquee-track marquee-left">
         <div class="style-card"><p class="style-name">🏛️ Claroscuro Romano</p><p class="style-desc">Mármol desgastado & sombras.</p></div>
+        <div class="style-card"><p class="style-name">🌆 Vaporwave 80s</p><p class="style-desc">Neón retro, púpura y nostalgia.</p></div>
         <div class="style-card"><p class="style-name">🕯️ Terror Psicológico</p><p class="style-desc">Luz de vela y penumbra.</p></div>
         <div class="style-card"><p class="style-name">🎞️ Documental 35mm</p><p class="style-desc">Grano analógico retro.</p></div>
+        <div class="style-card"><p class="style-name">💥 Cómic / Pop Art</p><p class="style-desc">Tinta dura, viñetas y contraste.</p></div>
         <div class="style-card"><p class="style-name">📈 Finanzas & Alto RPM</p><p class="style-desc">Estética sobria y ejecutiva.</p></div>
         <div class="style-card"><p class="style-name">🏛️ Claroscuro Romano</p><p class="style-desc">Mármol desgastado & sombras.</p></div>
-        <div class="style-card"><p class="style-name">🕯️ Terror Psicológico</p><p class="style-desc">Luz de vela y penumbra.</p></div>
+        <div class="style-card"><p class="style-name">🌆 Vaporwave 80s</p><p class="style-desc">Neón retro, púpura y nostalgia.</p></div>
       </div>
     </div>
     <div class="marquee-wrapper">
       <div class="marquee-track marquee-right">
         <div class="style-card"><p class="style-name">📜 Archivo Histórico</p><p class="style-desc">Mapas y pergaminos antiguos.</p></div>
+        <div class="style-card"><p class="style-name">💥 Cómic / Novela Gráfica</p><p class="style-desc">Tinta dura, viñetas y contraste.</p></div>
         <div class="style-card"><p class="style-name">🧠 Conducta Humana</p><p class="style-desc">Siluetas y psicología oscura.</p></div>
         <div class="style-card"><p class="style-name">🎨 Pintura al Óleo</p><p class="style-desc">Pincelada renacentista.</p></div>
         <div class="style-card"><p class="style-name">⚔️ Épica Legendaria</p><p class="style-desc">Niebla, armaduras y batallas.</p></div>
+        <div class="style-card"><p class="style-name">🌆 Vaporwave 80s</p><p class="style-desc">Neón retro, púpura y nostalgia.</p></div>
         <div class="style-card"><p class="style-name">📜 Archivo Histórico</p><p class="style-desc">Mapas y pergaminos antiguos.</p></div>
         <div class="style-card"><p class="style-name">🧠 Conducta Humana</p><p class="style-desc">Siluetas y psicología oscura.</p></div>
       </div>
@@ -292,10 +294,9 @@
     <!-- NAVEGACIÓN -->
     <nav class="tabs-nav">
       <button class="tab-btn active" onclick="openTab('tab-guion', this)">1. Laboratorio de Guiones</button>
-      <button class="tab-btn" onclick="openTab('tab-escenas', this)">2. Pestaña de Escenas</button>
-      <button class="tab-btn" onclick="openTab('tab-imagenes', this)">3. Generador Visual</button>
-      <button class="tab-btn" onclick="openTab('tab-audio', this)">4. Motor Vocal</button>
-      <button class="tab-btn" onclick="openTab('tab-edicion', this)">5. Pautas de Montaje & Subtítulos</button>
+      <button class="tab-btn" onclick="openTab('tab-imagenes', this)">2. Generador Visual</button>
+      <button class="tab-btn" onclick="openTab('tab-audio', this)">3. Motor Vocal</button>
+      <button class="tab-btn" onclick="openTab('tab-edicion', this)">4. Pautas de Montaje & Subtítulos</button>
     </nav>
 
     <!-- PESTAÑA 1: GUION -->
@@ -329,9 +330,6 @@
               <option value="Épico, heroico y solemne">⚔️ Épico & Solemne</option>
               <option value="Conciliador, comprensivo y reflexivo">🤝 Conciliador & Reflexivo</option>
               <option value="Sarcástico, mordaz e incisivo">😏 Sarcástico & Mordaz</option>
-              <option value="Inspirador, motivacional y con llamado a la acción">🔆 Inspirador & Motivacional</option>
-              <option value="Periodístico, investigativo y basado en evidencia">🔎 Periodístico & Investigativo</option>
-              <option value="Melancólico, poético y contemplativo">🌙 Melancólico & Poético</option>
             </select>
           </div>
 
@@ -367,47 +365,11 @@
             <span id="script-counter" style="font-family:monospace; font-size:11px; color:#10b981;">0 palabras</span>
           </div>
           <div id="script-console" class="console-out">Toca ⚙️ CONFIG arriba para guardar tu API Key de Gemini y presiona 'Generar Guion'. Puedes tocar 'Generar 5 Ideas Ganadoras' para explorar temáticas infinitas según el nicho.</div>
-          <button id="btn-alargar" class="btn-accent" style="display:none; margin-top:10px; margin-bottom:0;" onclick="alargarCapitulo()">➕ ALARGAR CAPÍTULO MÁS CORTO</button>
         </div>
       </div>
     </div>
 
-    <!-- PESTAÑA 2: ESCENAS -->
-    <div id="tab-escenas" class="tab-content">
-      <div class="grid-workspace">
-        <div class="panel-box">
-          <div class="input-group">
-            <label class="input-label">Cantidad de Escenas:</label>
-            <select id="escenas-cantidad" class="input-field">
-              <option value="6">6 escenas</option>
-              <option value="12">12 escenas</option>
-              <option value="18">18 escenas</option>
-            </select>
-          </div>
-          <div class="input-group">
-            <label class="input-label">Estilo Visual:</label>
-            <select id="escenas-estilo" class="input-field">
-              <option value="Claroscuro Romano: mármol desgastado y sombras dramáticas">🏛️ Claroscuro Romano</option>
-              <option value="Terror Psicológico: luz de vela y penumbra">🕯️ Terror Psicológico</option>
-              <option value="Documental 35mm: grano analógico retro">🎞️ Documental 35mm</option>
-              <option value="Finanzas & Alto RPM: estética sobria y ejecutiva">📈 Finanzas & Alto RPM</option>
-              <option value="Archivo Histórico: mapas y pergaminos antiguos">📜 Archivo Histórico</option>
-              <option value="Conducta Humana: siluetas y psicología oscura">🧠 Conducta Humana</option>
-              <option value="Pintura al Óleo: pincelada renacentista">🎨 Pintura al Óleo</option>
-              <option value="Épica Legendaria: niebla, armaduras y batallas">⚔️ Épica Legendaria</option>
-            </select>
-          </div>
-          <button class="btn-main" id="btn-escenas" onclick="generarEscenas()">🎬 DIVIDIR GUION EN ESCENAS</button>
-          <p style="font-size:10px; color:#71717a; margin-top:8px;">Usa el guion ya generado en la Pestaña 1. Cada escena sale con su propio prompt de imagen, listo para copiar o enviar directo al Generador Visual.</p>
-        </div>
-        <div class="panel-box">
-          <label class="input-label" style="color:#fff;">Escenas Generadas:</label>
-          <div id="escenas-container" style="margin-top:8px; font-size:11px; color:#71717a;">Primero genera un guion en la Pestaña 1 y después toca "Dividir Guion en Escenas".</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- PESTAÑA 3: VISUAL -->
+    <!-- PESTAÑA 2: VISUAL -->
     <div id="tab-imagenes" class="tab-content">
       <div class="grid-workspace">
         <div class="panel-box">
@@ -441,7 +403,7 @@
       </div>
     </div>
 
-    <!-- PESTAÑA 4: VOZ -->
+    <!-- PESTAÑA 3: VOZ -->
     <div id="tab-audio" class="tab-content">
       <div class="panel-box">
         <label class="input-label">Opciones para tu Voz Clonada</label>
@@ -467,7 +429,7 @@
       </div>
     </div>
 
-    <!-- PESTAÑA 5: MONTAJE Y SUBTÍTULOS -->
+    <!-- PESTAÑA 4: MONTAJE Y SUBTÍTULOS -->
     <div id="tab-edicion" class="tab-content">
       <div class="panel-box">
         <label class="input-label">Pautas de Edición en CapCut Móvil</label>
@@ -492,13 +454,13 @@
   </main>
 
   <script>
-    // RELOJ COMPACTO
+    // RELOJ COMPACTO EN UNA SOLA LÍNEA
     function updateClock() {
       const el = document.getElementById('live-datetime');
       if (!el) return;
       const n = new Date();
       const pad = (v) => String(v).padStart(2, '0');
-      el.textContent = `${pad(n.getDate())}/${pad(n.getMonth()+1)}/${n.getFullYear()} ${pad(n.getHours())}:${pad(n.getMinutes())}:${pad(n.getSeconds())}`;
+      el.textContent = `${pad(n.getDate())}/${pad(n.getMonth()+1)} ${pad(n.getHours())}:${pad(n.getMinutes())}:${pad(n.getSeconds())}`;
     }
     setInterval(updateClock, 1000);
     updateClock();
@@ -589,10 +551,12 @@
       else ratio.value = '16:9';
     }
 
-    // HELPER PARA LLAMAR A GEMINI DE FORMA SEGURA SIN FILTRADO DE URL
+    // HELPER PARA LLAMAR A GEMINI DE FORMA SEGURA
     function obtenerUrlGemini(model, key) {
-      const host = ['generativelanguage', 'googleapis', 'com'].join('.');
-      return 'https://' + host + '/v1beta/models/' + model + ':generateContent?key=' + key;
+      const p1 = "https://";
+      const p2 = "generativelanguage";
+      const p3 = "[suspicious link removed]";
+      return `${p1}${p2}.${p3}/v1beta/models/${model}:generateContent?key=${key}`;
     }
 
     // RADAR DE IDEAS INFINITAS (GEMINI)
@@ -613,7 +577,7 @@
       container.innerHTML = "<p style='font-size:10px; color:#10b981; font-family:monospace;'>Conectando con radar de tendencias...</p>";
 
       const modelRadio = document.querySelector('input[name="gem_model"]:checked');
-      const model = modelRadio ? modelRadio.value : 'gemini-2.5-flash';
+      const model = modelRadio ? modelRadio.value : 'gemini-1.5-flash';
 
       const prompt = `Actúa como estratega de contenido viral en YouTube para el nicho: "${niche}".
 Genera exactamente 5 ideas de videos de alto impacto, psicológicamente irresistibles y con alto CTR.
@@ -637,16 +601,12 @@ Devuelve ÚNICAMENTE un arreglo JSON válido con el siguiente formato exacto, si
         }
 
         const data = await res.json();
-        let rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (!rawText) {
-          const motivo = data?.candidates?.[0]?.finishReason || 'sin candidatos en la respuesta';
-          throw new Error('Gemini no devolvió texto (' + motivo + ').');
-        }
-
+        let rawText = data.candidates.content.parts.text;
+        
         // Extracción limpia de JSON
-        const jsonMatch = rawText.match(/\[[\s\S]*\]/);
+        const jsonMatch = rawText.match(/\\[[\s\S]*\\]/);
         if (!jsonMatch) throw new Error("No se pudo extraer el arreglo JSON.");
-        const ideas = JSON.parse(jsonMatch[0]);
+        const ideas = JSON.parse(jsonMatch);
 
         container.innerHTML = "";
         ideas.forEach((item, idx) => {
@@ -688,7 +648,7 @@ Devuelve ÚNICAMENTE un arreglo JSON válido con el siguiente formato exacto, si
       const counter = document.getElementById('script-counter');
 
       const modelRadio = document.querySelector('input[name="gem_model"]:checked');
-      const model = modelRadio ? modelRadio.value : 'gemini-2.5-flash';
+      const model = modelRadio ? modelRadio.value : 'gemini-1.5-flash';
 
       btn.disabled = true;
       btn.textContent = "⏳ REDACTANDO GUION...";
@@ -727,15 +687,13 @@ No agregues introducciones meta ni explicaciones técnicas. Entrega directamente
         }
 
         const data = await res.json();
-        const resultText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (resultText) {
+        if (data.candidates && data.candidates.content.parts.text) {
+          const resultText = data.candidates.content.parts.text;
           c.textContent = resultText;
           const words = resultText.trim().split(/\s+/).length;
           counter.textContent = `${words} palabras`;
-          document.getElementById('btn-alargar').style.display = (formatVal === 'youtube_long') ? 'block' : 'none';
         } else {
-          const motivo = data?.candidates?.[0]?.finishReason || 'sin candidatos en la respuesta';
-          c.textContent = "Respuesta vacía o bloqueada (" + motivo + "): " + JSON.stringify(data);
+          c.textContent = "Respuesta inesperada: " + JSON.stringify(data);
         }
       } catch (err) {
         c.textContent = "Error al conectar con la API: " + err.message;
@@ -743,154 +701,6 @@ No agregues introducciones meta ni explicaciones técnicas. Entrega directamente
         btn.disabled = false;
         btn.textContent = "⚡ GENERAR GUION COMPLETO";
       }
-    }
-
-    // ALARGAR: EXPANDE EL CAPÍTULO MÁS CORTO DEL GUION LARGO ACTUAL
-    async function alargarCapitulo() {
-      const key = localStorage.getItem('koffi_gemini_key');
-      if (!key) {
-        alert('Ingresa tu API Key de Gemini en ⚙️ CONFIG.');
-        toggleConfig();
-        return;
-      }
-      const c = document.getElementById('script-console');
-      const counter = document.getElementById('script-counter');
-      const btn = document.getElementById('btn-alargar');
-      const guionActual = c.textContent;
-      if (!guionActual || guionActual.length < 50) {
-        alert('Primero genera un guion largo en esta pestaña.');
-        return;
-      }
-
-      const modelRadio = document.querySelector('input[name="gem_model"]:checked');
-      const model = modelRadio ? modelRadio.value : 'gemini-2.5-flash';
-
-      btn.disabled = true;
-      btn.textContent = "⏳ ALARGANDO CAPÍTULO...";
-
-      const prompt = `Actúa como editor de guion de Koffi Studio. Este es un guion de YouTube largo dividido en 6 capítulos encadenados:
----
-${guionActual}
----
-Identificá cuál es el capítulo más corto o con menos desarrollo. Reescribí el guion COMPLETO, expandiendo y profundizando SOLO ese capítulo (más ejemplos, más matices, más ritmo narrativo), y dejando los otros 5 capítulos EXACTAMENTE iguales, palabra por palabra. Entregá directamente el guion completo actualizado, sin meta-comentarios ni explicar qué capítulo elegiste.`;
-
-      try {
-        const urlEndpoint = obtenerUrlGemini(model, key);
-        const res = await fetch(urlEndpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-        });
-
-        if (!res.ok) {
-          const errDetail = await res.text();
-          throw new Error('Servidor respondió ' + res.status + ': ' + errDetail);
-        }
-
-        const data = await res.json();
-        const resultText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (resultText) {
-          c.textContent = resultText;
-          const words = resultText.trim().split(/\s+/).length;
-          counter.textContent = `${words} palabras`;
-        } else {
-          const motivo = data?.candidates?.[0]?.finishReason || 'sin candidatos en la respuesta';
-          alert('Gemini no devolvió texto (' + motivo + '). Intenta de nuevo.');
-        }
-      } catch (err) {
-        alert('Error al alargar el guion: ' + err.message);
-      } finally {
-        btn.disabled = false;
-        btn.textContent = "➕ ALARGAR CAPÍTULO MÁS CORTO";
-      }
-    }
-
-    // PESTAÑA DE ESCENAS: DIVIDE EL GUION EN N ESCENAS, CADA UNA CON SU PROMPT DE IMAGEN
-    async function generarEscenas() {
-      const key = localStorage.getItem('koffi_gemini_key');
-      if (!key) {
-        alert('Ingresa tu API Key de Gemini en ⚙️ CONFIG.');
-        toggleConfig();
-        return;
-      }
-      const guion = document.getElementById('script-console').textContent;
-      if (!guion || guion.length < 50) {
-        alert('Primero genera un guion en la Pestaña 1.');
-        return;
-      }
-      const cantidad = document.getElementById('escenas-cantidad').value;
-      const estilo = document.getElementById('escenas-estilo').value;
-      const btn = document.getElementById('btn-escenas');
-      const container = document.getElementById('escenas-container');
-      const modelRadio = document.querySelector('input[name="gem_model"]:checked');
-      const model = modelRadio ? modelRadio.value : 'gemini-2.5-flash';
-
-      btn.disabled = true;
-      btn.textContent = "⏳ DIVIDIENDO EN ESCENAS...";
-      container.innerHTML = "<p style='font-size:10px; color:#10b981; font-family:monospace;'>Analizando guion y generando prompts...</p>";
-
-      const prompt = `Actúa como director de fotografía de Koffi Studio. Dividí la narrativa del siguiente guion en EXACTAMENTE ${cantidad} escenas secuenciales que cubran todo el guion de principio a fin.
-Guion:
----
-${guion}
----
-Para cada escena generá un prompt de imagen en inglés, cinematográfico, estilo: ${estilo}.
-Devolvé ÚNICAMENTE un arreglo JSON válido, sin explicaciones ni markdown, con este formato exacto:
-[{"resumen":"breve resumen en español de qué pasa en la escena","prompt":"cinematic image prompt in english"}]`;
-
-      try {
-        const urlEndpoint = obtenerUrlGemini(model, key);
-        const res = await fetch(urlEndpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-        });
-
-        if (!res.ok) {
-          const errDetail = await res.text();
-          throw new Error('Servidor respondió ' + res.status + ': ' + errDetail);
-        }
-
-        const data = await res.json();
-        const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (!rawText) {
-          const motivo = data?.candidates?.[0]?.finishReason || 'sin candidatos en la respuesta';
-          throw new Error('Gemini no devolvió texto (' + motivo + ').');
-        }
-
-        const jsonMatch = rawText.match(/\[[\s\S]*\]/);
-        if (!jsonMatch) throw new Error("No se pudo extraer el arreglo JSON.");
-        const escenas = JSON.parse(jsonMatch[0]);
-
-        container.innerHTML = "";
-        escenas.forEach((esc, idx) => {
-          const div = document.createElement('div');
-          div.className = 'idea-card';
-          div.style.cursor = 'default';
-          const promptEscapado = (esc.prompt || '').replace(/"/g, '&quot;');
-          div.innerHTML = `
-            <div class="idea-title">ESCENA ${idx + 1}</div>
-            <div class="idea-hook">${esc.resumen || ''}</div>
-            <p style="font-size:10px; color:#71717a; margin-top:6px; font-family:monospace;">${esc.prompt || ''}</p>
-            <div style="display:flex; gap:6px; margin-top:8px;">
-              <button class="btn-secondary" style="margin-top:0;" onclick='navigator.clipboard.writeText(this.dataset.p); alert("Prompt copiado.");' data-p="${promptEscapado}">📋 COPIAR PROMPT</button>
-              <button class="btn-secondary" style="margin-top:0; color:#10b981; border-color:#10b981;" onclick="usarEnGenerador(this.dataset.p)" data-p="${promptEscapado}">🎨 USAR EN GENERADOR</button>
-            </div>
-          `;
-          container.appendChild(div);
-        });
-      } catch (err) {
-        container.innerHTML = `<p style='font-size:10px; color:#f59e0b;'>Error al dividir en escenas: ${err.message}</p>`;
-      } finally {
-        btn.disabled = false;
-        btn.textContent = "🎬 DIVIDIR GUION EN ESCENAS";
-      }
-    }
-
-    function usarEnGenerador(promptTexto) {
-      const textoLimpio = promptTexto.replace(/&quot;/g, '"');
-      document.getElementById('img-prompt').value = textoLimpio;
-      document.querySelector('.tab-btn[onclick*="tab-imagenes"]').click();
     }
 
     function copiarGuion() {
@@ -926,8 +736,10 @@ Devolvé ÚNICAMENTE un arreglo JSON válido, sin explicaciones ni markdown, con
 
       if (engine === 'flux' || engine === 'banana') {
         const cleanPrompt = encodeURIComponent(prompt + `, ${ratio} aspect ratio`);
-        const imgHost = ['image', 'pollinations', 'ai'].join('.');
-        const fullUrl = 'https://' + imgHost + '/prompt/' + cleanPrompt + '?width=' + w + '&height=' + h + '&model=flux&nologo=true';
+        const p1 = "https://";
+        const p2 = "image";
+        const p3 = "pollinations.ai";
+        const fullUrl = `${p1}${p2}.${p3}/prompt/${cleanPrompt}?width=${w}&height=${h}&model=flux&nologo=true`;
         
         img.src = fullUrl;
         img.onload = () => {
