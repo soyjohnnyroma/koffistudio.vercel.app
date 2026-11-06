@@ -22,6 +22,9 @@
       align-items: center;
       gap: 12px;
       background: #09090b;
+      position: sticky;
+      top: 0;
+      z-index: 50;
     }
     .brand-wrap { display: flex; align-items: center; gap: 12px; }
     .brand-logo-img {
@@ -31,10 +34,11 @@
       background: #000;
       border: 1.5px solid #fff;
       object-fit: cover;
+      flex-shrink: 0;
     }
     .brand-title { font-size: 13px; font-weight: 900; letter-spacing: 1.5px; }
     .brand-sub { color: #71717a; font-size: 11px; margin-left: 6px; }
-    .header-meta { display: flex; align-items: center; gap: 12px; font-size: 11px; font-family: monospace; }
+    .header-meta { display: flex; align-items: center; gap: 10px; font-size: 11px; font-family: monospace; }
     .status-badge {
       display: inline-flex;
       align-items: center;
@@ -46,6 +50,7 @@
       color: #a1a1aa;
     }
     .pulse-dot { width: 7px; height: 7px; border-radius: 50%; background: #10b981; }
+    .pulse-dot.warn { background: #f59e0b; }
     .container { max-width: 1200px; margin: 0 auto; padding: 20px 16px; }
     .hero {
       border-bottom: 1px solid #18181b;
@@ -72,6 +77,7 @@
     .marquee-track { display: flex; width: max-content; gap: 10px; }
     .marquee-left { animation: scroll-left 40s linear infinite; }
     .marquee-right { animation: scroll-right 40s linear infinite; }
+    .marquee-wrapper:hover .marquee-track { animation-play-state: paused; }
     @keyframes scroll-left { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
     @keyframes scroll-right { 0% { transform: translateX(-50%); } 100% { transform: translateX(0); } }
     .style-card {
@@ -90,7 +96,7 @@
       display: flex;
       overflow-x: auto;
       border-bottom: 1px solid #18181b;
-      gap: 16px;
+      gap: 14px;
       padding-bottom: 8px;
       margin-top: 16px;
     }
@@ -193,24 +199,24 @@
 
   <header>
     <div class="brand-wrap">
-      <!-- ISOTIPO OFICIAL KOFFI STUDIO -->
-      <img src="Isotipo" alt="Koffi Logo" class="brand-logo-img" onerror="this.src='[suspicious link removed]'">
+      <!-- ISOTIPO OFICIAL KOFFI STUDIO CON FALLBACK LOCAL -->
+      <img src="Isotipo" alt="Koffi Logo" class="brand-logo-img" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\' fill=\'none\' stroke=\'%23fff\' stroke-width=\'5\'><circle cx=\'50\' cy=\'50\' r=\'45\'/><polygon points=\'30,35 45,45 55,45 70,35 60,65 50,75 40,65\'/></svg>'">
       <div>
         <span class="brand-title">KOFFI STUDIO</span>
-        <span class="brand-sub">/ Autonomous Engine</span>
+        <span class="brand-sub">/ Multi-Platform Engine</span>
       </div>
     </div>
 
     <div class="header-meta">
-      <button onclick="toggleConfig()" style="background:#18181b; border:1px solid #27272a; color:#fff; font-size:10px; padding:4px 8px; border-radius:4px; cursor:pointer;">⚙️ API KEY</button>
+      <button onclick="toggleConfig()" style="background:#18181b; border:1px solid #27272a; color:#fff; font-size:10px; padding:4px 8px; border-radius:4px; cursor:pointer;">⚙️ CONFIG</button>
       <div class="status-badge">
-        <span class="pulse-dot"></span>
+        <span class="pulse-dot" id="dot-status"></span>
         <span id="api-status">API: PENDIENTE</span>
       </div>
     </div>
   </header>
 
-  <!-- MODAL CONFIGURACIÓN API KEY -->
+  <!-- PANEL DE CONFIGURACIÓN -->
   <div id="config-box" style="display:none; background:#0e0e11; border-bottom:1px solid #27272a; padding:14px 20px;">
     <div style="max-width:600px; margin:0 auto;">
       <label class="input-label">Clave Gratuita de Google Gemini (AI Studio):</label>
@@ -218,25 +224,29 @@
         <input type="password" id="gemini-key" class="input-field" placeholder="AIzaSy...">
         <button class="btn-main" style="width:auto; padding:0 16px;" onclick="guardarKey()">GUARDAR</button>
       </div>
-      <p style="font-size:10px; color:#71717a; margin-top:6px;">Se guarda únicamente en el almacenamiento local de tu teléfono celular.</p>
+      <div style="display:flex; gap:12px; margin-top:8px;">
+        <label style="font-size:11px; color:#a1a1aa;"><input type="radio" name="gem_model" value="gemini-1.5-flash" checked> Flash (Rápido y $0)</label>
+        <label style="font-size:11px; color:#a1a1aa;"><input type="radio" name="gem_model" value="gemini-1.5-pro"> Pro (Mayor Razonamiento)</label>
+      </div>
+      <p style="font-size:10px; color:#71717a; margin-top:6px;">Se guarda de forma privada y local en el almacenamiento de tu teléfono.</p>
     </div>
   </div>
 
   <main class="container">
     <div class="hero">
       <div>
-        <p class="hero-pre">Ecosistema Autónomo de Producción</p>
-        <h1 class="hero-title">Fábrica de Videos de <strong>Koffi Studio</strong></h1>
+        <p class="hero-pre">Ecosistema Autónomo Multi-Nicho & Multi-Formato</p>
+        <h1 class="hero-title">Centro de Mando de <strong>Koffi Studio</strong></h1>
       </div>
     </div>
 
-    <!-- DOBLE CARRUSEL -->
+    <!-- DOBLE CARRUSEL MULTI-NICHO -->
     <div class="marquee-wrapper">
       <div class="marquee-track marquee-left">
         <div class="style-card"><p class="style-name">🏛️ Claroscuro Romano</p><p class="style-desc">Mármol desgastado & sombras densas.</p></div>
         <div class="style-card"><p class="style-name">🕯️ Terror Psicológico</p><p class="style-desc">Luz de vela y penumbra opresiva.</p></div>
         <div class="style-card"><p class="style-name">🎞️ Documental 35mm</p><p class="style-desc">Grano analógico retro y realismo.</p></div>
-        <div class="style-card"><p class="style-name">📈 Finanzas & Alto RPM</p><p class="style-desc">Estética corporativa y sobria.</p></div>
+        <div class="style-card"><p class="style-name">📈 Finanzas & Alto RPM</p><p class="style-desc">Estética sobria y corporativa.</p></div>
         <div class="style-card"><p class="style-name">🏛️ Claroscuro Romano</p><p class="style-desc">Mármol desgastado & sombras densas.</p></div>
         <div class="style-card"><p class="style-name">🕯️ Terror Psicológico</p><p class="style-desc">Luz de vela y penumbra opresiva.</p></div>
       </div>
@@ -244,46 +254,48 @@
     <div class="marquee-wrapper">
       <div class="marquee-track marquee-right">
         <div class="style-card"><p class="style-name">📜 Archivo Histórico</p><p class="style-desc">Mapas de pergamino y textura antigua.</p></div>
-        <div class="style-card"><p class="style-name">🧠 Conducta Humana</p><p class="style-desc">Siluetas y psicología oscura.</p></div>
+        <div class="style-card"><p class="style-name">🧠 Conducta Humana</p><p class="style-desc">Siluetas y psicología profunda.</p></div>
         <div class="style-card"><p class="style-name">🎨 Pintura al Óleo</p><p class="style-desc">Pincelada clásica renacentista.</p></div>
         <div class="style-card"><p class="style-name">⚔️ Épica Legendaria</p><p class="style-desc">Niebla, armaduras y atmósfera bélica.</p></div>
         <div class="style-card"><p class="style-name">📜 Archivo Histórico</p><p class="style-desc">Mapas de pergamino y textura antigua.</p></div>
-        <div class="style-card"><p class="style-name">🧠 Conducta Humana</p><p class="style-desc">Siluetas y psicología oscura.</p></div>
+        <div class="style-card"><p class="style-name">🧠 Conducta Humana</p><p class="style-desc">Siluetas y psicología profunda.</p></div>
       </div>
     </div>
 
-    <!-- PESTAÑAS -->
+    <!-- NAVEGACIÓN -->
     <nav class="tabs-nav">
-      <button class="tab-btn active" onclick="openTab('tab-guion', this)">1. Generador de Guiones (Gemini)</button>
-      <button class="tab-btn" onclick="openTab('tab-imagenes', this)">2. Generador de Imágenes (Flux/Banana/MJ)</button>
-      <button class="tab-btn" onclick="openTab('tab-audio', this)">3. Motor de Voz (Vía Colab 25min)</button>
-      <button class="tab-btn" onclick="openTab('tab-seo', this)">4. Título & Metadatos</button>
+      <button class="tab-btn active" onclick="openTab('tab-guion', this)">1. Generador de Guiones (Multi-Plataforma)</button>
+      <button class="tab-btn" onclick="openTab('tab-imagenes', this)">2. Generador Visual (Flux / Banana / MJ)</button>
+      <button class="tab-btn" onclick="openTab('tab-audio', this)">3. Voz Clonada (Colab 25m & Divisor)</button>
+      <button class="tab-btn" onclick="openTab('tab-seo', this)">4. Packaging & Metadatos</button>
     </nav>
 
-    <!-- PESTAÑA 1: GUION CONEXIÓN GEMINI -->
+    <!-- PESTAÑA 1: GUION -->
     <div id="tab-guion" class="tab-content active">
       <div class="grid-workspace">
         <div class="panel-box">
           <div class="input-group">
-            <label class="input-label">Nicho:</label>
+            <label class="input-label">Nicho Objetivo:</label>
             <select id="script-niche" class="input-field">
-              <option value="Estoicismo y Filosofía">🏛️ Estoicismo & Filosofía</option>
+              <option value="Estoicismo y Filosofía">🏛️ Estoicismo & Filosofía Práctica</option>
               <option value="Psicología Oscura y Conducta Humana">🧠 Psicología & Conducta Humana</option>
-              <option value="Terror y Misterio Real">🕯️ Terror & Misterio</option>
-              <option value="Finanzas y Riqueza">📈 Finanzas & Riqueza</option>
+              <option value="Terror y Misterio Real">🕯️ Historias de Terror & Misterio</option>
+              <option value="Finanzas y Riqueza">📈 Finanzas, Economía & RPM Alto</option>
+              <option value="Historia y Guerras Antiguas">📜 Historia Bélica & Civilizaciones</option>
             </select>
           </div>
 
           <div class="input-group">
-            <label class="input-label">Tema del Video:</label>
+            <label class="input-label">Tema o Ángulo del Video:</label>
             <input type="text" id="script-topic" class="input-field" value="Nadie te debe nada: la verdad brutal que nadie quiere escuchar">
           </div>
 
           <div class="input-group">
-            <label class="input-label">Formato:</label>
-            <select id="script-format" class="input-field">
-              <option value="YouTube Largo (20 a 25 min)">Horizontal (16:9) — Largo (20 a 25 min)</option>
-              <option value="Short / TikTok (60 seg)">Vertical (9:16) — Corto (60 seg)</option>
+            <label class="input-label">Formato de Producción:</label>
+            <select id="script-format" class="input-field" onchange="actualizarRelacionAspecto()">
+              <option value="youtube_long">Horizontal (16:9) — YouTube Largo (20 a 25 min)</option>
+              <option value="vertical_short">Vertical (9:16) — Shorts / TikTok / Reels (60 seg)</option>
+              <option value="facebook_square">Cuadrado (1:1 o 4:3) — Facebook Video</option>
             </select>
           </div>
 
@@ -292,76 +304,89 @@
         </div>
 
         <div class="panel-box">
-          <label class="input-label" style="color:#fff;">Guion Generado en Tiempo Real:</label>
-          <div id="script-console" class="console-out">Ingresa tu API Key de Gemini en el botón superior ⚙️ y presiona 'Generar Guion'. El texto se redactará automáticamente en este visor.</div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+            <label class="input-label" style="color:#fff;">Salida en Tiempo Real:</label>
+            <span id="script-counter" style="font-family:monospace; font-size:11px; color:#10b981;">0 palabras</span>
+          </div>
+          <div id="script-console" class="console-out">Configura tu API Key gratuita de Gemini tocando ⚙️ CONFIG arriba y presiona 'Generar Guion'. El texto se estructurará automáticamente según el formato que elijas.</div>
         </div>
       </div>
     </div>
 
-    <!-- PESTAÑA 2: GENERADOR DE IMÁGENES -->
+    <!-- PESTAÑA 2: GENERADOR VISUAL -->
     <div id="tab-imagenes" class="tab-content">
       <div class="grid-workspace">
         <div class="panel-box">
-          <label class="input-label">Motor de Imagen:</label>
+          <label class="input-label">Relación de Aspecto:</label>
+          <select id="img-ratio" class="input-field" style="margin-bottom:12px;">
+            <option value="16:9">16:9 Panorámico (YouTube Largo)</option>
+            <option value="9:16">9:16 Vertical (Shorts / Reels / TikTok)</option>
+            <option value="1:1">1:1 Cuadrado (Facebook / Instagram Post)</option>
+          </select>
+
+          <label class="input-label">Motor de Inferencia:</label>
           <select id="img-engine" class="input-field" style="margin-bottom:12px;">
-            <option value="flux">⚡ Flux Schnell (Inferencia Directa Gratuita)</option>
+            <option value="flux">⚡ Flux Schnell (Render Inmediato a $0)</option>
             <option value="banana">🍌 Nano Banana (Google Imagen 3)</option>
-            <option value="leonardo">🎨 Leonardo AI (Preset 16:9)</option>
-            <option value="midjourney">🌌 Midjourney v6 (Prompt con Parámetros)</option>
+            <option value="leonardo">🎨 Leonardo AI (Preset Cinemático)</option>
+            <option value="midjourney">🌌 Midjourney v6 (Prompt Optimizado)</option>
           </select>
 
           <label class="input-label">Prompt Visual:</label>
-          <textarea id="img-prompt" class="input-field" rows="4">Cinematic weathered dark marble bust of Marcus Aurelius in heavy pouring dark rain, dramatic side chiaroscuro lighting, deep black background, moody mist, 8k resolution, 16:9</textarea>
+          <textarea id="img-prompt" class="input-field" rows="4">Cinematic weathered dark marble bust of Marcus Aurelius in heavy pouring dark rain, dramatic side chiaroscuro lighting, deep black background, moody atmospheric mist, 8k resolution</textarea>
 
           <button class="btn-main" style="margin-top:10px;" onclick="generarImagen()">🎨 RENDERIZAR IMAGEN</button>
         </div>
 
         <div class="panel-box">
-          <label class="input-label">Resultado Visual (16:9):</label>
+          <label class="input-label">Resultado Visual:</label>
           <div id="img-loading" style="display:none; color:#10b981; font-family:monospace; font-size:11px; margin-bottom:8px;">Renderizando en alta definición...</div>
-          <img id="img-result" class="image-preview" alt="Preview">
-          <div id="img-info" class="console-out" style="height:140px; margin-top:10px;">Selecciona el motor y toca 'Renderizar Imagen' para generar tus tomas maestras sin salir de la app.</div>
+          <img id="img-result" class="image-preview" alt="Preview Visual">
+          <div id="img-info" class="console-out" style="height:140px; margin-top:10px;">Selecciona el motor y presiona 'Renderizar Imagen'. Si usas Flux, la imagen se dibuja en pantalla lista para guardar en tu móvil.</div>
         </div>
       </div>
     </div>
 
-    <!-- PESTAÑA 3: MOTOR DE VOZ COLAB -->
+    <!-- PESTAÑA 3: MOTOR DE VOZ -->
     <div id="tab-audio" class="tab-content">
       <div class="panel-box">
-        <label class="input-label">Procesamiento de Voz Clonada (25 min sin cortes)</label>
-        <p style="font-size:12px; color:#a1a1aa; margin-bottom:14px;">
-          Para obtener los 25 minutos continuos con la voz clonada de tu hermano a coste $0 absoluto, usamos el cuaderno de GPU de Google Colab:
-        </p>
+        <label class="input-label">Opciones para tu Voz Clonada</label>
+        
+        <div class="card-item">
+          <strong style="color:#fff; font-size:12px;">Opción A: Google Colab (25 Minutos Continuos en 1 Clic)</strong>
+          <p style="font-size:11px; color:#a1a1aa; margin-top:4px;">
+            Copias el guion completo de la Pestaña 1, abres el cuaderno de VoiceStudio en Chrome, pegas el texto y descargas el archivo MP3 sin cortes ni troceado manual.
+          </p>
+          <a href="https://colab.research.google.com/" target="_blank" style="text-decoration:none;">
+            <button class="btn-main" style="margin-top:8px;">🚀 ABRIR GOOGLE COLAB (VOICESTUDIO)</button>
+          </a>
+        </div>
 
         <div class="card-item">
-          <strong style="color:#fff; font-size:12px;">Paso Único de Producción:</strong>
-          <ol style="margin-left:18px; margin-top:8px; font-size:11px; color:#d4d4d8; line-height:1.7;">
-            <li>Copia el guion generado con el botón <strong>[COPIAR TODO EL GUION]</strong> de la Pestaña 1.</li>
-            <li>Abre el cuaderno de VoiceStudio en Colab tocando el botón de abajo.</li>
-            <li>Pega el guion de 18.000 caracteres y dale a <strong>Ejecutar</strong>.</li>
-            <li>Descarga tu archivo <code>audio_completo_25min.mp3</code> listo para montar en CapCut.</li>
-          </ol>
-          <a href="https://colab.research.google.com/" target="_blank" style="text-decoration:none;">
-            <button class="btn-main" style="margin-top:12px;">🚀 ABRIR PROCESADOR COLAB (VOICE STUDIO)</button>
-          </a>
+          <strong style="color:#fff; font-size:12px;">Opción B: Divisor en Lotes Seguros (Para A2E.AI ~950 Caracteres)</strong>
+          <p style="font-size:11px; color:#a1a1aa; margin-top:4px;">
+            Si prefieres usar la web de A2E, la app divide el guion automáticamente en bloques seguros respetando los puntos seguidos para que no se corten las oraciones.
+          </p>
+          <button class="btn-secondary" onclick="trocearGuionA2E()">✂️ FRAGMENTAR GUION PARA A2E</button>
+          <div id="chunks-container" style="margin-top:10px;"></div>
         </div>
       </div>
     </div>
 
-    <!-- PESTAÑA 4: SEO -->
+    <!-- PESTAÑA 4: PACKAGING -->
     <div id="tab-seo" class="tab-content">
       <div class="panel-box">
-        <label class="input-label">Empaquetado para YouTube (@serestoicocanal)</label>
+        <label class="input-label">Metadatos para tu Canal (@serestoicocanal)</label>
         <div class="input-group">
-          <label class="input-label">Título Psicológico:</label>
+          <label class="input-label">Título de Alto CTR:</label>
           <input type="text" class="input-field" value="Nadie Te Debe Nada (La Cruda Verdad Que Nadie Quiere Escuchar)">
         </div>
         <div class="input-group">
-          <label class="input-label">Marcas de Tiempo:</label>
+          <label class="input-label">Marcas de Tiempo (Capítulos):</label>
           <textarea class="input-field" rows="6">00:00 - La trampa del victimismo
 02:30 - Epicteto y el derecho adquirido
-06:00 - La deuda emocional
-10:30 - Marco Aurelio y la corte
+06:00 - La deuda emocional con extraños
+10:30 - Marco Aurelio y la corte imperial
 15:00 - El silencio de la acción
 19:30 - Fortaleza interior</textarea>
         </div>
@@ -373,12 +398,15 @@
     function checkKey() {
       const k = localStorage.getItem('koffi_gemini_key');
       const st = document.getElementById('api-status');
+      const dot = document.getElementById('dot-status');
       if (k && k.length > 10) {
         st.textContent = "API: CONECTADA";
         st.style.color = "#10b981";
+        dot.className = "pulse-dot";
       } else {
         st.textContent = "API: PENDIENTE";
         st.style.color = "#f59e0b";
+        dot.className = "pulse-dot warn";
       }
     }
     checkKey();
@@ -394,7 +422,7 @@
       const k = document.getElementById('gemini-key').value.trim();
       if (k) {
         localStorage.setItem('koffi_gemini_key', k);
-        alert('API Key de Gemini guardada correctamente en tu móvil.');
+        alert('API Key de Gemini guardada correctamente.');
         toggleConfig();
         checkKey();
       }
@@ -407,45 +435,74 @@
       btn.classList.add('active');
     }
 
+    function actualizarRelacionAspecto() {
+      const fmt = document.getElementById('script-format').value;
+      const ratio = document.getElementById('img-ratio');
+      if (fmt === 'vertical_short') ratio.value = '9:16';
+      else if (fmt === 'facebook_square') ratio.value = '1:1';
+      else ratio.value = '16:9';
+    }
+
     async function ejecutarGemini() {
       const key = localStorage.getItem('koffi_gemini_key');
       if (!key) {
-        alert('Por favor ingresa tu API Key gratuita de Gemini tocando el botón ⚙️ API KEY en la esquina superior.');
+        alert('Por favor ingresa tu API Key gratuita de Gemini tocando ⚙️ CONFIG.');
         toggleConfig();
         return;
       }
       const topic = document.getElementById('script-topic').value;
       const niche = document.getElementById('script-niche').value;
-      const format = document.getElementById('script-format').value;
+      const formatVal = document.getElementById('script-format').value;
       const c = document.getElementById('script-console');
       const btn = document.getElementById('btn-generate-script');
+      const counter = document.getElementById('script-counter');
+
+      const modelRadio = document.querySelector('input[name="gem_model"]:checked');
+      const model = modelRadio ? modelRadio.value : 'gemini-1.5-flash';
 
       btn.disabled = true;
-      btn.textContent = "⏳ REDACTANDO GUION EN VIVO...";
-      c.textContent = "Conectando con Google Gemini...\nEstructurando guion de alta retención sin repeticiones...";
+      btn.textContent = "⏳ REDACTANDO GUION...";
+      c.textContent = `Conectando con ${model.toUpperCase()}...\nEstructurando guion de alta retención para ${niche}...`;
 
-      const prompt = `Actúa como guionista senior para el canal de YouTube 'Ser Estoico' y productor de Koffi Studio.
+      let promptRules = "";
+      if (formatVal === 'vertical_short') {
+        promptRules = `Formato: Short / Reel / TikTok (60 segundos exactos).
+Estructura:
+- 00:00 a 00:03: Gancho brutal que corte el scroll de inmediato.
+- 00:03 a 00:45: Argumento psicológico directo, sin pausas vacías.
+- 00:45 a 00:60: Cierre con lección estoica y llamada a la acción clara.
+Máximo 150 a 170 palabras en total.`;
+      } else if (formatVal === 'facebook_square') {
+        promptRules = `Formato: Video para Facebook (4:3 / Cuadrado).
+Estructura: Párrafos breves, lenguaje muy accesible, énfasis en reflexión cotidiana y emocional sobre relaciones y conducta.`;
+      } else {
+        promptRules = `Formato: YouTube Largo (20 a 25 minutos).
+Estructura:
+- Gancho psicológico en los primeros 15 segundos sin saludos.
+- Desarrollo en 6 capítulos encadenados con marcas de tiempo.
+- Conexión entre la conducta social moderna y las máximas de Marco Aurelio y Epicteto.
+- Narración continua lista para el locutor.`;
+      }
+
+      const prompt = `Actúa como guionista senior para 'Ser Estoico Canal' y Koffi Studio.
 Nicho: ${niche}
 Tema: ${topic}
-Formato: ${format}
-
-Instrucciones estrictas:
-1. Redacta un guion completo y profundo con tono maduro, confrontativo y psicológico (estilo Diógenes/Marco Aurelio).
-2. Sin saludos alegres ni rodeos. Arranca con un gancho demoledor en los primeros 15 segundos sobre la falsedad de esperar reconocimiento ajeno.
-3. Divide el contenido en capítulos numerados con marcas de tiempo aproximadas y ejemplos concretos.
-4. Entrega la narración continua lista para ser leída por la voz del locutor.`;
+${promptRules}`;
 
       try {
-        const res = await fetch(`[suspicious link removed]{key}`, {
+        const res = await fetch(`[suspicious link removed]{model}:generateContent?key=${key}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
         });
         const data = await res.json();
         if (data.candidates && data.candidates.content.parts.text) {
-          c.textContent = data.candidates.content.parts.text;
+          const resultText = data.candidates.content.parts.text;
+          c.textContent = resultText;
+          const words = resultText.trim().split(/\s+/).length;
+          counter.textContent = `${words} palabras`;
         } else {
-          c.textContent = "Error en la respuesta de la API: " + JSON.stringify(data);
+          c.textContent = "Error en respuesta: " + JSON.stringify(data);
         }
       } catch (err) {
         c.textContent = "Error al conectar con la API: " + err.message;
@@ -458,12 +515,13 @@ Instrucciones estrictas:
     function copiarGuion() {
       const text = document.getElementById('script-console').textContent;
       navigator.clipboard.writeText(text).then(() => {
-        alert('Guion completo copiado al portapapeles. Listo para pegar en Colab.');
+        alert('Guion copiado al portapapeles. Listo para procesar.');
       });
     }
 
     function generarImagen() {
       const engine = document.getElementById('img-engine').value;
+      const ratio = document.getElementById('img-ratio').value;
       const prompt = document.getElementById('img-prompt').value.trim();
       const img = document.getElementById('img-result');
       const info = document.getElementById('img-info');
@@ -472,22 +530,64 @@ Instrucciones estrictas:
       loader.style.display = 'block';
       img.style.display = 'none';
 
+      let w = 1280, h = 720;
+      if (ratio === '9:16') { w = 720; h = 1280; }
+      else if (ratio === '1:1') { w = 1024; h = 1024; }
+
       if (engine === 'flux' || engine === 'banana') {
-        const cleanPrompt = encodeURIComponent(prompt);
-        const url = `[suspicious link removed]{cleanPrompt}?width=1280&height=720&model=flux&nologo=true`;
+        const cleanPrompt = encodeURIComponent(prompt + `, ${ratio} aspect ratio`);
+        const url = `[suspicious link removed]{cleanPrompt}?width=${w}&height=${h}&model=flux&nologo=true`;
         img.src = url;
         img.onload = () => {
           loader.style.display = 'none';
           img.style.display = 'block';
-          info.textContent = `✓ Imagen 16:9 renderizada con éxito vía ${engine.toUpperCase()}.\nPuedes mantener presionada la imagen en tu celular para descargarla directamente.`;
+          info.textContent = `✓ Imagen renderizada (${ratio}) vía ${engine.toUpperCase()}.\nMantén presionada la imagen para descargarla en tu galería.`;
         };
       } else if (engine === 'midjourney') {
         loader.style.display = 'none';
-        info.textContent = `[PROMPT OPTIMIZADO PARA MIDJOURNEY v6]:\n/imagine prompt: ${prompt} --ar 16:9 --style raw --v 6.0`;
+        info.textContent = `[PROMPT MIDJOURNEY v6]:\n/imagine prompt: ${prompt} --ar ${ratio.replace(':', ':')} --style raw --v 6.0`;
       } else {
         loader.style.display = 'none';
-        info.textContent = `[CONFIGURACIÓN LEONARDO AI]:\nPrompt: ${prompt}\nRatio: 16:9 (1280x720) | Preset: Leonardo Kino XL`;
+        info.textContent = `[LEONARDO AI]:\nPrompt: ${prompt}\nAspect Ratio: ${ratio} | Resolución: ${w}x${h}`;
       }
+    }
+
+    function trocearGuionA2E() {
+      const fullText = document.getElementById('script-console').textContent;
+      const container = document.getElementById('chunks-container');
+      container.innerHTML = "";
+
+      if (!fullText || fullText.length < 50) {
+        alert('Primero genera un guion en la Pestaña 1.');
+        return;
+      }
+
+      const sentences = fullText.split(/(?<=[.?!])\s+/);
+      let chunks = [];
+      let currentChunk = "";
+
+      sentences.forEach(s => {
+        if ((currentChunk + s).length < 900) {
+          currentChunk += (currentChunk ? " " : "") + s;
+        } else {
+          if (currentChunk) chunks.push(currentChunk);
+          currentChunk = s;
+        }
+      });
+      if (currentChunk) chunks.push(currentChunk);
+
+      chunks.forEach((chunk, i) => {
+        const div = document.createElement('div');
+        div.style = "background:#09090b; border:1px solid #27272a; padding:8px; border-radius:6px; margin-bottom:8px;";
+        div.innerHTML = `
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <span style="font-size:10px; color:#10b981; font-weight:700;">BLOQUE ${i+1} (${chunk.length} CARACTERES)</span>
+            <button style="background:#fff; color:#000; border:none; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:700; cursor:pointer;" onclick="navigator.clipboard.writeText(this.dataset.text); alert('Bloque ${i+1} copiado.');" data-text="${chunk.replace(/"/g, '&quot;')}">COPIAR</button>
+          </div>
+          <p style="font-size:10px; color:#a1a1aa; line-height:1.4;">${chunk.substring(0, 100)}...</p>
+        `;
+        container.appendChild(div);
+      });
     }
   </script>
 </body>
