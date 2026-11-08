@@ -1,15 +1,31 @@
 {
-  "name": "Koffi Studio",
-  "short_name": "Koffi",
-  "description": "Autonomous Media Engine: guiones, imágenes y voz",
-  "start_url": "./index.html",
+  "name": "Koffi Studio — Media Engine",
+  "short_name": "Koffi Studio",
+  "description": "Ecosistema de producción de contenido multi-nicho y multi-plataforma.",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
+  "orientation": "any",
   "background_color": "#030303",
   "theme_color": "#030303",
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }
