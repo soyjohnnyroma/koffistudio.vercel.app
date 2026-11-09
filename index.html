@@ -51,7 +51,7 @@
     .btn-secondary{background:#18181b;color:#fff;border:1px solid #27272a;padding:8px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;width:100%;margin-top:8px;}
     .btn-accent{background:#27272a;color:#10b981;border:1px solid #10b981;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;width:100%;margin-bottom:10px;}
     .console-out{display:block;width:100%;max-width:100%;min-width:0;box-sizing:border-box;background:#030303;border:1px solid #18181b;border-radius:6px;padding:12px;font-family:monospace;font-size:11px;line-height:1.6;color:#d4d4d8;height:380px;overflow-y:auto;overflow-x:hidden;white-space:pre-wrap;overflow-wrap:anywhere;}
-    #script-console{display:block;width:100%;max-width:100%;min-width:0;min-height:380px;box-sizing:border-box;white-space:pre-wrap;overflow-wrap:anywhere;overflow-x:hidden;}
+    #script-console{display:block;width:100%;max-width:100%;min-width:0;height:380px;min-height:380px;box-sizing:border-box;resize:vertical;white-space:pre-wrap;overflow-wrap:anywhere;overflow-x:hidden;overflow-y:auto;outline:none;cursor:text;}
     .card-item{background:#121214;border:1px solid #18181b;border-radius:6px;padding:12px;margin-bottom:10px;}
     .idea-card{background:#121214;border:1px solid #27272a;border-radius:6px;padding:8px 10px;margin-bottom:6px;cursor:pointer;}
     .idea-title{font-size:11px;font-weight:700;color:#fff;}
@@ -157,7 +157,7 @@
             <label class="input-label" style="color:#fff;">Guion en Tiempo Real:</label>
             <span id="script-counter" style="font-family:monospace; font-size:11px; color:#10b981;">0 palabras · 0 min</span>
           </div>
-          <div id="script-console" class="console-out">Toca ⚙️ CONFIG arriba para guardar tu llave de Gemini. Luego elige un nicho, toca 🎲 para recibir ideas (o escribe tu tema) y presiona 'Generar Guion Completo'.</div>
+          <textarea id="script-console" class="console-out" spellcheck="false" aria-label="Editor del guion">Toca ⚙️ CONFIG arriba para guardar tu llave de Gemini. Luego elige un nicho, toca 🎲 para recibir ideas (o escribe tu tema) y presiona 'Generar Guion Completo'.</textarea>
         </div>
       </div>
     </div>
@@ -629,14 +629,14 @@ Devuelve ÚNICAMENTE un arreglo JSON válido con el siguiente formato exacto, si
       try {
         if (formatVal !== 'youtube_long') {
           btn.textContent = "⏳ REDACTANDO GUION...";
-          c.textContent = "Conectando con Gemini...";
+          c.value = "Conectando con Gemini...";
           const reglas = formatVal === 'vertical_short'
             ? `Formato: Short / Reel / TikTok (60 segundos). Gancho de 3 segundos que corte el scroll, argumento veloz sin pausas y remate final claro. Máximo 160 palabras.`
             : `Formato: Video para Facebook. Estructura reflexiva cotidiana, párrafos breves, alta resonancia emocional sobre relaciones y conducta.`;
           const pc = `Actúa como guionista senior y productor audiovisual de Koffi Studio.\n${base}\n${reglas}\nNo agregues introducciones meta ni explicaciones técnicas. Entrega directamente el guion listo para ser locutado, sin títulos ni marcas, solo texto corrido.`;
           const r = await llamarConRef(pc + '\n' + refVideo, pc,
-            (t) => { c.textContent = `Google pidió calma. Reintentando en ${t} s...`; });
-          c.textContent = r.text;
+            (t) => { c.value = `Google pidió calma. Reintentando en ${t} s...`; });
+          c.value = r.text;
           actualizarContador(r.text);
           c.dataset.ready = '1';
           return;
@@ -644,11 +644,11 @@ Devuelve ÚNICAMENTE un arreglo JSON válido con el siguiente formato exacto, si
 
         const llave = `${niche}|${topic}|${tone}|${ref}`;
         if (!avance || avance.llave !== llave) avance = { llave, esquema: null, capitulos: [] };
-        const esperando = (t) => { c.textContent = (avance.capitulos.join('\n\n') + `\n\n⏳ Google pidió calma. Reintentando en ${t} s...`).trim(); };
+        const esperando = (t) => { c.value = (avance.capitulos.join('\n\n') + `\n\n⏳ Google pidió calma. Reintentando en ${t} s...`).trim(); };
 
         if (!avance.esquema) {
           btn.textContent = "⏳ DISEÑANDO ESQUEMA (1/7)...";
-          c.textContent = "Diseñando el esquema de 6 capítulos...";
+          c.value = "Diseñando el esquema de 6 capítulos...";
           const pe = `Actúa como guionista senior de YouTube.\n${base}\nDiseña el esquema de un video de 22 minutos en exactamente 6 capítulos que se encadenan, cada uno con un giro o tensión que obligue a seguir viendo. Devuelve ÚNICAMENTE un arreglo JSON válido, sin markdown: [{"titulo":"...","resumen":"qué se cuenta en este capítulo, en 2 frases"}]`;
           const r = await llamarConRef(pe + '\n' + refVideo, pe, esperando);
           const t = r.text.replace(/```json/gi, '').replace(/```/g, '');
@@ -663,9 +663,9 @@ Devuelve ÚNICAMENTE un arreglo JSON válido con el siguiente formato exacto, si
         const total = avance.esquema.length;
         const listaEsquema = avance.esquema.map((e, k) => `${k + 1}. ${e.titulo}: ${e.resumen}`).join('\n');
         for (let n = avance.capitulos.length; n < total; n++) {
-          if (detener) { c.textContent = avance.capitulos.join('\n\n') + '\n\n⏹ Detenido. Toca GENERAR para continuar desde el capítulo ' + (n + 1) + '.'; break; }
+          if (detener) { c.value = avance.capitulos.join('\n\n') + '\n\n⏹ Detenido. Toca GENERAR para continuar desde el capítulo ' + (n + 1) + '.'; break; }
           btn.textContent = `⏳ CAPÍTULO ${n + 1} DE ${total} (${n + 2}/${total + 1})...`;
-          c.textContent = (avance.capitulos.join('\n\n') + `\n\n✍️ Escribiendo capítulo ${n + 1} de ${total}: ${avance.esquema[n].titulo}...`).trim();
+          c.value = (avance.capitulos.join('\n\n') + `\n\n✍️ Escribiendo capítulo ${n + 1} de ${total}: ${avance.esquema[n].titulo}...`).trim();
           const previo = avance.capitulos.length ? avance.capitulos[avance.capitulos.length - 1].split(/\s+/).slice(-70).join(' ') : '';
           const esPrimero = n === 0, esUltimo = n === total - 1;
           const prompt = `Actúa como guionista senior de YouTube y productor de Koffi Studio.
@@ -681,8 +681,8 @@ Reglas:
 - Entrega solo texto corrido listo para locutar: sin títulos, sin números de capítulo, sin viñetas, sin acotaciones entre corchetes.`;
           const r = await callGeminiSafe(prompt, esperando);
           avance.capitulos.push(r.text.trim());
-          c.textContent = avance.capitulos.join('\n\n');
-          actualizarContador(c.textContent);
+          c.value = avance.capitulos.join('\n\n');
+          actualizarContador(c.value);
           if (n < total - 1) await sleep(PAUSA_ENTRE_LLAMADAS_MS);
         }
 
@@ -690,7 +690,7 @@ Reglas:
           c.dataset.ready = '1';
           const w = actualizarContador(avance.capitulos.join('\n\n'));
           if (avance.capitulos.length === total) {
-            if (w < 3000) c.textContent += `\n\n[Nota: quedó en ${w} palabras. Para 20-25 min se necesitan 3000 a 3700.]`;
+            if (w < 3000) c.value += `\n\n[Nota: quedó en ${w} palabras. Para 20-25 min se necesitan 3000 a 3700.]`;
             guionListo = { esquema: avance.esquema, capitulos: avance.capitulos.slice(), base };
             document.getElementById('btn-alargar').style.display = 'block';
             avance = null;
@@ -698,7 +698,7 @@ Reglas:
         }
       } catch (err) {
         const parcial = avance && avance.capitulos.length ? avance.capitulos.join('\n\n') + '\n\n' : '';
-        c.textContent = parcial + '⚠️ ' + err.message;
+        c.value = parcial + '⚠️ ' + err.message;
         if (parcial) { c.dataset.ready = '1'; actualizarContador(parcial); }
       } finally {
         btn.disabled = false;
@@ -721,9 +721,9 @@ Reglas:
         const r = await callGeminiSafe(prompt, (t) => { btn.textContent = `⏳ Google pidió calma (${t} s)...`; });
         if (contarPalabras(r.text) > min) g.capitulos[idx] = r.text.trim();
         else alert('La IA no logró ampliarlo esta vez. Vuelve a tocar el botón.');
-        c.textContent = g.capitulos.join('\n\n');
+        c.value = g.capitulos.join('\n\n');
         c.dataset.ready = '1';
-        actualizarContador(c.textContent);
+        actualizarContador(c.value);
       } catch (e) {
         alert(e.message);
       } finally {
@@ -733,12 +733,12 @@ Reglas:
     }
 
     function copiarGuion() {
-      const text = document.getElementById('script-console').textContent;
+      const text = document.getElementById('script-console').value;
       navigator.clipboard.writeText(text).then(() => alert('Guion copiado al portapapeles.'));
     }
 
     function descargarGuionTxt() {
-      const text = document.getElementById('script-console').textContent;
+      const text = document.getElementById('script-console').value;
       const topic = document.getElementById('script-topic').value || "guion_koffi";
       const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
       const a = document.createElement('a');
@@ -750,7 +750,7 @@ Reglas:
     // ===== ESCENAS VISUALES =====
     async function generarEscenas() {
       const c = document.getElementById('script-console');
-      const guion = c.dataset.ready ? c.textContent.trim() : '';
+      const guion = c.dataset.ready ? c.value.trim() : '';
       const note = document.getElementById('scene-note');
       const cont = document.getElementById('scenes-container');
       const btn = document.getElementById('btn-escenas');
@@ -909,7 +909,7 @@ Reglas:
     // ===== DIVISOR A2E =====
     function trocearGuionA2E() {
       const consola = document.getElementById('script-console');
-      const fullText = consola.textContent;
+      const fullText = consola.value;
       const container = document.getElementById('chunks-container');
       container.innerHTML = "";
       if (!consola.dataset.ready || fullText.length < 50) { alert('Primero genera un guion en la Pestaña 1.'); return; }
