@@ -50,9 +50,7 @@
     .btn-main{width:100%;background:#fff;color:#000;border:none;padding:10px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;}
     .btn-secondary{background:#18181b;color:#fff;border:1px solid #27272a;padding:8px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;width:100%;margin-top:8px;}
     .btn-accent{background:#27272a;color:#10b981;border:1px solid #10b981;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;width:100%;margin-bottom:10px;}
-    .console-out{display:block;width:100%;background:#030303;border:1px solid #18181b;border-radius:6px;padding:12px;font-family:monospace;font-size:11px;line-height:1.6;color:#d4d4d8;height:380px;min-height:240px;overflow-y:auto;white-space:pre-wrap;resize:vertical;outline:none;}
-    .console-out:focus{border-color:#52525b;}
-    .console-out::placeholder{color:#71717a;opacity:1;}
+    .console-out{background:#030303;border:1px solid #18181b;border-radius:6px;padding:12px;font-family:monospace;font-size:11px;line-height:1.6;color:#d4d4d8;height:380px;overflow-y:auto;white-space:pre-wrap;}
     .card-item{background:#121214;border:1px solid #18181b;border-radius:6px;padding:12px;margin-bottom:10px;}
     .idea-card{background:#121214;border:1px solid #27272a;border-radius:6px;padding:8px 10px;margin-bottom:6px;cursor:pointer;}
     .idea-title{font-size:11px;font-weight:700;color:#fff;}
@@ -605,7 +603,20 @@ Devuelve ÚNICAMENTE un arreglo JSON válido con el siguiente formato exacto, si
         ? `Referencia de estructura y gancho (título o descripción del usuario): "${ref}". Úsala como inspiración de ritmo y retención, pero escribe contenido 100% original.`
         : '';
       const refVideo = `Se adjunta un video de referencia. Analiza cómo abre, cómo estructura el contenido, su ritmo, sus ganchos y los giros que retienen al espectador, y replica ESA mecánica, pero con contenido 100% original sobre el tema indicado (no copies frases ni datos).`;
-      const base = `Nicho: ${niche}\nTema principal: ${topic}\nTONO DE VOZ (obligatorio; debe notarse en el vocabulario, el ritmo de las frases y la forma de dirigirte al espectador): ${tone}\n${refTexto}`;
+      const reglasGlobales = `REGLAS EDITORIALES GLOBALES Y OBLIGATORIAS PARA TODOS LOS TONOS Y FORMATOS:
+- Escribe en español latinoamericano neutro, natural y comprensible en toda América Latina. Evita expresiones propias de España y regionalismos demasiado locales.
+- Usa siempre tuteo. No uses voseo ni usted.
+- Comienza directamente con el tema o una idea potente. No saludes ni uses fórmulas de bienvenida.
+- No pidas suscribirse, activar notificaciones ni realizar acciones de suscripción en ninguna parte del guion, incluida la apertura y el cierre.
+- No uses vulgaridades ni insultos. La fuerza del mensaje debe estar en las ideas, no en las groserías.
+- Respeta estrictamente el tono de voz seleccionado. Estas reglas globales NO cambian ni uniforman los perfiles: cada tono conserva su personalidad, vocabulario, ritmo y estilo propios.
+- Evita repetir ideas, argumentos, ejemplos o párrafos. Cada parte debe aportar contenido nuevo.
+- Entrega prosa natural, limpia y lista para locución. No uses Markdown, asteriscos, negritas, viñetas ni adornos.
+- La narración debe sentirse como una sola pieza continua. Las divisiones internas sirven únicamente para organizar la escritura y la producción: nunca anuncies capítulos, escenas, bloques ni números; no incluyas encabezados ni títulos dentro del texto que se va a narrar.
+- Une cada bloque con transiciones naturales. Conserva pausas y cambios de ritmo mediante puntuación y párrafos, sin etiquetas ni acotaciones para el narrador.
+- El cierre debe ser breve y contundente, sin despedidas largas ni llamadas a suscribirse.
+- Antes de entregar, revisa que no haya expresiones peninsulares, vulgaridades, repeticiones, títulos ni referencias habladas a capítulos o escenas.`;
+      const base = `Nicho: ${niche}\nTema principal: ${topic}\nTONO DE VOZ SELECCIONADO (debe notarse en el vocabulario, el ritmo y la forma de dirigirte al espectador): ${tone}\n${reglasGlobales}\n${refTexto}`;
 
       // Si hay enlace de YouTube, intenta que Gemini vea el video; si falla, sigue sin él
       async function llamarConRef(conVideo, sinVideo, onWait) {
@@ -650,7 +661,7 @@ Devuelve ÚNICAMENTE un arreglo JSON válido con el siguiente formato exacto, si
         if (!avance.esquema) {
           btn.textContent = "⏳ DISEÑANDO ESQUEMA (1/7)...";
           c.value = "Diseñando el esquema de 6 capítulos...";
-          const pe = `Actúa como guionista senior de YouTube.\n${base}\nDiseña el esquema de un video de 22 minutos en exactamente 6 capítulos que se encadenan, cada uno con un giro o tensión que obligue a seguir viendo. Devuelve ÚNICAMENTE un arreglo JSON válido, sin markdown: [{"titulo":"...","resumen":"qué se cuenta en este capítulo, en 2 frases"}]`;
+          const pe = `Actúa como guionista senior de YouTube.\n${base}\nDiseña una estructura interna de exactamente 6 bloques narrativos consecutivos para un video de aproximadamente 22 minutos. Los títulos son etiquetas internas de planificación y NUNCA deben aparecer en la narración final. Cada bloque debe avanzar la misma historia o argumento, con transiciones naturales, sin anunciar que comienza otro bloque. Devuelve ÚNICAMENTE un arreglo JSON válido, sin markdown: [{"titulo":"etiqueta interna de organización, no narrable","resumen":"qué se desarrolla en este bloque, en 2 frases"}]`;
           const r = await llamarConRef(pe + '\n' + refVideo, pe, esperando);
           const t = r.text.replace(/```json/gi, '').replace(/```/g, '');
           const i1 = t.indexOf('['), i2 = t.lastIndexOf(']');
@@ -674,12 +685,14 @@ ${base}
 ESQUEMA COMPLETO DEL VIDEO:
 ${listaEsquema}
 
-Escribe SOLO el capítulo ${n + 1} de ${total}: "${avance.esquema[n].titulo}".
+Desarrolla únicamente el bloque narrativo interno ${n + 1} de ${total}, cuyo objetivo editorial es: "${avance.esquema[n].titulo}". Esta etiqueta es solo para tu planificación: NO la escribas ni la menciones en el texto.
 Reglas:
 - Longitud OBLIGATORIA: entre 600 y 700 palabras. Desarrolla con ejemplos, escenas y reflexiones; no resumas.
-- ${esPrimero ? 'Abre con un gancho psicológico en los primeros 15 segundos, sin saludos formales.' : 'Continúa de forma natural desde el final del capítulo anterior, sin saludar ni repetir lo ya dicho. Final del capítulo anterior: "' + previo + '"'}
-- ${esUltimo ? 'Cierra el video con un remate contundente y una invitación breve a suscribirse.' : 'Termina con un gancho que abra el siguiente capítulo. NO cierres ni te despidas.'}
-- Entrega solo texto corrido listo para locutar: sin títulos, sin números de capítulo, sin viñetas, sin acotaciones entre corchetes.`;
+- ${esPrimero ? 'Abre directamente con un gancho psicológico en los primeros 15 segundos, sin saludos ni bienvenida.' : 'Continúa como si el texto nunca se hubiera interrumpido. Enlaza naturalmente con la última idea del bloque anterior, sin saludar, repetir ni anunciar una nueva parte. Contexto final anterior: "' + previo + '"'}
+- ${esUltimo ? 'Cierra todo el guion con un remate contundente, breve y memorable. No añadas despedidas largas ni llamadas a suscribirse.' : 'Deja una transición orgánica que permita continuar con la siguiente idea, sin anunciar capítulos, escenas, bloques ni usar frases como “en el próximo capítulo”. No cierres el video.'}
+- El texto debe sonar como una narración única y continua. No incluyas títulos, subtítulos, números, etiquetas, encabezados, viñetas, Markdown, asteriscos ni acotaciones entre corchetes.
+- No escribas expresiones como “capítulo uno”, “capítulo dos”, “escena tres”, “en esta parte” o equivalentes.
+- Devuelve exclusivamente el texto que debe pronunciar el narrador.`;
           const r = await callGeminiSafe(prompt, esperando);
           avance.capitulos.push(r.text.trim());
           c.value = avance.capitulos.join('\n\n');
@@ -718,7 +731,7 @@ Reglas:
       btn.disabled = true;
       btn.textContent = `⏳ AMPLIANDO CAPÍTULO ${idx + 1}...`;
       try {
-        const prompt = `Actúa como guionista senior de YouTube.\n${g.base}\nA continuación está el capítulo ${idx + 1} de ${g.capitulos.length} de un video. Reescríbelo AMPLIÁNDOLO a entre 850 y 1000 palabras: conserva el mismo inicio, el mismo hilo y el mismo final, pero agrega escenas, ejemplos concretos y reflexiones nuevas. No repitas ideas ya dichas. Entrega solo texto corrido listo para locutar, sin títulos ni viñetas.\n\nCAPÍTULO ACTUAL:\n${g.capitulos[idx]}`;
+        const prompt = `Actúa como guionista senior de YouTube.\n${g.base}\nA continuación tienes un bloque interno de una narración continua. Reescríbelo AMPLIÁNDOLO a entre 850 y 1000 palabras: conserva el mismo inicio, el mismo hilo y el mismo final, pero agrega escenas, ejemplos concretos y reflexiones nuevas. No repitas ideas ya dichas. No anuncies ni nombres capítulos, escenas o bloques. No añadas títulos, encabezados, Markdown, asteriscos ni viñetas. Mantén el español latinoamericano neutro, el tuteo y el tono seleccionado. No incluyas llamadas a suscribirse. Entrega exclusivamente el texto narrado, limpio y listo para locutar.\n\nTEXTO ACTUAL:\n${g.capitulos[idx]}`;
         const r = await callGeminiSafe(prompt, (t) => { btn.textContent = `⏳ Google pidió calma (${t} s)...`; });
         if (contarPalabras(r.text) > min) g.capitulos[idx] = r.text.trim();
         else alert('La IA no logró ampliarlo esta vez. Vuelve a tocar el botón.');
@@ -762,7 +775,7 @@ Reglas:
       btn.textContent = '⏳ CREANDO ESCENAS...';
       cont.innerHTML = '';
       try {
-        const prompt = `Eres director de arte de videos de YouTube.\nDivide el siguiente guion en exactamente ${n} escenas consecutivas que cubran todo el guion en orden.\nPara cada escena entrega: "fragmento" (las primeras 10 palabras del tramo del guion, tal cual), "descripcion" (en español, qué se ve, 1 frase) y "prompt" (en inglés, para un generador de imágenes: sujeto, encuadre, luz; incluye este estilo: ${estilo}; sin texto, sin letras, sin marcas de agua).\nDevuelve ÚNICAMENTE un arreglo JSON válido, sin markdown: [{"fragmento":"...","descripcion":"...","prompt":"..."}]\n\nGUION:\n${guion}`;
+        const prompt = `Eres director de arte de videos de YouTube.\nDivide el siguiente guion en exactamente ${n} escenas consecutivas que cubran todo el guion en orden. Las escenas son referencias de producción visual únicamente: no agregues títulos, encabezados ni números de escena al texto narrado, y no alteres ni reescribas el guion.\nPara cada escena entrega: "fragmento" (las primeras 10 palabras del tramo del guion, tal cual), "descripcion" (en español, qué se ve, 1 frase) y "prompt" (en inglés, para un generador de imágenes: sujeto, encuadre, luz; incluye este estilo: ${estilo}; sin texto, sin letras, sin marcas de agua).\nDevuelve ÚNICAMENTE un arreglo JSON válido, sin markdown: [{"fragmento":"...","descripcion":"...","prompt":"..."}]\n\nGUION:\n${guion}`;
         const r = await callGeminiSafe(prompt,
           (t) => { note.textContent = `Google pidió calma. Reintentando en ${t} s...`; },
           (m) => { note.textContent = `Consultando a ${m}... (máx. 45 s)`; });
@@ -936,13 +949,6 @@ Reglas:
     }
 
     // ===== INICIO =====
-    const editorGuion = document.getElementById('script-console');
-    editorGuion.addEventListener('input', () => {
-      actualizarContador(editorGuion.value);
-      editorGuion.dataset.ready = editorGuion.value.trim().length >= 50 ? '1' : '';
-      guionListo = null;
-      document.getElementById('btn-alargar').style.display = 'none';
-    });
     construirUI();
     checkKey();
   </script>
