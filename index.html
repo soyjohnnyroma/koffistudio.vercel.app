@@ -40,9 +40,9 @@
     .tab-btn.active{color:#fff;border-bottom:2px solid #fff;}
     .tab-content{display:none;margin-top:14px;}
     .tab-content.active{display:block;}
-    .grid-workspace{display:grid;grid-template-columns:1fr;gap:16px;}
-    @media(min-width:900px){.grid-workspace{grid-template-columns:380px 1fr;}}
-    .panel-box{background:#09090b;border:1px solid #18181b;border-radius:8px;padding:14px;}
+    .grid-workspace{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;width:100%;min-width:0;}
+    @media(min-width:900px){.grid-workspace{grid-template-columns:minmax(0,380px) minmax(0,1fr);}}
+    .panel-box{background:#09090b;border:1px solid #18181b;border-radius:8px;padding:14px;width:100%;min-width:0;box-sizing:border-box;}
     .input-group{margin-bottom:10px;}
     .input-label{display:block;font-size:11px;color:#a1a1aa;margin-bottom:4px;font-weight:600;text-transform:uppercase;}
     .input-field{width:100%;background:#121214;border:1px solid #27272a;border-radius:6px;padding:8px 10px;color:#fff;font-size:12px;outline:none;}
@@ -50,8 +50,8 @@
     .btn-main{width:100%;background:#fff;color:#000;border:none;padding:10px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;}
     .btn-secondary{background:#18181b;color:#fff;border:1px solid #27272a;padding:8px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;width:100%;margin-top:8px;}
     .btn-accent{background:#27272a;color:#10b981;border:1px solid #10b981;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;width:100%;margin-bottom:10px;}
-    .console-out{display:block;width:100%;max-width:100%;background:#030303;border:1px solid #18181b;border-radius:6px;padding:12px;font-family:monospace;font-size:11px;line-height:1.6;color:#d4d4d8;height:380px;min-height:380px;overflow-y:auto;white-space:pre-wrap;}
-    #script-console{display:block;width:100%;max-width:100%;min-height:380px;resize:vertical;white-space:pre-wrap;overflow-wrap:break-word;}
+    .console-out{display:block;width:100%;max-width:100%;min-width:0;box-sizing:border-box;background:#030303;border:1px solid #18181b;border-radius:6px;padding:12px;font-family:monospace;font-size:11px;line-height:1.6;color:#d4d4d8;height:380px;overflow-y:auto;overflow-x:hidden;white-space:pre-wrap;overflow-wrap:anywhere;}
+    #script-console{display:block;width:100%;max-width:100%;min-width:0;min-height:380px;box-sizing:border-box;white-space:pre-wrap;overflow-wrap:anywhere;overflow-x:hidden;}
     .card-item{background:#121214;border:1px solid #18181b;border-radius:6px;padding:12px;margin-bottom:10px;}
     .idea-card{background:#121214;border:1px solid #27272a;border-radius:6px;padding:8px 10px;margin-bottom:6px;cursor:pointer;}
     .idea-title{font-size:11px;font-weight:700;color:#fff;}
@@ -157,7 +157,7 @@
             <label class="input-label" style="color:#fff;">Guion en Tiempo Real:</label>
             <span id="script-counter" style="font-family:monospace; font-size:11px; color:#10b981;">0 palabras · 0 min</span>
           </div>
-          <textarea id="script-console" class="console-out" spellcheck="true" aria-label="Editor del guion" placeholder="Tu guion aparecerá aquí. También puedes escribir o editar directamente..."></textarea>
+          <div id="script-console" class="console-out">Toca ⚙️ CONFIG arriba para guardar tu llave de Gemini. Luego elige un nicho, toca 🎲 para recibir ideas (o escribe tu tema) y presiona 'Generar Guion Completo'.</div>
         </div>
       </div>
     </div>
@@ -413,8 +413,8 @@
       const choice = document.querySelector('input[name="gem_model"]:checked');
       const wantPro = choice && choice.value === 'pro';
       const models = wantPro
-        ? ['gemini-3.1-pro-preview', 'gemini-3.8-flash']
-        : ['gemini-3.8-flash', 'gemini-3.5-flash-lite'];
+        ? ['gemini-pro-latest', 'gemini-2.5-pro', 'gemini-flash-latest']
+        : ['gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.0-flash'];
       const limite = videoUrl ? 120000 : 45000;
       const partes = videoUrl ? [{ fileData: { fileUri: videoUrl } }, { text: prompt }] : [{ text: prompt }];
       let lastErr = 'Sin respuesta';
@@ -604,20 +604,7 @@ Devuelve ÚNICAMENTE un arreglo JSON válido con el siguiente formato exacto, si
         ? `Referencia de estructura y gancho (título o descripción del usuario): "${ref}". Úsala como inspiración de ritmo y retención, pero escribe contenido 100% original.`
         : '';
       const refVideo = `Se adjunta un video de referencia. Analiza cómo abre, cómo estructura el contenido, su ritmo, sus ganchos y los giros que retienen al espectador, y replica ESA mecánica, pero con contenido 100% original sobre el tema indicado (no copies frases ni datos).`;
-      const reglasGlobales = `REGLAS EDITORIALES GLOBALES Y OBLIGATORIAS PARA TODOS LOS TONOS Y FORMATOS:
-- Escribe en español latinoamericano neutro, natural y comprensible en toda América Latina. Evita expresiones propias de España y regionalismos demasiado locales.
-- Usa siempre tuteo. No uses voseo ni usted.
-- Comienza directamente con el tema o una idea potente. No saludes ni uses fórmulas de bienvenida.
-- No pidas suscribirse, activar notificaciones ni realizar acciones de suscripción en ninguna parte del guion, incluida la apertura y el cierre.
-- No uses vulgaridades ni insultos. La fuerza del mensaje debe estar en las ideas, no en las groserías.
-- Respeta estrictamente el tono de voz seleccionado. Estas reglas globales NO cambian ni uniforman los perfiles: cada tono conserva su personalidad, vocabulario, ritmo y estilo propios.
-- Evita repetir ideas, argumentos, ejemplos o párrafos. Cada parte debe aportar contenido nuevo.
-- Entrega prosa natural, limpia y lista para locución. No uses Markdown, asteriscos, negritas, viñetas ni adornos.
-- La narración debe sentirse como una sola pieza continua. Las divisiones internas sirven únicamente para organizar la escritura y la producción: nunca anuncies capítulos, escenas, bloques ni números; no incluyas encabezados ni títulos dentro del texto que se va a narrar.
-- Une cada bloque con transiciones naturales. Conserva pausas y cambios de ritmo mediante puntuación y párrafos, sin etiquetas ni acotaciones para el narrador.
-- El cierre debe ser breve y contundente, sin despedidas largas ni llamadas a suscribirse.
-- Antes de entregar, revisa que no haya expresiones peninsulares, vulgaridades, repeticiones, títulos ni referencias habladas a capítulos o escenas.`;
-      const base = `Nicho: ${niche}\nTema principal: ${topic}\nTONO DE VOZ SELECCIONADO (debe notarse en el vocabulario, el ritmo y la forma de dirigirte al espectador): ${tone}\n${reglasGlobales}\n${refTexto}`;
+      const base = `Nicho: ${niche}\nTema principal: ${topic}\nTONO DE VOZ (obligatorio; debe notarse en el vocabulario, el ritmo de las frases y la forma de dirigirte al espectador): ${tone}\n${refTexto}`;
 
       // Si hay enlace de YouTube, intenta que Gemini vea el video; si falla, sigue sin él
       async function llamarConRef(conVideo, sinVideo, onWait) {
@@ -642,14 +629,14 @@ Devuelve ÚNICAMENTE un arreglo JSON válido con el siguiente formato exacto, si
       try {
         if (formatVal !== 'youtube_long') {
           btn.textContent = "⏳ REDACTANDO GUION...";
-          c.value = "Conectando con Gemini...";
+          c.textContent = "Conectando con Gemini...";
           const reglas = formatVal === 'vertical_short'
             ? `Formato: Short / Reel / TikTok (60 segundos). Gancho de 3 segundos que corte el scroll, argumento veloz sin pausas y remate final claro. Máximo 160 palabras.`
             : `Formato: Video para Facebook. Estructura reflexiva cotidiana, párrafos breves, alta resonancia emocional sobre relaciones y conducta.`;
           const pc = `Actúa como guionista senior y productor audiovisual de Koffi Studio.\n${base}\n${reglas}\nNo agregues introducciones meta ni explicaciones técnicas. Entrega directamente el guion listo para ser locutado, sin títulos ni marcas, solo texto corrido.`;
           const r = await llamarConRef(pc + '\n' + refVideo, pc,
-            (t) => { c.value = `Google pidió calma. Reintentando en ${t} s...`; });
-          c.value = r.text;
+            (t) => { c.textContent = `Google pidió calma. Reintentando en ${t} s...`; });
+          c.textContent = r.text;
           actualizarContador(r.text);
           c.dataset.ready = '1';
           return;
@@ -657,12 +644,12 @@ Devuelve ÚNICAMENTE un arreglo JSON válido con el siguiente formato exacto, si
 
         const llave = `${niche}|${topic}|${tone}|${ref}`;
         if (!avance || avance.llave !== llave) avance = { llave, esquema: null, capitulos: [] };
-        const esperando = (t) => { c.value = (avance.capitulos.join('\n\n') + `\n\n⏳ Google pidió calma. Reintentando en ${t} s...`).trim(); };
+        const esperando = (t) => { c.textContent = (avance.capitulos.join('\n\n') + `\n\n⏳ Google pidió calma. Reintentando en ${t} s...`).trim(); };
 
         if (!avance.esquema) {
           btn.textContent = "⏳ DISEÑANDO ESQUEMA (1/7)...";
-          c.value = "Diseñando el esquema de 6 capítulos...";
-          const pe = `Actúa como guionista senior de YouTube.\n${base}\nDiseña una estructura interna de exactamente 6 bloques narrativos consecutivos para un video de aproximadamente 22 minutos. Los títulos son etiquetas internas de planificación y NUNCA deben aparecer en la narración final. Cada bloque debe avanzar la misma historia o argumento, con transiciones naturales, sin anunciar que comienza otro bloque. Devuelve ÚNICAMENTE un arreglo JSON válido, sin markdown: [{"titulo":"etiqueta interna de organización, no narrable","resumen":"qué se desarrolla en este bloque, en 2 frases"}]`;
+          c.textContent = "Diseñando el esquema de 6 capítulos...";
+          const pe = `Actúa como guionista senior de YouTube.\n${base}\nDiseña el esquema de un video de 22 minutos en exactamente 6 capítulos que se encadenan, cada uno con un giro o tensión que obligue a seguir viendo. Devuelve ÚNICAMENTE un arreglo JSON válido, sin markdown: [{"titulo":"...","resumen":"qué se cuenta en este capítulo, en 2 frases"}]`;
           const r = await llamarConRef(pe + '\n' + refVideo, pe, esperando);
           const t = r.text.replace(/```json/gi, '').replace(/```/g, '');
           const i1 = t.indexOf('['), i2 = t.lastIndexOf(']');
@@ -676,9 +663,9 @@ Devuelve ÚNICAMENTE un arreglo JSON válido con el siguiente formato exacto, si
         const total = avance.esquema.length;
         const listaEsquema = avance.esquema.map((e, k) => `${k + 1}. ${e.titulo}: ${e.resumen}`).join('\n');
         for (let n = avance.capitulos.length; n < total; n++) {
-          if (detener) { c.value = avance.capitulos.join('\n\n') + '\n\n⏹ Detenido. Toca GENERAR para continuar desde el capítulo ' + (n + 1) + '.'; break; }
+          if (detener) { c.textContent = avance.capitulos.join('\n\n') + '\n\n⏹ Detenido. Toca GENERAR para continuar desde el capítulo ' + (n + 1) + '.'; break; }
           btn.textContent = `⏳ CAPÍTULO ${n + 1} DE ${total} (${n + 2}/${total + 1})...`;
-          c.value = (avance.capitulos.join('\n\n') + `\n\n✍️ Escribiendo capítulo ${n + 1} de ${total}: ${avance.esquema[n].titulo}...`).trim();
+          c.textContent = (avance.capitulos.join('\n\n') + `\n\n✍️ Escribiendo capítulo ${n + 1} de ${total}: ${avance.esquema[n].titulo}...`).trim();
           const previo = avance.capitulos.length ? avance.capitulos[avance.capitulos.length - 1].split(/\s+/).slice(-70).join(' ') : '';
           const esPrimero = n === 0, esUltimo = n === total - 1;
           const prompt = `Actúa como guionista senior de YouTube y productor de Koffi Studio.
@@ -686,18 +673,16 @@ ${base}
 ESQUEMA COMPLETO DEL VIDEO:
 ${listaEsquema}
 
-Desarrolla únicamente el bloque narrativo interno ${n + 1} de ${total}, cuyo objetivo editorial es: "${avance.esquema[n].titulo}". Esta etiqueta es solo para tu planificación: NO la escribas ni la menciones en el texto.
+Escribe SOLO el capítulo ${n + 1} de ${total}: "${avance.esquema[n].titulo}".
 Reglas:
 - Longitud OBLIGATORIA: entre 600 y 700 palabras. Desarrolla con ejemplos, escenas y reflexiones; no resumas.
-- ${esPrimero ? 'Abre directamente con un gancho psicológico en los primeros 15 segundos, sin saludos ni bienvenida.' : 'Continúa como si el texto nunca se hubiera interrumpido. Enlaza naturalmente con la última idea del bloque anterior, sin saludar, repetir ni anunciar una nueva parte. Contexto final anterior: "' + previo + '"'}
-- ${esUltimo ? 'Cierra todo el guion con un remate contundente, breve y memorable. No añadas despedidas largas ni llamadas a suscribirse.' : 'Deja una transición orgánica que permita continuar con la siguiente idea, sin anunciar capítulos, escenas, bloques ni usar frases como “en el próximo capítulo”. No cierres el video.'}
-- El texto debe sonar como una narración única y continua. No incluyas títulos, subtítulos, números, etiquetas, encabezados, viñetas, Markdown, asteriscos ni acotaciones entre corchetes.
-- No escribas expresiones como “capítulo uno”, “capítulo dos”, “escena tres”, “en esta parte” o equivalentes.
-- Devuelve exclusivamente el texto que debe pronunciar el narrador.`;
+- ${esPrimero ? 'Abre con un gancho psicológico en los primeros 15 segundos, sin saludos formales.' : 'Continúa de forma natural desde el final del capítulo anterior, sin saludar ni repetir lo ya dicho. Final del capítulo anterior: "' + previo + '"'}
+- ${esUltimo ? 'Cierra el video con un remate contundente y una invitación breve a suscribirse.' : 'Termina con un gancho que abra el siguiente capítulo. NO cierres ni te despidas.'}
+- Entrega solo texto corrido listo para locutar: sin títulos, sin números de capítulo, sin viñetas, sin acotaciones entre corchetes.`;
           const r = await callGeminiSafe(prompt, esperando);
           avance.capitulos.push(r.text.trim());
-          c.value = avance.capitulos.join('\n\n');
-          actualizarContador(c.value);
+          c.textContent = avance.capitulos.join('\n\n');
+          actualizarContador(c.textContent);
           if (n < total - 1) await sleep(PAUSA_ENTRE_LLAMADAS_MS);
         }
 
@@ -705,7 +690,7 @@ Reglas:
           c.dataset.ready = '1';
           const w = actualizarContador(avance.capitulos.join('\n\n'));
           if (avance.capitulos.length === total) {
-            if (w < 3000) c.value += `\n\n[Nota: quedó en ${w} palabras. Para 20-25 min se necesitan 3000 a 3700.]`;
+            if (w < 3000) c.textContent += `\n\n[Nota: quedó en ${w} palabras. Para 20-25 min se necesitan 3000 a 3700.]`;
             guionListo = { esquema: avance.esquema, capitulos: avance.capitulos.slice(), base };
             document.getElementById('btn-alargar').style.display = 'block';
             avance = null;
@@ -713,7 +698,7 @@ Reglas:
         }
       } catch (err) {
         const parcial = avance && avance.capitulos.length ? avance.capitulos.join('\n\n') + '\n\n' : '';
-        c.value = parcial + '⚠️ ' + err.message;
+        c.textContent = parcial + '⚠️ ' + err.message;
         if (parcial) { c.dataset.ready = '1'; actualizarContador(parcial); }
       } finally {
         btn.disabled = false;
@@ -732,13 +717,13 @@ Reglas:
       btn.disabled = true;
       btn.textContent = `⏳ AMPLIANDO CAPÍTULO ${idx + 1}...`;
       try {
-        const prompt = `Actúa como guionista senior de YouTube.\n${g.base}\nA continuación tienes un bloque interno de una narración continua. Reescríbelo AMPLIÁNDOLO a entre 850 y 1000 palabras: conserva el mismo inicio, el mismo hilo y el mismo final, pero agrega escenas, ejemplos concretos y reflexiones nuevas. No repitas ideas ya dichas. No anuncies ni nombres capítulos, escenas o bloques. No añadas títulos, encabezados, Markdown, asteriscos ni viñetas. Mantén el español latinoamericano neutro, el tuteo y el tono seleccionado. No incluyas llamadas a suscribirse. Entrega exclusivamente el texto narrado, limpio y listo para locutar.\n\nTEXTO ACTUAL:\n${g.capitulos[idx]}`;
+        const prompt = `Actúa como guionista senior de YouTube.\n${g.base}\nA continuación está el capítulo ${idx + 1} de ${g.capitulos.length} de un video. Reescríbelo AMPLIÁNDOLO a entre 850 y 1000 palabras: conserva el mismo inicio, el mismo hilo y el mismo final, pero agrega escenas, ejemplos concretos y reflexiones nuevas. No repitas ideas ya dichas. Entrega solo texto corrido listo para locutar, sin títulos ni viñetas.\n\nCAPÍTULO ACTUAL:\n${g.capitulos[idx]}`;
         const r = await callGeminiSafe(prompt, (t) => { btn.textContent = `⏳ Google pidió calma (${t} s)...`; });
         if (contarPalabras(r.text) > min) g.capitulos[idx] = r.text.trim();
         else alert('La IA no logró ampliarlo esta vez. Vuelve a tocar el botón.');
-        c.value = g.capitulos.join('\n\n');
+        c.textContent = g.capitulos.join('\n\n');
         c.dataset.ready = '1';
-        actualizarContador(c.value);
+        actualizarContador(c.textContent);
       } catch (e) {
         alert(e.message);
       } finally {
@@ -748,12 +733,12 @@ Reglas:
     }
 
     function copiarGuion() {
-      const text = document.getElementById('script-console').value;
+      const text = document.getElementById('script-console').textContent;
       navigator.clipboard.writeText(text).then(() => alert('Guion copiado al portapapeles.'));
     }
 
     function descargarGuionTxt() {
-      const text = document.getElementById('script-console').value;
+      const text = document.getElementById('script-console').textContent;
       const topic = document.getElementById('script-topic').value || "guion_koffi";
       const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
       const a = document.createElement('a');
@@ -765,7 +750,7 @@ Reglas:
     // ===== ESCENAS VISUALES =====
     async function generarEscenas() {
       const c = document.getElementById('script-console');
-      const guion = c.dataset.ready ? c.value.trim() : '';
+      const guion = c.dataset.ready ? c.textContent.trim() : '';
       const note = document.getElementById('scene-note');
       const cont = document.getElementById('scenes-container');
       const btn = document.getElementById('btn-escenas');
@@ -776,7 +761,7 @@ Reglas:
       btn.textContent = '⏳ CREANDO ESCENAS...';
       cont.innerHTML = '';
       try {
-        const prompt = `Eres director de arte de videos de YouTube.\nDivide el siguiente guion en exactamente ${n} escenas consecutivas que cubran todo el guion en orden. Las escenas son referencias de producción visual únicamente: no agregues títulos, encabezados ni números de escena al texto narrado, y no alteres ni reescribas el guion.\nPara cada escena entrega: "fragmento" (las primeras 10 palabras del tramo del guion, tal cual), "descripcion" (en español, qué se ve, 1 frase) y "prompt" (en inglés, para un generador de imágenes: sujeto, encuadre, luz; incluye este estilo: ${estilo}; sin texto, sin letras, sin marcas de agua).\nDevuelve ÚNICAMENTE un arreglo JSON válido, sin markdown: [{"fragmento":"...","descripcion":"...","prompt":"..."}]\n\nGUION:\n${guion}`;
+        const prompt = `Eres director de arte de videos de YouTube.\nDivide el siguiente guion en exactamente ${n} escenas consecutivas que cubran todo el guion en orden.\nPara cada escena entrega: "fragmento" (las primeras 10 palabras del tramo del guion, tal cual), "descripcion" (en español, qué se ve, 1 frase) y "prompt" (en inglés, para un generador de imágenes: sujeto, encuadre, luz; incluye este estilo: ${estilo}; sin texto, sin letras, sin marcas de agua).\nDevuelve ÚNICAMENTE un arreglo JSON válido, sin markdown: [{"fragmento":"...","descripcion":"...","prompt":"..."}]\n\nGUION:\n${guion}`;
         const r = await callGeminiSafe(prompt,
           (t) => { note.textContent = `Google pidió calma. Reintentando en ${t} s...`; },
           (m) => { note.textContent = `Consultando a ${m}... (máx. 45 s)`; });
@@ -847,7 +832,7 @@ Reglas:
     async function imagenNanoBanana(prompt, ratio) {
       const key = localStorage.getItem('koffi_gemini_key');
       if (!key) throw new Error('Falta tu llave de Gemini en ⚙️ CONFIG');
-      const modelos = ['gemini-3.1-flash-image'];
+      const modelos = ['gemini-2.5-flash-image', 'gemini-2.5-flash-image-preview'];
       let ultimo = 'Sin respuesta';
       for (const m of modelos) {
         try {
@@ -924,7 +909,7 @@ Reglas:
     // ===== DIVISOR A2E =====
     function trocearGuionA2E() {
       const consola = document.getElementById('script-console');
-      const fullText = consola.value;
+      const fullText = consola.textContent;
       const container = document.getElementById('chunks-container');
       container.innerHTML = "";
       if (!consola.dataset.ready || fullText.length < 50) { alert('Primero genera un guion en la Pestaña 1.'); return; }
