@@ -157,6 +157,7 @@
             <label class="input-label" style="color:#fff;">Guion en Tiempo Real:</label>
             <span id="script-counter" style="font-family:monospace; font-size:11px; color:#10b981;">0 palabras · 0 min</span>
           </div>
+          <p id="save-status" style="font-size:10px;color:#71717a;margin:0 0 7px;">El trabajo se guarda automáticamente en este dispositivo.</p>
           <textarea id="script-console" class="console-out" spellcheck="false" aria-label="Editor del guion">Toca ⚙️ CONFIG arriba para guardar tu llave de Gemini. Luego elige un nicho, toca 🎲 para recibir ideas (o escribe tu tema) y presiona 'Generar Guion Completo'.</textarea>
         </div>
       </div>
@@ -573,16 +574,109 @@ Devuelve ÚNICAMENTE un arreglo JSON válido con el siguiente formato exacto, si
 
     // ===== GUION (por capítulos para llegar a 20-25 min) =====
     const PALABRAS_POR_MIN = 145;
+    const KOFFI_PROJECT_KEY = 'koffi_studio_project_v2';
+    const PALABRAS_MIN_CAPITULO = 520;
+    const PALABRAS_MAX_CAPITULO = 600;
     let detener = false;
     let avance = null;
     let guionListo = null;
+    let saveTimer = null;
 
-    function detenerGuion() { detener = true; }
+    function detenerGuion() { detener = true; guardarProyecto(); }
 
     function actualizarContador(texto) {
       const w = contarPalabras(texto);
       document.getElementById('script-counter').textContent = `${w} palabras · ≈ ${(w / PALABRAS_POR_MIN).toFixed(1)} min`;
       return w;
+    }
+
+    function estadoGuardado(mensaje, error = false) {
+      const el = document.getElementById('save-status');
+      if (!el) return;
+      el.textContent = mensaje;
+      el.style.color = error ? '#f59e0b' : '#71717a';
+    }
+
+    function guardarProyecto() {
+      try {
+        const proyecto = {
+          version: 2, actualizado: new Date().toISOString(),
+          controles: {
+            nicho: document.getElementById('script-niche')?.value || '',
+            tono: document.getElementById('script-tone')?.value || '',
+            tema: document.getElementById('script-topic')?.value || '',
+            referencia: document.getElementById('script-ref')?.value || '',
+            formato: document.getElementById('script-format')?.value || 'youtube_long'
+          },
+          editor: document.getElementById('script-console')?.value || '',
+          avance, guionListo
+        };
+        localStorage.setItem(KOFFI_PROJECT_KEY, JSON.stringify(proyecto));
+        estadoGuardado('✓ Guardado automáticamente en este dispositivo.');
+        return true;
+      } catch (e) {
+        estadoGuardado('⚠️ No se pudo guardar. Descarga una copia TXT para proteger tu trabajo.', true);
+        console.warn('Koffi Studio: error al guardar el proyecto', e);
+        return false;
+      }
+    }
+
+    function programarGuardado() {
+      clearTimeout(saveTimer);
+      estadoGuardado('Guardando cambios…');
+      saveTimer = setTimeout(guardarProyecto, 350);
+    }
+
+    function restaurarProyecto() {
+      try {
+        const raw = localStorage.getItem(KOFFI_PROJECT_KEY);
+        if (!raw) return;
+        const proyecto = JSON.parse(raw);
+        if (!proyecto || proyecto.version !== 2) return;
+        const c = proyecto.controles || {};
+        const asignar = (id, valor) => {
+          const el = document.getElementById(id);
+          if (el && valor !== undefined && valor !== null && valor !== '') el.value = valor;
+        };
+        asignar('script-niche', c.nicho);
+        asignar('script-tone', c.tono);
+        asignar('script-topic', c.tema);
+        asignar('script-ref', c.referencia);
+        asignar('script-format', c.formato);
+        if (typeof proyecto.editor === 'string') {
+          const editor = document.getElementById('script-console');
+          editor.value = proyecto.editor;
+          editor.dataset.ready = editor.value.trim().length >= 50 ? '1' : '';
+          actualizarContador(editor.value);
+        }
+        avance = proyecto.avance || null;
+        guionListo = proyecto.guionListo || null;
+        if (guionListo && Array.isArray(guionListo.capitulos)) {
+          document.getElementById('btn-alargar').style.display = 'block';
+        }
+        if (avance && Array.isArray(avance.capitulos)) {
+          const btn = document.getElementById('btn-generate-script');
+          btn.textContent = avance.capitulos.length ? '▶ CONTINUAR GUION' : '⚡ GENERAR GUION COMPLETO';
+          estadoGuardado(`✓ Proyecto recuperado. ${avance.capitulos.length} de 6 capítulos completados; puedes continuar.`);
+        } else {
+          estadoGuardado('✓ Último trabajo recuperado de este dispositivo.');
+        }
+      } catch (e) {
+        estadoGuardado('⚠️ No se pudo recuperar el último proyecto guardado.', true);
+        console.warn('Koffi Studio: error al recuperar el proyecto', e);
+      }
+    }
+
+    function conectarGuardadoAutomatico() {
+      ['script-niche','script-tone','script-topic','script-ref','script-format','script-console'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', () => {
+          if (id === 'script-console') actualizarContador(el.value);
+          programarGuardado();
+        });
+        if (el && el.tagName !== 'TEXTAREA') el.addEventListener('change', programarGuardado);
+      });
+      window.addEventListener('beforeunload', guardarProyecto);
     }
 
     async function ejecutarGemini() {
@@ -639,11 +733,15 @@ Devuelve ÚNICAMENTE un arreglo JSON válido con el siguiente formato exacto, si
           c.value = r.text;
           actualizarContador(r.text);
           c.dataset.ready = '1';
+          guardarProyecto();
           return;
         }
 
         const llave = `${niche}|${topic}|${tone}|${ref}`;
-        if (!avance || avance.llave !== llave) avance = { llave, esquema: null, capitulos: [] };
+        if (!avance || avance.llave !== llave) avance = { llave, esquema: null, capitulos: [], base, estado: 'iniciado' };
+        avance.base = base;
+        avance.estado = 'generando';
+        guardarProyecto();
         const esperando = (t) => { c.value = (avance.capitulos.join('\n\n') + `\n\n⏳ Google pidió calma. Reintentando en ${t} s...`).trim(); };
 
         if (!avance.esquema) {
@@ -655,8 +753,10 @@ Devuelve ÚNICAMENTE un arreglo JSON válido con el siguiente formato exacto, si
           const i1 = t.indexOf('['), i2 = t.lastIndexOf(']');
           if (i1 === -1 || i2 === -1) throw new Error('No pude armar el esquema. Intenta de nuevo.');
           const esq = JSON.parse(t.slice(i1, i2 + 1));
-          if (!Array.isArray(esq) || esq.length < 3) throw new Error('El esquema vino incompleto. Intenta de nuevo.');
-          avance.esquema = esq.slice(0, 6);
+          if (!Array.isArray(esq) || esq.length !== 6 || esq.some(e => !e || !e.titulo || !e.resumen)) throw new Error('El esquema debe contener exactamente 6 capítulos completos. Intenta de nuevo.');
+          avance.esquema = esq;
+          avance.estado = 'esquema_listo';
+          guardarProyecto();
           await sleep(PAUSA_ENTRE_LLAMADAS_MS);
         }
 
@@ -674,15 +774,26 @@ ESQUEMA COMPLETO DEL VIDEO:
 ${listaEsquema}
 
 Escribe SOLO el capítulo ${n + 1} de ${total}: "${avance.esquema[n].titulo}".
-Reglas:
-- Longitud OBLIGATORIA: entre 600 y 700 palabras. Desarrolla con ejemplos, escenas y reflexiones; no resumas.
-- ${esPrimero ? 'Abre con un gancho psicológico en los primeros 15 segundos, sin saludos formales.' : 'Continúa de forma natural desde el final del capítulo anterior, sin saludar ni repetir lo ya dicho. Final del capítulo anterior: "' + previo + '"'}
-- ${esUltimo ? 'Cierra el video con un remate contundente y una invitación breve a suscribirse.' : 'Termina con un gancho que abra el siguiente capítulo. NO cierres ni te despidas.'}
-- Entrega solo texto corrido listo para locutar: sin títulos, sin números de capítulo, sin viñetas, sin acotaciones entre corchetes.`;
+REGLAS EDITORIALES OBLIGATORIAS:
+- Longitud: entre ${PALABRAS_MIN_CAPITULO} y ${PALABRAS_MAX_CAPITULO} palabras. Desarrolla con profundidad; no rellenes ni resumas.
+- Español latinoamericano neutro, tuteo natural, sin voseo ni expresiones propias de España.
+- El tono elegido debe sentirse en el vocabulario, el ritmo y la cercanía de la narración.
+- Cada capítulo debe aportar ideas, escenas, ejemplos y reflexiones nuevas. No repitas conceptos, ejemplos, metáforas, preguntas retóricas ni frases ya utilizadas.
+- Respeta la función de este capítulo dentro del esquema completo. No adelantes el contenido de capítulos posteriores ni vuelvas a explicar lo ya desarrollado.
+- ${esPrimero ? 'Abre con un gancho psicológico potente durante los primeros 15 segundos, sin saludos formales.' : 'Continúa orgánicamente desde el capítulo anterior, sin resumen ni recapitulación. Usa este cierre solo como punto de continuidad: "' + previo + '"'}
+- ${esUltimo ? 'Cierra con una conclusión contundente, emocional y natural. No incluyas invitaciones a suscribirse, seguir el canal, comentar ni llamadas promocionales.' : 'Termina con una transición o tensión que impulse al siguiente capítulo, sin cerrar el video ni despedirte.'}
+- No incluyas llamadas a suscribirse, comentar, compartir ni seguir el canal en ningún capítulo.
+- Entrega exclusivamente texto corrido listo para locución: sin títulos, números de capítulo, viñetas, acotaciones, corchetes, notas ni explicaciones meta.
+
+CONTENIDO YA DESARROLLADO (evita repetirlo):
+${avance.capitulos.map((texto, i) => `CAPÍTULO ${i + 1}:\n${texto.slice(-2200)}`).join('\n\n')}`;
           const r = await callGeminiSafe(prompt, esperando);
           avance.capitulos.push(r.text.trim());
+          avance.estado = 'capitulo_' + avance.capitulos.length + '_completado';
           c.value = avance.capitulos.join('\n\n');
+          c.dataset.ready = '1';
           actualizarContador(c.value);
+          guardarProyecto();
           if (n < total - 1) await sleep(PAUSA_ENTRE_LLAMADAS_MS);
         }
 
@@ -690,16 +801,20 @@ Reglas:
           c.dataset.ready = '1';
           const w = actualizarContador(avance.capitulos.join('\n\n'));
           if (avance.capitulos.length === total) {
-            if (w < 3000) c.value += `\n\n[Nota: quedó en ${w} palabras. Para 20-25 min se necesitan 3000 a 3700.]`;
-            guionListo = { esquema: avance.esquema, capitulos: avance.capitulos.slice(), base };
-            document.getElementById('btn-alargar').style.display = 'block';
+            guionListo = { esquema: avance.esquema, capitulos: avance.capitulos.slice(), base, actualizado: new Date().toISOString() };
             avance = null;
+            guardarProyecto();
+            document.getElementById('btn-alargar').style.display = 'block';
+          } else {
+            avance.estado = 'pausado';
+            guardarProyecto();
           }
         }
       } catch (err) {
         const parcial = avance && avance.capitulos.length ? avance.capitulos.join('\n\n') + '\n\n' : '';
         c.value = parcial + '⚠️ ' + err.message;
         if (parcial) { c.dataset.ready = '1'; actualizarContador(parcial); }
+        if (avance) { avance.estado = 'error_o_pausa'; guardarProyecto(); }
       } finally {
         btn.disabled = false;
         stopBtn.style.display = 'none';
@@ -711,19 +826,28 @@ Reglas:
       if (!guionListo) { alert('Primero genera un guion largo.'); return; }
       const g = guionListo;
       const c = document.getElementById('script-console');
+      if (c.value.trim() !== g.capitulos.join('\n\n').trim()) {
+        alert('El editor tiene cambios manuales. Para protegerlos, no ampliaré el guion desde la versión anterior.');
+        return;
+      }
       const btn = document.getElementById('btn-alargar');
       let idx = 0, min = Infinity;
       g.capitulos.forEach((t, i) => { const w = contarPalabras(t); if (w < min) { min = w; idx = i; } });
       btn.disabled = true;
       btn.textContent = `⏳ AMPLIANDO CAPÍTULO ${idx + 1}...`;
       try {
-        const prompt = `Actúa como guionista senior de YouTube.\n${g.base}\nA continuación está el capítulo ${idx + 1} de ${g.capitulos.length} de un video. Reescríbelo AMPLIÁNDOLO a entre 850 y 1000 palabras: conserva el mismo inicio, el mismo hilo y el mismo final, pero agrega escenas, ejemplos concretos y reflexiones nuevas. No repitas ideas ya dichas. Entrega solo texto corrido listo para locutar, sin títulos ni viñetas.\n\nCAPÍTULO ACTUAL:\n${g.capitulos[idx]}`;
+        const prompt = `Actúa como guionista senior de YouTube.\n${g.base}\nA continuación está el capítulo ${idx + 1} de ${g.capitulos.length} de un video. Reescríbelo y ajústalo a entre ${PALABRAS_MIN_CAPITULO} y ${PALABRAS_MAX_CAPITULO} palabras. Conserva su función narrativa, pero elimina repeticiones y no introduzcas ideas ya desarrolladas en los otros capítulos. Mantén español latinoamericano neutro y tuteo. No incluyas llamadas promocionales. Entrega solo texto corrido listo para locutar, sin títulos, viñetas ni notas.
+
+LOS OTROS CAPÍTULOS (no repetir):
+${g.capitulos.filter((_, i) => i !== idx).map((t, i) => t.slice(-1400)).join('\n\n')}\n\nCAPÍTULO ACTUAL:\n${g.capitulos[idx]}`;
         const r = await callGeminiSafe(prompt, (t) => { btn.textContent = `⏳ Google pidió calma (${t} s)...`; });
-        if (contarPalabras(r.text) > min) g.capitulos[idx] = r.text.trim();
-        else alert('La IA no logró ampliarlo esta vez. Vuelve a tocar el botón.');
+        const nuevasPalabras = contarPalabras(r.text);
+        if (nuevasPalabras >= PALABRAS_MIN_CAPITULO && nuevasPalabras <= PALABRAS_MAX_CAPITULO && nuevasPalabras > min) g.capitulos[idx] = r.text.trim();
+        else alert(`La ampliación no respetó el rango de ${PALABRAS_MIN_CAPITULO} a ${PALABRAS_MAX_CAPITULO} palabras. Conservé el capítulo anterior para no alterar el objetivo de duración.`);
         c.value = g.capitulos.join('\n\n');
         c.dataset.ready = '1';
         actualizarContador(c.value);
+        guardarProyecto();
       } catch (e) {
         alert(e.message);
       } finally {
@@ -936,6 +1060,8 @@ Reglas:
 
     // ===== INICIO =====
     construirUI();
+    restaurarProyecto();
+    conectarGuardadoAutomatico();
     checkKey();
   </script>
 </body>
