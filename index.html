@@ -5,391 +5,135 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#030303">
   <title>Koffi Studio — Media Engine</title>
-  <link rel="manifest" href="./manifest.json">
-  <link rel="apple-touch-icon" href="./icon-192.png">
-  <link rel="icon" href="./icon-192.png" type="image/png">
+  <link rel="icon" href="icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="manifest" href="manifest.json">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background-color: #030303;
-      color: #f4f4f5;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      min-height: 100vh;
-      line-height: 1.5;
-    }
-    header {
-      border-bottom: 1px solid #18181b;
-      padding: 10px 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #09090b;
-      position: sticky;
-      top: 0;
-      z-index: 50;
-    }
-    .brand-wrap { display: flex; align-items: center; gap: 10px; }
-    .brand-logo-img {
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      background: #000;
-      border: 1px solid #27272a;
-      object-fit: cover;
-    }
-    .brand-title { font-size: 13px; font-weight: 800; letter-spacing: 1px; }
-    .brand-sub { color: #71717a; font-size: 11px; margin-left: 4px; }
-    .header-meta { display: flex; align-items: center; gap: 10px; font-size: 11px; font-family: monospace; }
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: #18181b;
-      padding: 4px 8px;
-      border-radius: 14px;
-      border: 1px solid #27272a;
-      color: #a1a1aa;
-    }
-    .pulse-dot { width: 7px; height: 7px; border-radius: 50%; background: #10b981; }
-    .pulse-dot.warn { background: #f59e0b; }
-    .container { max-width: 1200px; margin: 0 auto; padding: 14px 16px; }
-    .hero-strip {
-      border-bottom: 1px solid #18181b;
-      padding-bottom: 10px;
-      margin-bottom: 14px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      font-size: 11px;
-      letter-spacing: 1px;
-      color: #a1a1aa;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    /* CARRUSEL DOBLE */
-    .marquee-wrapper {
-      overflow: hidden;
-      position: relative;
-      margin-bottom: 8px;
-      mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
-      -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
-    }
-    .marquee-track { display: flex; width: max-content; gap: 10px; }
-    .marquee-left { animation: scroll-left 45s linear infinite; }
-    .marquee-right { animation: scroll-right 45s linear infinite; }
-    .marquee-wrapper:hover .marquee-track { animation-play-state: paused; }
-    @keyframes scroll-left { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-    @keyframes scroll-right { 0% { transform: translateX(-50%); } 100% { transform: translateX(0); } }
-    .style-card {
-      width: 185px;
-      background: #09090b;
-      border: 1px solid #18181b;
-      border-radius: 6px;
-      padding: 8px 10px;
-      text-align: left;
-    }
-    .style-name { font-size: 11px; font-weight: 700; color: #fff; }
-    .style-desc { font-size: 10px; color: #71717a; margin-top: 2px; }
-
-    /* PESTAÑAS */
-    .tabs-nav {
-      display: flex;
-      overflow-x: auto;
-      border-bottom: 1px solid #18181b;
-      gap: 14px;
-      padding-bottom: 8px;
-      margin-top: 12px;
-    }
-    .tab-btn {
-      background: none;
-      border: none;
-      color: #71717a;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      padding-bottom: 6px;
-      white-space: nowrap;
-    }
-    .tab-btn.active { color: #ffffff; border-bottom: 2px solid #ffffff; }
-    .tab-content { display: none; margin-top: 14px; }
-    .tab-content.active { display: block; }
-
-    .grid-workspace {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 16px;
-    }
-    @media(min-width: 900px) {
-      .grid-workspace { grid-template-columns: 380px 1fr; }
-    }
-    .panel-box {
-      background: #09090b;
-      border: 1px solid #18181b;
-      border-radius: 8px;
-      padding: 14px;
-    }
-    .input-group { margin-bottom: 10px; }
-    .input-label { display: block; font-size: 11px; color: #a1a1aa; margin-bottom: 4px; font-weight: 600; text-transform: uppercase; }
-    .input-field {
-      width: 100%;
-      background: #121214;
-      border: 1px solid #27272a;
-      border-radius: 6px;
-      padding: 8px 10px;
-      color: #fff;
-      font-size: 12px;
-      outline: none;
-    }
-    .input-field:focus { border-color: #71717a; }
-    .btn-main {
-      width: 100%;
-      background: #ffffff;
-      color: #000000;
-      border: none;
-      padding: 10px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .btn-main:hover { background: #e4e4e7; }
-    .btn-secondary {
-      background: #18181b;
-      color: #ffffff;
-      border: 1px solid #27272a;
-      padding: 8px 12px;
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
-      width: 100%;
-      margin-top: 8px;
-    }
-    .btn-accent {
-      background: #27272a;
-      color: #10b981;
-      border: 1px solid #10b981;
-      padding: 6px 10px;
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: 700;
-      cursor: pointer;
-      width: 100%;
-      margin-bottom: 10px;
-    }
-    .btn-accent:hover { background: #18181b; }
-    .console-out {
-      background: #030303;
-      border: 1px solid #18181b;
-      border-radius: 6px;
-      padding: 12px;
-      font-family: monospace;
-      font-size: 11px;
-      line-height: 1.6;
-      color: #d4d4d8;
-      height: 380px;
-      overflow-y: auto;
-      white-space: pre-wrap;
-    }
-    .card-item {
-      background: #121214;
-      border: 1px solid #18181b;
-      border-radius: 6px;
-      padding: 12px;
-      margin-bottom: 10px;
-    }
-    .idea-card {
-      background: #121214;
-      border: 1px solid #27272a;
-      border-radius: 6px;
-      padding: 8px 10px;
-      margin-bottom: 6px;
-      cursor: pointer;
-      transition: border-color 0.2s;
-    }
-    .idea-card:hover { border-color: #10b981; }
-    .idea-title { font-size: 11px; font-weight: 700; color: #fff; }
-    .idea-hook { font-size: 10px; color: #a1a1aa; margin-top: 2px; }
-    .image-preview {
-      width: 100%;
-      border-radius: 6px;
-      border: 1px solid #27272a;
-      margin-top: 10px;
-      display: none;
-    }
-
-    /* IDENTIDAD Y DISEÑO RESPONSIVO */
-    header { width:100%; flex-direction:column; justify-content:center; align-items:center; gap:10px; padding:16px 14px 12px; }
-    .brand-wrap { display:flex; justify-content:center; align-items:center; gap:12px; min-width:0; text-align:left; }
-    .brand-logo-img { width:56px; height:56px; flex:0 0 56px; border-radius:50%; object-fit:contain; padding:4px; }
-    .brand-copy { display:flex; flex-direction:column; align-items:flex-start; min-width:0; }
-    .brand-title { display:block; font-size:23px; line-height:1.12; letter-spacing:2.2px; white-space:nowrap; }
-    .brand-sub { display:block; margin:5px 0 0; font-size:11px; line-height:1.2; letter-spacing:2px; white-space:nowrap; }
-    .brand-tagline { display:block; color:#62626b; font-size:9px; letter-spacing:1.25px; line-height:1.3; margin-top:4px; white-space:nowrap; }
-    .header-meta { justify-content:center; flex-wrap:wrap; gap:8px; font-size:10px; }
-    #live-datetime { color:#85858e !important; font-size:10px; font-weight:500 !important; letter-spacing:.2px !important; padding:0 3px; white-space:nowrap; }
-    .header-meta button { min-height:30px; }
-    .hero-strip { justify-content:center; text-align:center; font-size:10px; letter-spacing:1.4px; color:#777780; padding:8px 4px 12px; white-space:normal; }
-    .style-card { cursor:pointer; transition:border-color .2s, background .2s; }
-    .style-card:focus-visible,.style-card.selected { outline:none; border-color:#10b981; background:#101a17; }
-    .tabs-nav { scrollbar-width:thin; gap:18px; }
-    .tab-btn { font-size:12px; padding:8px 2px 9px; }
-    .input-field, select, textarea, button { max-width:100%; }
-    button:disabled { opacity:.55; cursor:not-allowed; }
-    .action-row { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
-    .action-row > * { flex:1 1 140px; }
-    .muted-note { color:#777780; font-size:11px; line-height:1.6; margin-top:8px; }
-    .scene-card { background:#101012; border:1px solid #27272a; border-radius:7px; padding:11px; margin:8px 0; }
-    .scene-card textarea { min-height:90px; }
-    @media(max-width:560px) {
-      header { padding:13px 10px 11px; gap:9px; }
-      .brand-logo-img { width:49px; height:49px; flex-basis:49px; }
-      .brand-title { font-size:19px; letter-spacing:1.8px; }
-      .brand-sub { font-size:9px; letter-spacing:1.6px; }
-      .brand-tagline { font-size:8px; letter-spacing:.9px; }
-      .header-meta { gap:6px; }
-      .container { padding:12px 10px; }
-      .panel-box { padding:12px; }
-      .grid-workspace { grid-template-columns:minmax(0,1fr); }
-      .tabs-nav { gap:14px; }
-      .tab-btn { font-size:11px; }
-    }
-    @media(min-width:900px) {
-      header { padding:18px 24px 13px; }
-      .brand-logo-img { width:62px; height:62px; flex-basis:62px; }
-      .brand-title { font-size:25px; }
-      .container { padding:18px 24px; }
-    }
-    @media(prefers-reduced-motion:reduce) { .marquee-track { animation:none !important; } * { scroll-behavior:auto !important; transition:none !important; } }
-
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:#030303;color:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;min-height:100vh;line-height:1.5;}
+    header{background:#09090b;border-bottom:1px solid #18181b;padding:16px 16px 10px;text-align:center;}
+    .brand-logo-img{display:block;width:44px;height:44px;margin:0 auto 8px;border-radius:50%;background:#000;object-fit:cover;}
+    .brand-title{display:block;font-size:15px;font-weight:600;letter-spacing:5px;padding-left:5px;color:#f4f4f5;white-space:nowrap;}
+    .brand-sub{display:block;margin-top:5px;font-size:9px;letter-spacing:4px;padding-left:4px;color:#a1a1aa;text-transform:uppercase;white-space:nowrap;}
+    .brand-tag{display:block;margin-top:4px;font-size:clamp(6.5px,2vw,8.5px);letter-spacing:1.4px;color:#52525b;text-transform:uppercase;white-space:nowrap;}
+    .util-bar{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:8px;border-top:1px solid #18181b;}
+    #live-datetime{font-family:monospace;font-size:10px;letter-spacing:.5px;color:#71717a;}
+    .util-right{display:flex;align-items:center;gap:8px;}
+    .btn-cfg{background:none;border:1px solid #27272a;color:#a1a1aa;font-size:10px;padding:3px 8px;border-radius:4px;cursor:pointer;white-space:nowrap;}
+    #pwa-install-btn{display:none;background:#10b981;border:none;color:#000;font-size:10px;font-weight:700;padding:4px 8px;border-radius:4px;cursor:pointer;}
+    #api-status{font-family:monospace;font-size:10px;font-weight:700;letter-spacing:.5px;white-space:nowrap;}
+    .container{max-width:1200px;margin:0 auto;padding:14px 16px;}
+    .marquee-wrapper{overflow:hidden;position:relative;margin-bottom:8px;mask-image:linear-gradient(to right,transparent,black 8%,black 92%,transparent);-webkit-mask-image:linear-gradient(to right,transparent,black 8%,black 92%,transparent);}
+    .marquee-track{display:flex;width:max-content;gap:10px;}
+    .marquee-left{animation:scroll-left 45s linear infinite;}
+    .marquee-right{animation:scroll-right 45s linear infinite;}
+    .marquee-wrapper:hover .marquee-track,.marquee-wrapper:active .marquee-track{animation-play-state:paused;}
+    @keyframes scroll-left{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+    @keyframes scroll-right{0%{transform:translateX(-50%);}100%{transform:translateX(0);}}
+    .style-card{width:185px;background:#09090b;border:1px solid #18181b;border-radius:6px;padding:8px 10px;text-align:left;cursor:pointer;}
+    .style-card.active{border-color:#10b981;}
+    .style-name{font-size:11px;font-weight:700;color:#fff;}
+    .style-desc{font-size:10px;color:#71717a;margin-top:2px;}
+    #estilo-activo{font-size:10px;color:#71717a;text-align:center;margin:2px 0 4px;}
+    .tabs-nav{display:flex;overflow-x:auto;border-bottom:1px solid #18181b;gap:14px;padding-bottom:8px;margin-top:12px;}
+    .tab-btn{background:none;border:none;color:#71717a;font-size:12px;font-weight:600;cursor:pointer;padding-bottom:6px;white-space:nowrap;}
+    .tab-btn.active{color:#fff;border-bottom:2px solid #fff;}
+    .tab-content{display:none;margin-top:14px;}
+    .tab-content.active{display:block;}
+    .grid-workspace{display:grid;grid-template-columns:1fr;gap:16px;}
+    @media(min-width:900px){.grid-workspace{grid-template-columns:380px 1fr;}}
+    .panel-box{background:#09090b;border:1px solid #18181b;border-radius:8px;padding:14px;}
+    .input-group{margin-bottom:10px;}
+    .input-label{display:block;font-size:11px;color:#a1a1aa;margin-bottom:4px;font-weight:600;text-transform:uppercase;}
+    .input-field{width:100%;background:#121214;border:1px solid #27272a;border-radius:6px;padding:8px 10px;color:#fff;font-size:12px;outline:none;}
+    .input-field:focus{border-color:#71717a;}
+    .btn-main{width:100%;background:#fff;color:#000;border:none;padding:10px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;}
+    .btn-secondary{background:#18181b;color:#fff;border:1px solid #27272a;padding:8px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;width:100%;margin-top:8px;}
+    .btn-accent{background:#27272a;color:#10b981;border:1px solid #10b981;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;width:100%;margin-bottom:10px;}
+    .console-out{display:block;width:100%;background:#030303;border:1px solid #18181b;border-radius:6px;padding:12px;font-family:monospace;font-size:11px;line-height:1.6;color:#d4d4d8;height:380px;min-height:240px;overflow-y:auto;white-space:pre-wrap;resize:vertical;outline:none;}
+    .console-out:focus{border-color:#52525b;}
+    .console-out::placeholder{color:#71717a;opacity:1;}
+    .card-item{background:#121214;border:1px solid #18181b;border-radius:6px;padding:12px;margin-bottom:10px;}
+    .idea-card{background:#121214;border:1px solid #27272a;border-radius:6px;padding:8px 10px;margin-bottom:6px;cursor:pointer;}
+    .idea-title{font-size:11px;font-weight:700;color:#fff;}
+    .idea-hook{font-size:10px;color:#a1a1aa;margin-top:2px;}
+    .image-preview{width:100%;border-radius:6px;border:1px solid #27272a;margin-top:10px;display:none;}
+    .nota{font-size:10px;color:#71717a;margin:-4px 0 10px;}
   </style>
 </head>
 <body>
 
   <header>
-    <div class="brand-wrap">
-      <img src="./icon-512.png" alt="Isotipo de Koffi Studio" class="brand-logo-img" width="56" height="56">
-      <div class="brand-copy">
-        <span class="brand-title">KOFFI STUDIO</span>
-        <span class="brand-sub">MEDIA ENGINE</span>
-        <span class="brand-tagline">ECOSISTEMA MULTI-NICHO Y MULTI-PLATAFORMA</span>
+    <img src="icon-192.png" alt="Koffi Studio" class="brand-logo-img" onerror="this.onerror=null;this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgBAMAAAAQtmoLAAAAMFBMVEX////7+/vx8fHe3t7FxcWfn59ycnJSUlItLS0PDw8FBQUEBAQDAwMCAgIBAQEAAADx+vdXAAAJJklEQVR42pVYa3gU1Rl+z9nVaszunt3YWoTsTiZBy0V2uVsk7AIK/oCIlxLaEqwNUqLtD6lWa+2DVYyo9BGVa4BUwCBiK81FCqXAbiIgQkI2CSBgNpNEbX1IZmezCwTYndMfswkz2QV1fs0zZ975Luc973zfR2Sku7gCe9oFmNM8k0M0V4QcksSc1EWSYkFufBjA0eg0AEdNOd8G4A334oOGtnCYMIc99xnsG3N9AG/yfbDv2HFHjh081JY7duKSrii7DkBtnvzG3sB0UcwqxpkDodCx2CNr453smgDeNOnJjTPGlgIIww5g+bGPZsybb0DoAbzpp0+++7PCOV1+kdkR5iHz1Msv7L2xZH70GgBpRMmWZ0rjtaP7n7TGfGt3XCjJd6QFJNjizc8u+08uMyZt+/qLnx7wpAGo0Yqlz718YPSANHbnvf/6T97r6P+K6dm+u6Y7FxauSHkfGV951RUouJQCSOT9nL2f+j6Q8dXM6ApX748HuhQ8+Jcy5+i0fGsdVdhbFRsAiFtGFL0QTU9QBCdaVrh8RkCg9nCdcUv1BOjc+nFzzACIW4a80PeNNFeXc3iR26cHBKsO18YAKKlGQiKAQMuqzpgOkMgc+VuXD0hkKSnuZLUxIG6dVOT2XAW0V29rigGI+AvIAEDg9DMRAIHmXZ/09AN41+Ipbh/AM6Yc7jA6FbdOmuXzAHGLZd00BoACgDrk4J98AHo2HC1WjQYOPt/QDgDm3fPrpH4LwcrwgtEAglUdVXuYoDdgGTbuREsEQHeGGIsmLajD6ryaqEj3Dd44Sk/WE098vSWUAAC7eeQWqc8lS0uRAIBPai4s3rG18SogPPFvJT1WCgD0UH6tknQpWBl+1AMgkWmLqXcPqopeZfxThztPLFngFgAkMhyxKEABPrjZy5I5N/3r4b2r/H2AzkNVi2skd6MWbTS7SgGIjMQt7HwUACLV+5YOsc3srU3SJmEtPNUca6/b9yYDgOBml9sHCkQ3je3QQg4JUvuuR46uTppo2VC9uLohu/iIEwDgGnvUDRAZgQB/wAMAwbcL8nOv8Jm9tZ0AkHDe31t7nh0b4orFACBxiz0WBWT57PTykCzLcvelvPjO0o8OrKZLOeec85fNb+4/vfjypbxWWZZlufubcfWyTOREpk0LIW5hUfVub37B3FNLAEBdP6hKybCuEDZ7vYIWhNvtMYOookY4ojpO1ATdNFiRWabt2tJqL7esbwlILm33cxrdMCO67U6NcLH3xw97bI7iojvm+AGAzf3m8dqWH555J3f7UgDAqPH3eSNEDgRs2mEKVvJbX964LhCf6l8JAJi5RV350t5bP6/Pivb5HIuaIWydnaRb+8x1JdNeNT+ec1jTnu7SbIFnVVjeUTkAgFInQLoz7zkSAQCeObJoWexKVrf9Uqt27hyk4ixRH9x8KvNDjQmRhfO9lPOmhMYLVfqoxE84+ePfw1QURdHWeu5ZH+zxbV9YKjVCNjoVxayqNHkqVcvJo22E3/wigDCAvDzgV5Uux5Eif6MLAMBskstMeA4FAMS2qyXV+eCJ56TIre9FENzVFskqjTC7Zc0tZ70aQKxn1BTOi2hMav3BGz5CbM1dx7v8AJRzDV3/HBxhzLHn0XqrxqYxsptGdjo0B51DF9eAEGcj+c0yBgD2ea8w3vEAI/eseUhjZ2L0F8ysyEmZsD+R6AE5b1P4DT4FAMJWn8IjlijMp7eFtRNLwpwqYSTFq7UJQNCmIJ6kd9wPEA4gu6H/zHKzApY04XAAUJgCc1JkzT5wAgA0WQ8QAk4xQBwZyP+WMgAg37zJwsSghITDDBikjrE28hoGAQBfh5tsTA8gaaoZ5vj3rEUwKQSuOxbBtEmMDBBbsrPS7fboxPrmrIvJnbYDeIw/oPtrqJnW2EALKk2c88M8hwBdB3CD5GWpBZYhakqdH3tv864BwCdPmfy0oFdaDsBsjBn0ZLZku6+eA2CTu9UOQ50BTmBmUAwmJEHKp2SuAHUD7CrlMFoglA0oBoUxZ3yfF7QvX5648Oe8cjs11l92Qpnd+CPMLm7grOKzF3vLS5qk7gkdxn2zg2Ja2GNMkwp2pmD78xfeEBQpp1G/ZmrLIjQz56zNEDWxvheJV5zdWVINtyQYrEf25wYpJ22G3xr9712SNC5jwcWVD6m3N7sEQ0JkJpkJVQ2ZQKMgecswPqMMD/Ke2YasKpKbmSkZZTKmKWe3d5lEbLvpry8bswrPKq9AyUnnFkn/1Pn7hoQqunpEKVYuGr7Fb+8oYhSSUzIAElQF+WXV4Boo3Xe0G1bkDhUUgtjoMbLJWgO57ZwERRKMWbWKFBTZxaedA9IUVKh5qgC3ZKAeOv46oQkUnIZS0gT0vgVcHpBVJSQooKDR/K0G+gniGYa4H+A9swwxD29xC6AgB7ODhqizlzQAJg/Qr7p92ts0m4EC7rGfuQwLJhXgClAuGrjas2lsD0ABS3G9IWoTdSqgAtA9IWiIuX5CEKAA7Zy8Ve8TOZkdweV3QSSmf6wOqxslABQgX48KDDh0wIhN4MascsuXC5imS3dNcGzUk8zTWQUosHW69ORuqZzXLCTrpegQg0+WYgVgsHXM0gHU4XVuJAssemp2IKz3tkfbJ0NWw5ktvxP6pHLkBPuGmC5NNg8A8DH6rLa8Mq/O01fC0S/vecWvW7yRMRCY5kZ01eL9NVMEXaFbU9EU08nPdLM16Alc0gGMhW5/Kd2HWCQBoNvt+no3WUprYmz6tOCD2qsmyFzCI0zRSdzBlvNPxq7TDmivhg3tgNczoOHY1XK14QjrYOkbDsQtwwtWfJ+WBsFPXvpeTRMS1sKLu/enQ3QNffrtMlefUPRvpunQttO/mHo89f3uoWtWPl/kSe0UbwtZVl8pPjwopbVcu8H7VsdNqQBimdG5+tLCgxk3GZrXcet28N0BId3UwRRcw18Pr4kH+scAPBS7d+2OCyWtnvRjCuHQWlIWLpzT5RftDGEeusF3+Q8f/ujaDbjW4o+/txRAiOQA/LXrt/iA2jzltb2B6aJ4xxxcKf/2IQLAm3x7/nHsuENk4KG23HETn7r+mOLqIAQg9u8yCOkftWjX3qxvHbVowxySyyC3Kd9tmJN0LXKN5vr/9GwVNvgX8cUAAAAASUVORK5CYII='">
+    <span class="brand-title">KOFFI STUDIO</span>
+    <span class="brand-sub">Media Engine</span>
+    <span class="brand-tag">Ecosistema multi-nicho y multi-plataforma</span>
+    <div class="util-bar">
+      <span id="live-datetime">--/--/---- --:--:--</span>
+      <div class="util-right">
+        <button id="pwa-install-btn" onclick="installPWA()">📲 INSTALAR</button>
+        <button class="btn-cfg" onclick="toggleConfig()">⚙️ CONFIG</button>
+        <span id="api-status">API: OFF</span>
       </div>
     </div>
-    <div class="header-meta">
-      <span id="live-datetime">--/--/---- --:--:--</span>
-      <button id="pwa-install-btn" style="display:none;background:#10b981;border:none;color:#000;font-size:10px;font-weight:700;padding:5px 9px;border-radius:5px;cursor:pointer;" onclick="installPWA()">INSTALAR</button>
-      <button onclick="toggleConfig()" style="background:#18181b;border:1px solid #27272a;color:#fff;font-size:10px;padding:5px 9px;border-radius:5px;cursor:pointer;">CONFIG</button>
-      <div class="status-badge"><span class="pulse-dot warn" id="dot-status"></span><span id="api-status">API: OFF</span></div>
-    </div>
   </header>
-  <!-- MODAL CONFIG -->
+
   <div id="config-box" style="display:none; background:#0e0e11; border-bottom:1px solid #27272a; padding:12px 16px;">
     <div style="max-width:600px; margin:0 auto;">
       <label class="input-label">Clave Gratuita de Google Gemini (AI Studio):</label>
       <div style="display:flex; gap:8px;">
         <input type="password" id="gemini-key" class="input-field" placeholder="AIzaSy...">
-        <button class="btn-main" style="width:auto; padding:0 14px;" onclick="guardarKey()">GUARDAR</button>
+        <button class="btn-main" style="width:auto; padding:0 14px;" onclick="guardarKey()">GUARDAR Y PROBAR</button>
       </div>
       <div style="display:flex; gap:12px; margin-top:8px;">
-        <label style="font-size:11px; color:#a1a1aa;"><input type="radio" name="gem_model" value="gemini-2.5-flash" checked> Gemini 2.5 Flash</label>
+        <label style="font-size:11px; color:#a1a1aa;"><input type="radio" name="gem_model" value="flash" checked> Flash (Rápido & $0)</label>
+        <label style="font-size:11px; color:#a1a1aa;"><input type="radio" name="gem_model" value="pro"> Pro (Mayor Razonamiento)</label>
       </div>
-      <p style="font-size:10px; color:#71717a; margin-top:4px;">Almacenamiento privado local en el navegador de tu teléfono móvil.</p>
+      <p style="font-size:10px; color:#71717a; margin-top:4px;">La llave se guarda solo en el navegador de tu teléfono.</p>
+      <button class="btn-secondary" onclick="probarConexion()">🔧 PROBAR CONEXIÓN CON GEMINI</button>
+      <pre id="diag-out" style="display:none; margin-top:8px; background:#030303; border:1px solid #18181b; border-radius:6px; padding:8px; font-size:10px; color:#d4d4d8; white-space:pre-wrap;"></pre>
     </div>
   </div>
 
   <main class="container">
-    <div class="hero-strip">
-      CENTRO DE PRODUCCIÓN MULTI-NICHO Y MULTIPLATAFORMA
-    </div>
+    <div class="marquee-wrapper"><div class="marquee-track marquee-left" id="track-1"></div></div>
+    <div class="marquee-wrapper"><div class="marquee-track marquee-right" id="track-2"></div></div>
+    <p id="estilo-activo"></p>
 
-    <!-- DOBLE CARRUSEL MULTI-ESTILO -->
-    <div class="marquee-wrapper">
-      <div class="marquee-track marquee-left">
-        <div class="style-card"><p class="style-name">🏛️ Claroscuro Romano</p><p class="style-desc">Mármol desgastado & sombras.</p></div>
-        <div class="style-card"><p class="style-name">🌆 Vaporwave 80s</p><p class="style-desc">Neón retro, púrpura y nostalgia.</p></div>
-        <div class="style-card"><p class="style-name">🕯️ Terror Psicológico</p><p class="style-desc">Luz de vela y penumbra.</p></div>
-        <div class="style-card"><p class="style-name">🎞️ Documental 35mm</p><p class="style-desc">Grano analógico retro.</p></div>
-        <div class="style-card"><p class="style-name">💥 Cómic / Pop Art</p><p class="style-desc">Tinta dura, viñetas y contraste.</p></div>
-        <div class="style-card"><p class="style-name">📈 Finanzas & Alto RPM</p><p class="style-desc">Estética sobria y ejecutiva.</p></div>
-        <div class="style-card"><p class="style-name">🏛️ Claroscuro Romano</p><p class="style-desc">Mármol desgastado & sombras.</p></div>
-        <div class="style-card"><p class="style-name">🌆 Vaporwave 80s</p><p class="style-desc">Neón retro, púrpura y nostalgia.</p></div>
-      </div>
-    </div>
-    <div class="marquee-wrapper">
-      <div class="marquee-track marquee-right">
-        <div class="style-card"><p class="style-name">📜 Archivo Histórico</p><p class="style-desc">Mapas y pergaminos antiguos.</p></div>
-        <div class="style-card"><p class="style-name">💥 Cómic / Novela Gráfica</p><p class="style-desc">Tinta dura, viñetas y contraste.</p></div>
-        <div class="style-card"><p class="style-name">🧠 Conducta Humana</p><p class="style-desc">Siluetas y psicología oscura.</p></div>
-        <div class="style-card"><p class="style-name">🎨 Pintura al Óleo</p><p class="style-desc">Pincelada renacentista.</p></div>
-        <div class="style-card"><p class="style-name">⚔️ Épica Legendaria</p><p class="style-desc">Niebla, armaduras y batallas.</p></div>
-        <div class="style-card"><p class="style-name">🌆 Vaporwave 80s</p><p class="style-desc">Neón retro, púrpura y nostalgia.</p></div>
-        <div class="style-card"><p class="style-name">📜 Archivo Histórico</p><p class="style-desc">Mapas y pergaminos antiguos.</p></div>
-        <div class="style-card"><p class="style-name">🧠 Conducta Humana</p><p class="style-desc">Siluetas y psicología oscura.</p></div>
-      </div>
-    </div>
-
-    <!-- NAVEGACIÓN -->
     <nav class="tabs-nav">
-      <button class="tab-btn active" onclick="openTab('tab-guion', this)">1. Guiones</button>
+      <button class="tab-btn active" onclick="openTab('tab-guion', this)">1. Laboratorio de Guiones</button>
       <button class="tab-btn" onclick="openTab('tab-escenas', this)">2. Escenas Visuales</button>
       <button class="tab-btn" onclick="openTab('tab-imagenes', this)">3. Generador Visual</button>
       <button class="tab-btn" onclick="openTab('tab-audio', this)">4. Motor Vocal</button>
-      <button class="tab-btn" onclick="openTab('tab-edicion', this)">5. Montaje</button>
+      <button class="tab-btn" onclick="openTab('tab-edicion', this)">5. Pautas de Montaje & Subtítulos</button>
     </nav>
 
-    <!-- PESTAÑA 1: GUION -->
     <div id="tab-guion" class="tab-content active">
       <div class="grid-workspace">
         <div class="panel-box">
           <div class="input-group">
             <label class="input-label">Nicho Objetivo:</label>
-            <select id="script-niche" class="input-field">
-              <option value="Estoicismo y Filosofía Práctica">🏛️ Estoicismo & Filosofía Práctica</option>
-              <option value="Psicología Oscura y Conducta Humana">🧠 Psicología Oscura & Conducta Humana</option>
-              <option value="Terror y Misterio Real">🕯️ Historias de Terror & Misterio</option>
-              <option value="Finanzas y Riqueza">📈 Finanzas, Economía & Alto RPM</option>
-              <option value="Historia Bélica y Civilizaciones">📜 Historia Bélica & Civilizaciones</option>
-              <option value="Desarrollo Personal y Hábitos">🌱 Desarrollo Personal & Hábitos</option>
-              <option value="Espiritualidad y Religión">🕊️ Espiritualidad & Religión</option>
-              <option value="Educación y Aprendizaje">📚 Educación & Aprendizaje</option>
-              <option value="Negocios y Emprendimiento">💼 Negocios & Emprendimiento</option>
-              <option value="Ciencia, Tecnología e Innovación">🔬 Ciencia & Tecnología</option>
-            </select>
+            <select id="script-niche" class="input-field" onchange="cambiarNicho()"></select>
           </div>
 
-          <!-- RADAR DE IDEAS INFINITAS -->
           <button class="btn-accent" id="btn-ideas" onclick="generarIdeas()">🎲 GENERAR 5 IDEAS GANADORAS</button>
           <div id="ideas-container" style="display:none; margin-bottom:10px;"></div>
 
           <div class="input-group">
             <label class="input-label">Tono de Comunicación:</label>
-            <select id="script-tone" class="input-field">
-              <option value="Confrontativo, firme, sobrio y penetrante">🔥 Confrontativo & Firme</option>
-              <option value="Cínico, irreverente y desafiante de las convenciones sociales">🏺 Cínico & Irreverente (Estilo Diógenes)</option>
-              <option value="Bofetada de realidad, directo al grano y desmitificador">⚡ Bofetada de Realidad / Despertador</option>
-              <option value="Académico, filosófico, riguroso y analítico">🎓 Académico & Filosófico</option>
-              <option value="Enigmático, oscuro, pausado y con tensión psicológica">🕯️ Misterioso & Enigmático</option>
-              <option value="Informal, cercano, como una charla honesta entre amigos">☕ Informal & Conversacional</option>
-              <option value="Épico, heroico y solemne">⚔️ Épico & Solemne</option>
-              <option value="Conciliador, comprensivo y reflexivo">🤝 Conciliador & Reflexivo</option>
-              <option value="Sarcástico, mordaz e incisivo">😏 Sarcástico & Mordaz</option>
-            </select>
+            <select id="script-tone" class="input-field"></select>
           </div>
 
           <div class="input-group">
             <label class="input-label">Tema o Ángulo Principal:</label>
-            <input type="text" id="script-topic" class="input-field" value="Nadie te debe nada: la verdad brutal que nadie quiere escuchar">
+            <input type="text" id="script-topic" class="input-field" oninput="temaAuto=false" placeholder="Escribe tu tema o toca 🎲 para recibir ideas">
           </div>
 
           <div class="input-group">
             <label class="input-label">Video de Referencia (Ingeniería Inversa):</label>
-            <input type="text" id="script-ref" class="input-field" placeholder="Pega URL o título de referencia (opcional)">
-            <p class="muted-note">Para analizar el contenido real de un video, agrega también su transcripción o un resumen. Un enlace por sí solo no garantiza acceso al video.</p>
+            <input type="text" id="script-ref" class="input-field" placeholder="Enlace de YouTube (la IA lo analiza) o un título">
           </div>
+          <p class="nota" id="ref-note">Opcional. Con un enlace de YouTube, la IA copia la mecánica de retención del video, no su contenido.</p>
 
           <div class="input-group">
             <label class="input-label">Formato de Producción:</label>
@@ -400,49 +144,40 @@
             </select>
           </div>
 
-          <button class="btn-main" id="btn-generate-script" onclick="ejecutarGemini()">GENERAR GUION COMPLETO</button>
-          <div class="action-row">
-            <button class="btn-secondary" id="btn-continue-script" onclick="continuarGuion()">CONTINUAR GUION</button>
-            <button class="btn-secondary" id="btn-stop-script" onclick="detenerGuion()">DETENER GENERACIÓN</button>
+          <button class="btn-main" id="btn-generate-script" onclick="ejecutarGemini()">⚡ GENERAR GUION COMPLETO</button>
+          <button class="btn-secondary" id="btn-alargar" style="display:none;" onclick="alargarGuion()">➕ ALARGAR (amplía el capítulo más corto)</button>
+          <button class="btn-secondary" id="btn-stop" style="display:none;" onclick="detenerGuion()">⏹ DETENER (conserva lo avanzado)</button>
+          <div style="display:flex; gap:8px;">
+            <button class="btn-secondary" onclick="copiarGuion()">📋 COPIAR TODO</button>
+            <button class="btn-secondary" onclick="descargarGuionTxt()">💾 DESCARGAR TXT</button>
           </div>
-          <div class="action-row">
-            <button class="btn-secondary" onclick="copiarGuion()">COPIAR TODO</button>
-            <button class="btn-secondary" onclick="descargarGuionTxt()">DESCARGAR TXT</button>
-          </div>
-          <p id="draft-status" class="muted-note">El avance se guarda automáticamente en este dispositivo.</p>
         </div>
 
         <div class="panel-box">
           <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
             <label class="input-label" style="color:#fff;">Guion en Tiempo Real:</label>
-            <span id="script-counter" style="font-family:monospace; font-size:11px; color:#10b981;">0 palabras</span>
+            <span id="script-counter" style="font-family:monospace; font-size:11px; color:#10b981;">0 palabras · 0 min</span>
           </div>
-          <div id="script-console" class="console-out">Toca ⚙️ CONFIG arriba para guardar tu API Key de Gemini y presiona 'Generar Guion'. Puedes tocar 'Generar 5 Ideas Ganadoras' para explorar temáticas infinitas según el nicho.</div>
+          <textarea id="script-console" class="console-out" spellcheck="true" aria-label="Editor del guion" placeholder="Tu guion aparecerá aquí. También puedes escribir o editar directamente..."></textarea>
         </div>
       </div>
     </div>
 
-    <!-- PESTAÑA 2: ESCENAS VISUALES -->
     <div id="tab-escenas" class="tab-content">
-      <div class="grid-workspace">
-        <div class="panel-box">
-          <label class="input-label" for="scene-count">Cantidad de escenas</label>
-          <select id="scene-count" class="input-field">
-            <option value="6">6 escenas maestras</option><option value="12">12 escenas</option><option value="18">18 escenas</option>
-          </select>
-          <label class="input-label" for="scene-source" style="margin-top:12px;">Texto base</label>
-          <textarea id="scene-source" class="input-field" rows="8" placeholder="Se toma automáticamente el guion de la pestaña 1. También puedes pegar aquí otro texto."></textarea>
-          <button class="btn-main" style="margin-top:10px;" id="btn-scenes" onclick="generarEscenas()">GENERAR ESCENAS VISUALES</button>
-          <p class="muted-note">Las escenas se redactan en inglés para mejorar la compatibilidad con motores de imagen. El estilo visual activo se incorpora automáticamente.</p>
-        </div>
-        <div class="panel-box">
-          <label class="input-label">Escenas y prompts</label>
-          <div id="scenes-output" class="console-out" style="height:auto;min-height:220px;">Genera escenas a partir de tu guion. Después podrás enviar cada prompt al Generador Visual.</div>
-        </div>
+      <div class="panel-box">
+        <label class="input-label">Cantidad de escenas:</label>
+        <select id="scene-count" class="input-field" style="margin-bottom:10px;">
+          <option value="6">6 escenas maestras (mínimo)</option>
+          <option value="12">12 escenas (dinámico)</option>
+          <option value="18">18 escenas (muy dinámico)</option>
+        </select>
+        <p id="scene-style-label" class="nota" style="margin:0 0 10px;"></p>
+        <button class="btn-main" id="btn-escenas" onclick="generarEscenas()">🎬 CREAR ESCENAS DESDE EL GUION</button>
+        <p id="scene-note" class="nota" style="margin:6px 0 0;">Toma el guion de la pestaña 1 y lo divide en escenas, cada una con un prompt listo para el Generador Visual.</p>
+        <div id="scenes-container" style="margin-top:12px;"></div>
       </div>
     </div>
 
-    <!-- PESTAÑA 2: VISUAL -->
     <div id="tab-imagenes" class="tab-content">
       <div class="grid-workspace">
         <div class="panel-box">
@@ -455,444 +190,761 @@
 
           <label class="input-label">Motor de Inferencia:</label>
           <select id="img-engine" class="input-field" style="margin-bottom:10px;">
-            <option value="flux">⚡ Flux (servicio externo)</option>
-            <option value="banana">🍌 Nano Banana (Gemini Image)</option>
+            <option value="flux">⚡ Flux Schnell (Render Inmediato a $0)</option>
+            <option value="banana">🍌 Nano Banana (Google · usa tu llave Gemini)</option>
             <option value="leonardo">🎨 Leonardo AI (Preset Cinemático)</option>
             <option value="midjourney">🌌 Midjourney v6 (Prompt Optimizado)</option>
           </select>
 
           <label class="input-label">Prompt Visual:</label>
-          <textarea id="img-prompt" class="input-field" rows="4">Cinematic weathered dark marble bust of Marcus Aurelius in heavy pouring dark rain, dramatic side chiaroscuro lighting, deep black background, moody atmospheric mist, 8k resolution</textarea>
+          <textarea id="img-prompt" class="input-field" rows="4">Cinematic weathered dark marble bust of Marcus Aurelius in heavy pouring dark rain, deep black background, 8k resolution</textarea>
+          <label style="display:flex; gap:6px; align-items:center; font-size:11px; color:#a1a1aa; margin-top:8px;"><input type="checkbox" id="img-use-style" checked> <span id="img-style-label">Aplicar estilo activo</span></label>
 
           <button class="btn-main" style="margin-top:10px;" onclick="generarImagen()">🎨 RENDERIZAR IMAGEN</button>
         </div>
 
         <div class="panel-box">
           <label class="input-label">Resultado Visual:</label>
-          <div id="img-loading" style="display:none; color:#10b981; font-family:monospace; font-size:11px; margin-bottom:8px;">Renderizando en alta definición...</div>
+          <div id="img-loading" style="display:none; color:#10b981; font-family:monospace; font-size:11px; margin-bottom:8px;">Renderizando...</div>
           <img id="img-result" class="image-preview" alt="Preview Visual">
-          <div id="img-info" class="console-out" style="height:140px; margin-top:10px;">Toca 'Renderizar Imagen' para generar tantas tomas como desees (6, 12 o 18 imágenes). Mantén presionada la imagen para guardarla en tu móvil.</div>
+          <div id="img-info" class="console-out" style="height:140px; margin-top:10px;">Toca 'Renderizar Imagen' para generar cada toma. Mantén presionada la imagen para guardarla en tu móvil.</div>
         </div>
       </div>
     </div>
 
-    <!-- PESTAÑA 4: MOTOR VOCAL -->
     <div id="tab-audio" class="tab-content">
       <div class="panel-box">
         <label class="input-label">Opciones para tu Voz Clonada</label>
-        
         <div class="card-item">
           <strong style="color:#fff; font-size:12px;">Vía 1: Google Colab (25 Minutos Continuos de un Tirón)</strong>
-          <p style="font-size:11px; color:#a1a1aa; margin-top:4px;">
-            Copia el guion con el botón inferior, abre VoiceStudio en Colab en una pestaña nueva, pega el texto y descarga el MP3 completo.
-          </p>
+          <p style="font-size:11px; color:#a1a1aa; margin-top:4px;">Copia el guion con el botón de la pestaña 1, abre VoiceStudio en Colab, pega el texto y descarga el MP3 completo.</p>
           <a href="https://colab.research.google.com/" target="_blank" style="text-decoration:none;">
             <button class="btn-main" style="margin-top:8px;">🚀 ABRIR GOOGLE COLAB (VOICESTUDIO)</button>
           </a>
         </div>
-
         <div class="card-item">
-          <strong style="color:#fff; font-size:12px;">Vía 2: Divisor Seguro para A2E.AI (~950 caracteres)</strong>
-          <p style="font-size:11px; color:#a1a1aa; margin-top:4px;">
-            Divide el texto por oraciones completas respetando los puntos seguidos para no cortar ideas.
-          </p>
+          <strong style="color:#fff; font-size:12px;">Vía 2: Divisor Seguro para A2E.AI (~900 caracteres)</strong>
+          <p style="font-size:11px; color:#a1a1aa; margin-top:4px;">Divide el texto por oraciones completas para no cortar ideas.</p>
           <button class="btn-secondary" onclick="trocearGuionA2E()">✂️ FRAGMENTAR GUION PARA A2E</button>
           <div id="chunks-container" style="margin-top:10px;"></div>
         </div>
       </div>
     </div>
 
-    <!-- PESTAÑA 5: PAUTAS DE MONTAJE -->
     <div id="tab-edicion" class="tab-content">
       <div class="panel-box">
         <label class="input-label">Pautas de Edición en CapCut Móvil</label>
-        
         <div class="card-item">
           <strong style="color:#10b981; font-size:12px;">📝 Configuración de Subtítulos Automáticos:</strong>
           <ul style="margin-left:18px; margin-top:6px; font-size:11px; color:#d4d4d8; line-height:1.7;">
             <li><strong>Posición:</strong> Centro exacto vertical de la pantalla (evita la barra de tiempo inferior y las zonas ciegas de Shorts/Reels).</li>
-            <li><strong>Tipografía y Color:</strong> Letra blanca pura (#FFFFFF), peso Bold, tamaño mediano (legible sin tapar el fondo).</li>
-            <li><strong>Sombra:</strong> Sombra negra sutil al 40% para legibilidad instantánea sobre claroscuro.</li>
+            <li><strong>Tipografía y Color:</strong> Letra blanca pura (#FFFFFF), peso Bold, tamaño mediano.</li>
+            <li><strong>Sombra:</strong> Sombra negra sutil al 40% para legibilidad sobre fondos oscuros.</li>
           </ul>
         </div>
-
         <div class="card-item">
           <strong style="color:#fff; font-size:12px;">🎞️ Cantidad de Imágenes y Dinamismo:</strong>
-          <p style="font-size:11px; color:#a1a1aa; margin-top:4px;">
-            El mínimo son <strong>6 imágenes maestras</strong> aplicando la regla de los 3 planos (Plano general, medio y primer plano a la mirada de la escultura con zoom lento de 30-50 segundos). Si deseas mayor dinamismo, genera <strong>12 a 18 imágenes</strong> para cambiar de plano cada 15 a 20 segundos.
-          </p>
+          <p style="font-size:11px; color:#a1a1aa; margin-top:4px;">El mínimo son <strong>6 imágenes maestras</strong> con la regla de los 3 planos (general, medio y primer plano) y zoom lento de 30-50 segundos. Para más dinamismo, usa <strong>12 a 18 imágenes</strong> y cambia de plano cada 15 a 20 segundos.</p>
         </div>
       </div>
     </div>
   </main>
 
   <script>
-    'use strict';
-    const GEMINI_DEFAULT_MODEL = 'gemini-2.5-flash';
-    const API_GAP_MS = 6000;
-    const API_TIMEOUT_MS = 45000;
-    const RETRY_DELAYS = [35000, 65000];
-    const DRAFT_KEY = 'koffi_script_draft_v2';
-    let lastApiCallTime = 0;
-    let generationStopRequested = false;
-    let activeGeneration = false;
-    let activeStyle = 'Claroscuro Romano';
-    let deferredPrompt = null;
-    let apiQueue = Promise.resolve();
+    // ===== DATOS =====
+    const NICHOS = [
+      ['Estoicismo y Filosofía Práctica', '🏛️ Estoicismo & Filosofía Práctica', 'Ej: Por qué Marco Aurelio escribía cada noche'],
+      ['Psicología Oscura y Conducta Humana', '🧠 Psicología Oscura & Conducta Humana', 'Ej: Las señales de una persona manipuladora'],
+      ['Terror y Misterio Real', '🕯️ Historias de Terror & Misterio', 'Ej: El caso sin resolver del faro abandonado'],
+      ['Finanzas y Riqueza', '📈 Finanzas, Economía & Alto RPM', 'Ej: Por qué la clase media nunca logra ahorrar'],
+      ['Historia Bélica y Civilizaciones', '📜 Historia Bélica & Civilizaciones', 'Ej: La batalla que cambió el destino de Roma'],
+      ['Inteligencia Artificial y Tecnología (explicado fácil)', '🤖 IA & Tecnología Explicada', 'Ej: Qué trabajos va a reemplazar la IA primero'],
+      ['Crimen Real y Casos Documentados', '🔎 Crimen Real & Casos Documentados', 'Ej: El robo perfecto que nadie pudo explicar'],
+      ['Historias para Dormir y Relajación', '🌙 Historias para Dormir & Relajación', 'Ej: Un viaje en tren nocturno por los Alpes'],
+      ['Mitología y Misterios Antiguos', '🔱 Mitología & Misterios Antiguos', 'Ej: Prometeo y el precio del conocimiento'],
+      ['Disciplina y Desarrollo Personal', '🔥 Disciplina & Desarrollo Personal', 'Ej: Por qué la motivación te abandona y qué hacer']
+    ];
+    const TONOS = [
+      ['Confrontativo, firme, sobrio y penetrante', '🔥 Confrontativo & Firme'],
+      ['Cínico, irreverente y desafiante de las convenciones sociales', '🏺 Cínico & Irreverente'],
+      ['Bofetada de realidad, directo al grano y desmitificador', '⚡ Bofetada de Realidad / Despertador'],
+      ['Académico, filosófico, riguroso y analítico', '🎓 Académico & Filosófico'],
+      ['Enigmático, oscuro, pausado y con tensión psicológica', '🕯️ Misterioso & Enigmático'],
+      ['Informal, cercano, como una charla honesta entre amigos', '☕ Informal & Conversacional'],
+      ['Épico, heroico y solemne', '⚔️ Épico & Solemne'],
+      ['Conciliador, comprensivo y reflexivo', '🤝 Conciliador & Reflexivo'],
+      ['Sarcástico, mordaz e incisivo', '😏 Sarcástico & Mordaz']
+    ];
+    const ESTILOS = [
+      { n: '🏛️ Claroscuro Romano', d: 'Mármol desgastado & sombras.', en: 'cinematic weathered dark marble, dramatic side chiaroscuro lighting, deep black background, moody atmospheric mist' },
+      { n: '🌆 Vaporwave 80s', d: 'Neón retro, púrpura y nostalgia.', en: 'vaporwave 80s retro aesthetic, neon purple and pink glow, synthwave grid, nostalgic atmosphere' },
+      { n: '🕯️ Terror Psicológico', d: 'Luz de vela y penumbra.', en: 'psychological horror, candlelight and deep shadows, desaturated colors, film grain' },
+      { n: '🎞️ Documental 35mm', d: 'Grano analógico retro.', en: '35mm documentary film still, analog grain, muted natural colors' },
+      { n: '💥 Cómic / Novela Gráfica', d: 'Tinta dura, viñetas y contraste.', en: 'graphic novel comic style, hard black ink, bold contrast, halftone pop art' },
+      { n: '📈 Finanzas & Alto RPM', d: 'Estética sobria y ejecutiva.', en: 'sober executive aesthetic, dark minimal, subtle gold accents' },
+      { n: '📜 Archivo Histórico', d: 'Mapas y pergaminos antiguos.', en: 'aged parchment, antique maps, historical archive look' },
+      { n: '🧠 Conducta Humana', d: 'Siluetas y psicología oscura.', en: 'dark psychology, human silhouettes, high contrast, moody lighting' },
+      { n: '🎨 Pintura al Óleo', d: 'Pincelada renacentista.', en: 'Renaissance oil painting, rich brushstrokes, dramatic warm light' },
+      { n: '⚔️ Épica Legendaria', d: 'Niebla, armaduras y batallas.', en: 'epic legendary scene, fog, armor, cinematic wide shot' }
+    ];
+    let estiloActual = 0;
+    let temaAuto = false;
 
-    const STYLE_PROMPTS = {
-      'Claroscuro Romano':'weathered classical Roman marble, dramatic chiaroscuro, deep shadows, restrained cinematic composition',
-      'Vaporwave 80s':'1980s retro-futurist vaporwave, restrained neon magenta and cyan, nostalgic cinematic atmosphere',
-      'Terror Psicológico':'psychological horror atmosphere, candlelight, oppressive shadows, subtle unsettling details',
-      'Documental 35mm':'35mm documentary photography, natural grain, authentic cinematic realism',
-      'Cómic / Pop Art':'graphic novel illustration, bold ink contours, expressive composition, controlled pop-art contrast',
-      'Finanzas & Alto RPM':'premium editorial finance photography, sober executive atmosphere, clean composition',
-      'Archivo Histórico':'historical archive aesthetic, aged documents, maps, textured paper, museum-like lighting',
-      'Conducta Humana':'cinematic human behavior study, expressive silhouettes, psychological visual symbolism',
-      'Pintura al Óleo':'Renaissance oil painting, visible brushwork, rich classical chiaroscuro',
-      'Épica Legendaria':'epic historical cinema, atmospheric mist, monumental scale, restrained dramatic lighting'
-    };
+    // ===== INTERFAZ =====
+    function construirUI() {
+      document.getElementById('script-niche').innerHTML = NICHOS.map(n => `<option value="${n[0]}">${n[1]}</option>`).join('');
+      document.getElementById('script-tone').innerHTML = TONOS.map(t => `<option value="${t[0]}">${t[1]}</option>`).join('');
+      const card = (e) => `<div class="style-card" data-i="${ESTILOS.indexOf(e)}" onclick="elegirEstilo(${ESTILOS.indexOf(e)})"><p class="style-name">${e.n}</p><p class="style-desc">${e.d}</p></div>`;
+      const fila = (arr) => arr.concat(arr).map(card).join('');
+      document.getElementById('track-1').innerHTML = fila(ESTILOS.slice(0, 5));
+      document.getElementById('track-2').innerHTML = fila(ESTILOS.slice(5));
+      cambiarNicho();
+      elegirEstilo(0);
+    }
 
-    const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-    const el = id => document.getElementById(id);
-    const wordCount = text => (text.trim().match(/\S+/g) || []).length;
-    const getApiKey = () => localStorage.getItem('koffi_gemini_key') || '';
-    const getModel = () => document.querySelector('input[name="gem_model"]:checked')?.value || GEMINI_DEFAULT_MODEL;
+    function elegirEstilo(i) {
+      estiloActual = i;
+      document.querySelectorAll('.style-card').forEach(c => c.classList.toggle('active', Number(c.dataset.i) === i));
+      const e = ESTILOS[i];
+      document.getElementById('estilo-activo').textContent = `Estilo visual activo: ${e.n} · se aplica a Escenas e Imágenes`;
+      document.getElementById('scene-style-label').textContent = `Estilo visual: ${e.n} (cámbialo tocando una tarjeta del carrusel de arriba)`;
+      document.getElementById('img-style-label').textContent = `Aplicar estilo activo: ${e.n}`;
+    }
 
+    function cambiarNicho() {
+      const v = document.getElementById('script-niche').value;
+      const n = NICHOS.find(x => x[0] === v);
+      const t = document.getElementById('script-topic');
+      t.placeholder = n ? n[2] : 'Escribe tu tema';
+      if (temaAuto) { t.value = ''; temaAuto = false; }
+      const ic = document.getElementById('ideas-container');
+      ic.style.display = 'none';
+      ic.innerHTML = '';
+    }
+
+    function openTab(id, btn) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    function actualizarRelacionAspecto() {
+      const fmt = document.getElementById('script-format').value;
+      const ratio = document.getElementById('img-ratio');
+      if (fmt === 'vertical_short') ratio.value = '9:16';
+      else if (fmt === 'facebook_square') ratio.value = '1:1';
+      else ratio.value = '16:9';
+    }
+
+    // ===== RELOJ, INSTALACIÓN, SERVICE WORKER =====
     function updateClock() {
-      const now = new Date();
-      const pad = n => String(n).padStart(2, '0');
-      el('live-datetime').textContent = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+      const el = document.getElementById('live-datetime');
+      if (!el) return;
+      const n = new Date();
+      const p = (v) => String(v).padStart(2, '0');
+      el.textContent = `${p(n.getDate())}/${p(n.getMonth() + 1)}/${n.getFullYear()}  ${p(n.getHours())}:${p(n.getMinutes())}:${p(n.getSeconds())}`;
     }
-    updateClock(); setInterval(updateClock, 1000);
+    setInterval(updateClock, 1000);
+    updateClock();
 
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const btn = document.getElementById('pwa-install-btn');
+      if (btn) btn.style.display = 'inline-block';
+    });
+    function installPWA() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(() => {
+          deferredPrompt = null;
+          document.getElementById('pwa-install-btn').style.display = 'none';
+        });
+      }
+    }
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+    }
+
+    // ===== AYUDAS =====
+    function esc(t) {
+      return String(t == null ? '' : t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+    const contarPalabras = (t) => (t.trim() ? t.trim().split(/\s+/).length : 0);
+
+    // Detecta si la referencia es un enlace de YouTube (que la IA sí puede analizar) o solo texto
+    function parseRef(ref) {
+      const r = (ref || '').trim();
+      if (!r) return { tipo: 'ninguna' };
+      const m = r.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:[^\s]*&)?v=|shorts\/|live\/|embed\/))([\w-]{11})/);
+      if (m) return { tipo: 'youtube', url: 'https://www.youtube.com/watch?v=' + m[1] };
+      return { tipo: 'texto' };
+    }
+
+    // ===== LLAVE Y ESTADO DE API =====
+    function marcarApi(ok) {
+      const st = document.getElementById('api-status');
+      st.textContent = ok ? 'API: ON' : 'API: OFF';
+      st.style.color = ok ? '#10b981' : '#ef4444';
+    }
     function checkKey() {
-      const connected = getApiKey().length > 10;
-      el('api-status').textContent = connected ? 'API: ON' : 'API: OFF';
-      el('api-status').style.color = connected ? '#10b981' : '#ef4444';
-      el('dot-status').className = connected ? 'pulse-dot' : 'pulse-dot warn';
+      const k = localStorage.getItem('koffi_gemini_key');
+      marcarApi(!!(k && k.length > 10));
     }
-    checkKey();
-
     function toggleConfig() {
-      const box = el('config-box');
-      box.style.display = getComputedStyle(box).display === 'none' ? 'block' : 'none';
-      el('gemini-key').value = getApiKey();
+      const b = document.getElementById('config-box');
+      b.style.display = b.style.display === 'none' ? 'block' : 'none';
+      const k = localStorage.getItem('koffi_gemini_key');
+      if (k) document.getElementById('gemini-key').value = k;
     }
     function guardarKey() {
-      const key = el('gemini-key').value.trim();
-      if (!key) { alert('Ingresa una clave válida de Gemini.'); return; }
-      localStorage.setItem('koffi_gemini_key', key);
-      checkKey(); el('config-box').style.display = 'none';
-      alert('Clave guardada únicamente en este dispositivo.');
-    }
-    function openTab(id, button) {
-      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.toggle('active', tab.id === id));
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn === button));
-    }
-    function actualizarRelacionAspecto() {
-      const format = el('script-format').value;
-      el('img-ratio').value = format === 'vertical_short' ? '9:16' : format === 'facebook_square' ? '1:1' : '16:9';
+      const k = document.getElementById('gemini-key').value.trim();
+      if (!k) { alert('Pega primero tu llave de Gemini.'); return; }
+      localStorage.setItem('koffi_gemini_key', k);
+      checkKey();
+      probarConexion();
     }
 
-    function getGeminiEndpoint(model=getModel()) {
-      return `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(getApiKey())}`;
-    }
-    function extractText(data) {
-      const parts = data?.candidates?.[0]?.content?.parts || [];
-      return parts.filter(p => typeof p.text === 'string').map(p => p.text).join('\n').trim();
-    }
-    function extractJson(text) {
-      const cleaned = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
-      try { return JSON.parse(cleaned); } catch (_) {}
-      const firstArray = cleaned.indexOf('['), lastArray = cleaned.lastIndexOf(']');
-      if (firstArray >= 0 && lastArray > firstArray) return JSON.parse(cleaned.slice(firstArray, lastArray+1));
-      const firstObject = cleaned.indexOf('{'), lastObject = cleaned.lastIndexOf('}');
-      if (firstObject >= 0 && lastObject > firstObject) return JSON.parse(cleaned.slice(firstObject, lastObject+1));
-      throw new Error('Gemini no devolvió un JSON válido. Intenta nuevamente.');
-    }
-    async function waitForApiGap() {
-      const remaining = API_GAP_MS - (Date.now() - lastApiCallTime);
-      if (remaining > 0) await sleep(remaining);
-    }
-    async function performGeminiRequest(prompt, options={}) {
-      if (!getApiKey()) throw new Error('Falta la clave de Gemini. Abre CONFIG y guárdala.');
-      const model = options.model || getModel();
-      for (let attempt=0; attempt<=RETRY_DELAYS.length; attempt++) {
-        await waitForApiGap();
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
+    // ===== LLAMADA A GEMINI =====
+    async function callGemini(prompt, onStatus, videoUrl) {
+      const key = localStorage.getItem('koffi_gemini_key');
+      const choice = document.querySelector('input[name="gem_model"]:checked');
+      const wantPro = choice && choice.value === 'pro';
+      const models = wantPro
+        ? ['gemini-pro-latest', 'gemini-2.5-pro', 'gemini-flash-latest']
+        : ['gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.0-flash'];
+      const limite = videoUrl ? 120000 : 45000;
+      const partes = videoUrl ? [{ fileData: { fileUri: videoUrl } }, { text: prompt }] : [{ text: prompt }];
+      let lastErr = 'Sin respuesta';
+      for (const m of models) {
+        let to;
         try {
-          lastApiCallTime = Date.now();
-          const body = { contents:[{ role:'user', parts:[{text:prompt}] }], generationConfig:{ temperature:0.85 } };
-          if (options.imageOutput) body.generationConfig.responseModalities = ['TEXT','IMAGE'];
-          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(getApiKey())}`, {
-            method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body), signal:controller.signal
+          if (onStatus) onStatus(m);
+          const ctl = new AbortController();
+          to = setTimeout(() => ctl.abort(), limite);
+          const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + m + ':generateContent', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+            body: JSON.stringify({ contents: [{ parts: partes }] }),
+            signal: ctl.signal
           });
-          if (response.status === 429 && attempt < RETRY_DELAYS.length) {
-            await response.text(); await sleep(RETRY_DELAYS[attempt]); continue;
+          const data = await res.json();
+          clearTimeout(to);
+          if (data.error) {
+            lastErr = data.error.message || 'Error de la API';
+            if (res.status === 429) {
+              const er = new Error(lastErr);
+              er.rateLimited = true;
+              er.daily = /per ?day|daily/i.test(lastErr);
+              throw er;
+            }
+            if (res.status === 400 || res.status === 401 || res.status === 403) {
+              if (/api key|permission|unauthenticated/i.test(lastErr)) marcarApi(false);
+              break;
+            }
+            continue;
           }
-          if (!response.ok) {
-            const detail = (await response.text()).slice(0,700);
-            if (response.status === 429) throw new Error('Google indica que se alcanzó el límite de solicitudes o la cuota disponible. El avance quedó guardado; intenta más tarde.');
-            if (response.status === 400 || response.status === 403) throw new Error(`Google rechazó la solicitud (${response.status}). Revisa la clave, el acceso al modelo y la configuración de AI Studio. ${detail}`);
-            throw new Error(`Error de Gemini ${response.status}: ${detail}`);
-          }
-          const data = await response.json();
-          if (data.promptFeedback?.blockReason) throw new Error(`La solicitud fue bloqueada: ${data.promptFeedback.blockReason}`);
-          return data;
-        } catch (error) {
-          if (error.name === 'AbortError') throw new Error('Gemini superó el tiempo máximo de 45 segundos. El avance anterior se conserva.');
-          throw error;
-        } finally { clearTimeout(timeout); }
+          const ps = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts;
+          const text = ps ? ps.map(p => p.text || '').join('') : '';
+          if (text) { marcarApi(true); return { text, model: m }; }
+          lastErr = 'La respuesta vino vacía (posible bloqueo de seguridad). Cambia el tema.';
+        } catch (e) {
+          clearTimeout(to);
+          if (e.rateLimited) throw e;
+          lastErr = e.name === 'AbortError'
+            ? 'Google tardó más de ' + (limite / 1000) + ' segundos en responder (' + m + ')'
+            : 'Sin conexión o bloqueo de red: ' + e.message;
+        }
       }
-      throw new Error('No fue posible completar la solicitud.');
-    }
-    // Cola global: impide que dos pestañas disparen llamadas Gemini al mismo tiempo.
-    function geminiRequest(prompt, options={}) {
-      const task = apiQueue.then(() => performGeminiRequest(prompt, options));
-      apiQueue = task.catch(() => {});
-      return task;
+      throw new Error(lastErr);
     }
 
-    function getScriptSettings() {
-      return {
-        topic:el('script-topic').value.trim(), niche:el('script-niche').value,
-        tone:el('script-tone').value, reference:el('script-ref').value.trim(),
-        format:el('script-format').value, model:getModel()
-      };
-    }
-    function saveDraft(draft) {
-      draft.updatedAt = new Date().toISOString();
-      localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
-      el('draft-status').textContent = `Avance guardado en este dispositivo · ${draft.completed}/${draft.total} capítulos completos.`;
-    }
-    function loadDraft() {
-      try { return JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); } catch (_) { return null; }
-    }
-    function renderDraft(draft) {
-      const text = draft.chapters.map(ch => ch.text).filter(Boolean).join('\n\n');
-      el('script-console').textContent = text || 'El proyecto está guardado. Presiona CONTINUAR GUION para retomarlo.';
-      el('script-counter').textContent = `${wordCount(text)} palabras`;
-      el('draft-status').textContent = `Proyecto guardado · ${draft.completed}/${draft.total} capítulos completos.`;
-    }
-    function buildLanguageRule() {
-      return 'Escribe exclusivamente en español latinoamericano neutro. Evita por completo vocabulario, giros, conjugaciones y modismos propios de España. No uses vosotros, móvil, ordenador, coche, vale, tío, chaval ni expresiones peninsulares. Usa formas naturales para América Latina: ustedes, teléfono o celular, computadora, auto o carro. No uses voseo. Mantén el tuteo.';
-    }
-    function buildReferenceRule(ref) {
-      return ref ? `Referencia proporcionada por el usuario: ${ref}. Si solo recibes un enlace y no puedes acceder a su contenido, no afirmes haber visto el video: trabaja únicamente con los datos disponibles y solicita título o resumen cuando sea indispensable. No inventes detalles de la referencia.` : '';
+    // Barandilla: si Google dice "vas muy rápido" (429), espera y reintenta
+    const PAUSA_ENTRE_LLAMADAS_MS = 6000;
+    async function callGeminiSafe(prompt, onWait, onStatus, videoUrl) {
+      const esperas = videoUrl ? [] : [35, 65];
+      for (let intento = 0; ; intento++) {
+        try {
+          return await callGemini(prompt, onStatus, videoUrl);
+        } catch (e) {
+          if (!e.rateLimited) throw e;
+          if (e.daily) throw new Error('Se agotó el límite DIARIO gratis de Gemini. Tu avance quedó guardado: vuelve a tocar el botón mañana y continúa donde quedó.');
+          if (intento >= esperas.length) throw new Error('Google sigue pidiendo calma. Tu avance quedó guardado: espera unos minutos y toca el botón para continuar.');
+          for (let t = esperas[intento]; t > 0; t--) {
+            if (onWait) onWait(t);
+            await sleep(1000);
+          }
+        }
+      }
     }
 
+    // ===== DIAGNÓSTICO =====
+    async function probarConexion() {
+      const out = document.getElementById('diag-out');
+      out.style.display = 'block';
+      const key = document.getElementById('gemini-key').value.trim() || localStorage.getItem('koffi_gemini_key');
+      if (!key) { out.textContent = 'Primero pega tu llave y toca GUARDAR Y PROBAR.'; marcarApi(false); return; }
+      const BASE = 'https://generativelanguage.googleapis.com/v1beta';
+      const L = [];
+      const show = () => { out.textContent = L.join('\n'); };
+      async function pedir(url, opts, ms) {
+        const ctl = new AbortController();
+        const t0 = Date.now();
+        const to = setTimeout(() => ctl.abort(), ms);
+        try {
+          const r = await fetch(url, Object.assign({}, opts, { signal: ctl.signal }));
+          const d = await r.json().catch(() => ({}));
+          return { status: r.status, data: d, ms: Date.now() - t0 };
+        } catch (e) {
+          return { error: e.name === 'AbortError' ? 'no respondió en ' + (ms / 1000) + ' s' : e.message, ms: Date.now() - t0 };
+        } finally { clearTimeout(to); }
+      }
+      L.push('1) Revisando la llave...'); show();
+      const r1 = await pedir(BASE + '/models?pageSize=100', { headers: { 'x-goog-api-key': key } }, 15000);
+      if (r1.error) { L.push('✗ No hay conexión con Google: ' + r1.error, '→ Es la red o el bloqueo del navegador, no el código.'); show(); return; }
+      if (r1.status !== 200) {
+        marcarApi(false);
+        L.push('✗ Google respondió ' + r1.status + ': ' + ((r1.data.error && r1.data.error.message) || 'error'), '→ Es la LLAVE. Crea o copia una en aistudio.google.com/apikey.');
+        show(); return;
+      }
+      marcarApi(true);
+      const nombres = (r1.data.models || []).map(m => m.name.replace('models/', '')).filter(n => /flash/.test(n) && !/image|tts|live|audio|embedding/.test(n));
+      L.push('✓ La llave es válida (' + r1.ms + ' ms).', 'Modelos flash: ' + (nombres.slice(0, 6).join(', ') || 'ninguno')); show();
+      L.push('2) Pidiendo una respuesta de prueba (puede tardar)...'); show();
+      const r2 = await pedir(BASE + '/models/gemini-flash-latest:generateContent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+        body: JSON.stringify({ contents: [{ parts: [{ text: 'Responde solo con la palabra: LISTO' }] }] })
+      }, 45000);
+      if (r2.error) { L.push('✗ La respuesta no llegó: ' + r2.error, '→ Google está lento o tu red se cortó. Reintenta.'); show(); return; }
+      if (r2.status === 429) { L.push('✗ Límite de uso gratis alcanzado (429).', '→ Espera unos minutos; si persiste, se acabó la cuota diaria.'); show(); return; }
+      if (r2.status !== 200) { L.push('✗ Error ' + r2.status + ': ' + ((r2.data.error && r2.data.error.message) || '')); show(); return; }
+      const p = r2.data.candidates && r2.data.candidates[0] && r2.data.candidates[0].content && r2.data.candidates[0].content.parts;
+      L.push('✓ Gemini respondió en ' + (r2.ms / 1000).toFixed(1) + ' s: ' + (p ? p.map(x => x.text || '').join('').trim() : '(vacío)'), '→ Todo bien de tu lado.');
+      show();
+    }
+
+    // ===== IDEAS GANADORAS =====
     async function generarIdeas() {
-      const btn=el('btn-ideas'), box=el('ideas-container');
-      btn.disabled=true; btn.textContent='CONSULTANDO GEMINI…'; box.style.display='block'; box.textContent='Preparando cinco propuestas…';
+      const key = localStorage.getItem('koffi_gemini_key');
+      if (!key) { alert('Ingresa tu llave de Gemini en ⚙️ CONFIG.'); toggleConfig(); return; }
+      const niche = document.getElementById('script-niche').value;
+      const btn = document.getElementById('btn-ideas');
+      const container = document.getElementById('ideas-container');
+      btn.disabled = true;
+      btn.textContent = "⏳ EXPLORANDO IDEAS GANADORAS...";
+      container.style.display = "block";
+      container.innerHTML = "<p style='font-size:10px; color:#10b981; font-family:monospace;'>Conectando con Gemini...</p>";
+      const prompt = `Actúa como estratega de contenido viral en YouTube para el nicho: "${niche}".
+Genera exactamente 5 ideas de videos de alto impacto, psicológicamente irresistibles y con alto CTR.
+Devuelve ÚNICAMENTE un arreglo JSON válido con el siguiente formato exacto, sin explicaciones ni markdown adicional:
+[{"titulo": "Título de alto impacto", "gancho": "El gancho de los primeros 15 segundos"}]`;
       try {
-        const niche=el('script-niche').value;
-        const prompt=`Propón exactamente 5 ideas originales de video para el nicho: ${niche}. Español latinoamericano neutro, sin modismos de España y sin voseo. Devuelve únicamente JSON válido como arreglo de objetos con las claves titulo y gancho. No uses Markdown.`;
-        const data=await geminiRequest(prompt); const ideas=extractJson(extractText(data));
-        if (!Array.isArray(ideas) || ideas.length===0) throw new Error('La respuesta no contiene una lista de ideas.');
-        box.innerHTML='';
-        ideas.slice(0,5).forEach((item,i)=>{
-          const card=document.createElement('button'); card.type='button'; card.className='idea-card';
-          const title=document.createElement('div'); title.className='idea-title'; title.textContent=`${i+1}. ${item.titulo||'Idea sin título'}`;
-          const hook=document.createElement('div'); hook.className='idea-hook'; hook.textContent=item.gancho||'';
-          card.append(title,hook); card.addEventListener('click',()=>{el('script-topic').value=item.titulo||''; saveCurrentForm();}); box.appendChild(card);
+        const aviso = (t) => { container.innerHTML = `<p style='font-size:10px; color:#10b981; font-family:monospace;'>${t}</p>`; };
+        const r = await callGeminiSafe(prompt,
+          (t) => aviso(`Google pidió calma. Reintentando en ${t} s...`),
+          (m) => aviso(`Consultando a ${esc(m)}... (máx. 45 s)`));
+        const raw = r.text.replace(/```json/gi, '').replace(/```/g, '').trim();
+        const i1 = raw.indexOf('['), i2 = raw.lastIndexOf(']');
+        if (i1 === -1 || i2 === -1) throw new Error('La IA no devolvió una lista válida. Intenta de nuevo.');
+        const ideas = JSON.parse(raw.slice(i1, i2 + 1));
+        container.innerHTML = "";
+        ideas.forEach((item, idx) => {
+          const card = document.createElement('div');
+          card.className = 'idea-card';
+          card.innerHTML = `<div class="idea-title">#${idx + 1}: ${esc(item.titulo)}</div><div class="idea-hook">${esc(item.gancho)}</div>`;
+          card.onclick = () => {
+            document.getElementById('script-topic').value = item.titulo;
+            temaAuto = true;
+            container.querySelectorAll('.idea-card').forEach(x => x.style.borderColor = '#27272a');
+            card.style.borderColor = '#10b981';
+          };
+          container.appendChild(card);
         });
-      } catch(error) { box.textContent=`No se pudieron generar las ideas: ${error.message}`; }
-      finally { btn.disabled=false; btn.textContent='GENERAR 5 IDEAS GANADORAS'; }
-    }
-
-    function makeLongChapterPrompt(settings, chapterNumber, previousSummary='') {
-      const chapters=[
-        'Capítulo 1 — Apertura contundente, tesis central y primera tensión. Incluye introducción sin saludos.',
-        'Capítulo 2 — Primera profundización: desarrolla el primer conflicto y sus consecuencias concretas.',
-        'Capítulo 3 — Segunda profundización: desmonta errores comunes y aumenta la tensión argumental.',
-        'Capítulo 4 — Tercera profundización: presenta ejemplos, contrastes y consecuencias prácticas.',
-        'Capítulo 5 — Punto de máxima presión: confronta las excusas y desarrolla la transformación de perspectiva.',
-        'Capítulo 6 — Cierre integrado, conclusión contundente y reflexión final. No agregues llamadas a la acción.'
-      ];
-      return `Actúa como guionista y productor editorial de Koffi Studio.\nNicho: ${settings.niche}\nTema: ${settings.topic}\nTono: ${settings.tone}\n${buildLanguageRule()}\n${buildReferenceRule(settings.reference)}\n\nEscribe ${chapters[chapterNumber-1]}\nExtensión: entre 600 y 700 palabras para este capítulo. El guion final debe superar aproximadamente 3.300 palabras y sostener una duración estimada de 20 a 25 minutos. Mantén continuidad narrativa, evita repetir ideas y no incluyas notas para el productor.\nContexto de continuidad de lo ya escrito: ${previousSummary||'Este es el inicio del guion.'}\nEntrega únicamente el texto del capítulo ${chapterNumber} de 6, listo para locución. No adelantes capítulos posteriores.`;
-    }
-    async function runLongDraft(draft) {
-      if (activeGeneration) return;
-      activeGeneration=true; generationStopRequested=false;
-      const btn=el('btn-generate-script'); btn.disabled=true; el('btn-continue-script').disabled=true; el('btn-stop-script').disabled=false;
-      try {
-        while (draft.completed < draft.total && !generationStopRequested) {
-          const n=draft.completed+1;
-          el('draft-status').textContent=`Generando capítulo ${n} de ${draft.total}. El avance se guarda al terminar cada capítulo.`;
-          const previous=draft.chapters.map(c=>c.text).filter(Boolean).join('\n').slice(-3500);
-          const data=await geminiRequest(makeLongChapterPrompt(draft.settings,n,previous),{model:draft.settings.model||GEMINI_DEFAULT_MODEL});
-          const text=extractText(data);
-          if (!text) throw new Error(`Gemini devolvió vacío en el capítulo ${n}.`);
-          draft.chapters[n-1]={number:n,text}; draft.completed=n; saveDraft(draft); renderDraft(draft);
-        }
-        if (generationStopRequested) el('draft-status').textContent='Generación detenida. Tu avance quedó guardado; puedes continuar cuando quieras.';
-        else el('draft-status').textContent='Guion completo. Todos los capítulos están guardados en este dispositivo.';
-      } catch(error) {
-        saveDraft(draft); renderDraft(draft);
-        el('draft-status').textContent=`La generación se interrumpió: ${error.message} El avance está guardado; puedes continuar más tarde.`;
+      } catch (err) {
+        container.innerHTML = `<p style='font-size:10px; color:#f59e0b;'>Error al explorar ideas: ${esc(err.message)}. Puedes escribir el tema manualmente.</p>`;
       } finally {
-        activeGeneration=false; btn.disabled=false; btn.textContent='GENERAR GUION COMPLETO';
-        el('btn-continue-script').disabled=false; el('btn-stop-script').disabled=true;
+        btn.disabled = false;
+        btn.textContent = "🎲 GENERAR 5 IDEAS GANADORAS";
       }
     }
+
+    // ===== GUION (por capítulos para llegar a 20-25 min) =====
+    const PALABRAS_POR_MIN = 145;
+    let detener = false;
+    let avance = null;
+    let guionListo = null;
+
+    function detenerGuion() { detener = true; }
+
+    function actualizarContador(texto) {
+      const w = contarPalabras(texto);
+      document.getElementById('script-counter').textContent = `${w} palabras · ≈ ${(w / PALABRAS_POR_MIN).toFixed(1)} min`;
+      return w;
+    }
+
     async function ejecutarGemini() {
-      const settings=getScriptSettings();
-      if (!settings.topic) { alert('Escribe un tema antes de generar el guion.'); return; }
-      if (!getApiKey()) { toggleConfig(); alert('Primero guarda tu clave de Gemini en CONFIG.'); return; }
-      if (activeGeneration) return;
-      if (settings.format==='youtube_long') {
-        const existing=loadDraft();
-        if (existing && existing.completed<existing.total && existing.settings.topic===settings.topic) {
-          if (!confirm('Ya existe un guion en proceso para este tema. ¿Quieres continuar ese proyecto?')) return;
-          await runLongDraft(existing); return;
+      const key = localStorage.getItem('koffi_gemini_key');
+      if (!key) { alert('Ingresa tu llave de Gemini en ⚙️ CONFIG.'); toggleConfig(); return; }
+      const topic = document.getElementById('script-topic').value.trim();
+      const niche = document.getElementById('script-niche').value;
+      const tone = document.getElementById('script-tone').value;
+      const ref = document.getElementById('script-ref').value.trim();
+      const formatVal = document.getElementById('script-format').value;
+      const c = document.getElementById('script-console');
+      const btn = document.getElementById('btn-generate-script');
+      const stopBtn = document.getElementById('btn-stop');
+      const nota = document.getElementById('ref-note');
+      if (!topic) { alert('Escribe un tema o toca 🎲 para elegir una idea.'); return; }
+
+      const refInfo = parseRef(ref);
+      const refTexto = refInfo.tipo === 'texto'
+        ? `Referencia de estructura y gancho (título o descripción del usuario): "${ref}". Úsala como inspiración de ritmo y retención, pero escribe contenido 100% original.`
+        : '';
+      const refVideo = `Se adjunta un video de referencia. Analiza cómo abre, cómo estructura el contenido, su ritmo, sus ganchos y los giros que retienen al espectador, y replica ESA mecánica, pero con contenido 100% original sobre el tema indicado (no copies frases ni datos).`;
+      const base = `Nicho: ${niche}\nTema principal: ${topic}\nTONO DE VOZ (obligatorio; debe notarse en el vocabulario, el ritmo de las frases y la forma de dirigirte al espectador): ${tone}\n${refTexto}`;
+
+      // Si hay enlace de YouTube, intenta que Gemini vea el video; si falla, sigue sin él
+      async function llamarConRef(conVideo, sinVideo, onWait) {
+        if (refInfo.tipo !== 'youtube') return callGeminiSafe(sinVideo, onWait);
+        nota.textContent = '🎬 Analizando el video de referencia (puede tardar)...';
+        try {
+          const r = await callGeminiSafe(conVideo, onWait, null, refInfo.url);
+          nota.textContent = '🎬 Video de referencia analizado por Gemini.';
+          return r;
+        } catch (e) {
+          nota.textContent = '⚠️ No pude analizar ese video (' + e.message.slice(0, 90) + '). Seguí solo con tu tema y tono.';
+          return callGeminiSafe(sinVideo, onWait);
         }
-        const draft={settings,total:6,completed:0,chapters:[],createdAt:new Date().toISOString()};
-        saveDraft(draft); renderDraft(draft); await runLongDraft(draft); return;
       }
-      const btn=el('btn-generate-script'); btn.disabled=true; btn.textContent='GENERANDO…';
+
+      detener = false;
+      btn.disabled = true;
+      document.getElementById('btn-alargar').style.display = 'none';
+      stopBtn.style.display = 'block';
+      c.dataset.ready = '';
+
       try {
-        const rules=settings.format==='vertical_short'
-          ? 'Formato vertical breve de hasta 160 palabras, gancho inmediato, desarrollo directo y cierre contundente.'
-          : 'Video cuadrado para Facebook, de 500 a 800 palabras, enfoque reflexivo y párrafos claros.';
-        const prompt=`Escribe un guion original. Nicho: ${settings.niche}. Tema: ${settings.topic}. Tono: ${settings.tone}. ${buildLanguageRule()} ${buildReferenceRule(settings.reference)} ${rules} Entrega solo el guion final, sin explicaciones.`;
-        const data=await geminiRequest(prompt); const text=extractText(data); if(!text) throw new Error('La respuesta llegó vacía.');
-        el('script-console').textContent=text; el('script-counter').textContent=`${wordCount(text)} palabras`;
-        saveDraft({settings,total:1,completed:1,chapters:[{number:1,text}],createdAt:new Date().toISOString()});
-      } catch(error) { el('draft-status').textContent=`No se pudo generar: ${error.message}`; }
-      finally { btn.disabled=false; btn.textContent='GENERAR GUION COMPLETO'; }
-    }
-    async function continuarGuion() {
-      const draft=loadDraft();
-      if (!draft) { alert('Todavía no hay un proyecto guardado.'); return; }
-      if (draft.completed>=draft.total) { renderDraft(draft); alert('Este guion ya está completo.'); return; }
-      await runLongDraft(draft);
-    }
-    function detenerGuion() { generationStopRequested=true; el('btn-stop-script').disabled=true; el('draft-status').textContent='Deteniendo después de la solicitud actual…'; }
-    function saveCurrentForm() { localStorage.setItem('koffi_form_state',JSON.stringify(getScriptSettings())); }
-    function restoreForm() {
-      try { const s=JSON.parse(localStorage.getItem('koffi_form_state')||'null'); if(!s)return;
-        if(s.topic!==undefined)el('script-topic').value=s.topic;
-        if(s.niche)el('script-niche').value=s.niche; if(s.tone)el('script-tone').value=s.tone;
-        if(s.reference!==undefined)el('script-ref').value=s.reference; if(s.format)el('script-format').value=s.format;
-      } catch(_){}
-      const d=loadDraft(); if(d)renderDraft(d);
-    }
-    ['script-topic','script-niche','script-tone','script-ref','script-format'].forEach(id=>el(id).addEventListener('change',saveCurrentForm));
-    restoreForm();
-    try { const savedScenes=JSON.parse(localStorage.getItem('koffi_scenes_data')||'null'); if(Array.isArray(savedScenes))renderScenes(savedScenes); } catch(_) {}
-    if(localStorage.getItem('koffi_scene_source')) el('scene-source').value=localStorage.getItem('koffi_scene_source');
-    if(localStorage.getItem('koffi_scene_count')) el('scene-count').value=localStorage.getItem('koffi_scene_count');
-    el('btn-stop-script').disabled=true;
+        if (formatVal !== 'youtube_long') {
+          btn.textContent = "⏳ REDACTANDO GUION...";
+          c.value = "Conectando con Gemini...";
+          const reglas = formatVal === 'vertical_short'
+            ? `Formato: Short / Reel / TikTok (60 segundos). Gancho de 3 segundos que corte el scroll, argumento veloz sin pausas y remate final claro. Máximo 160 palabras.`
+            : `Formato: Video para Facebook. Estructura reflexiva cotidiana, párrafos breves, alta resonancia emocional sobre relaciones y conducta.`;
+          const pc = `Actúa como guionista senior y productor audiovisual de Koffi Studio.\n${base}\n${reglas}\nNo agregues introducciones meta ni explicaciones técnicas. Entrega directamente el guion listo para ser locutado, sin títulos ni marcas, solo texto corrido.`;
+          const r = await llamarConRef(pc + '\n' + refVideo, pc,
+            (t) => { c.value = `Google pidió calma. Reintentando en ${t} s...`; });
+          c.value = r.text;
+          actualizarContador(r.text);
+          c.dataset.ready = '1';
+          return;
+        }
 
-    async function copyText(text) {
-      if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(text); return true; }
-      const area=document.createElement('textarea');area.value=text;area.style.position='fixed';area.style.opacity='0';document.body.appendChild(area);area.select();
-      const ok=document.execCommand('copy');area.remove();return ok;
+        const llave = `${niche}|${topic}|${tone}|${ref}`;
+        if (!avance || avance.llave !== llave) avance = { llave, esquema: null, capitulos: [] };
+        const esperando = (t) => { c.value = (avance.capitulos.join('\n\n') + `\n\n⏳ Google pidió calma. Reintentando en ${t} s...`).trim(); };
+
+        if (!avance.esquema) {
+          btn.textContent = "⏳ DISEÑANDO ESQUEMA (1/7)...";
+          c.value = "Diseñando el esquema de 6 capítulos...";
+          const pe = `Actúa como guionista senior de YouTube.\n${base}\nDiseña el esquema de un video de 22 minutos en exactamente 6 capítulos que se encadenan, cada uno con un giro o tensión que obligue a seguir viendo. Devuelve ÚNICAMENTE un arreglo JSON válido, sin markdown: [{"titulo":"...","resumen":"qué se cuenta en este capítulo, en 2 frases"}]`;
+          const r = await llamarConRef(pe + '\n' + refVideo, pe, esperando);
+          const t = r.text.replace(/```json/gi, '').replace(/```/g, '');
+          const i1 = t.indexOf('['), i2 = t.lastIndexOf(']');
+          if (i1 === -1 || i2 === -1) throw new Error('No pude armar el esquema. Intenta de nuevo.');
+          const esq = JSON.parse(t.slice(i1, i2 + 1));
+          if (!Array.isArray(esq) || esq.length < 3) throw new Error('El esquema vino incompleto. Intenta de nuevo.');
+          avance.esquema = esq.slice(0, 6);
+          await sleep(PAUSA_ENTRE_LLAMADAS_MS);
+        }
+
+        const total = avance.esquema.length;
+        const listaEsquema = avance.esquema.map((e, k) => `${k + 1}. ${e.titulo}: ${e.resumen}`).join('\n');
+        for (let n = avance.capitulos.length; n < total; n++) {
+          if (detener) { c.value = avance.capitulos.join('\n\n') + '\n\n⏹ Detenido. Toca GENERAR para continuar desde el capítulo ' + (n + 1) + '.'; break; }
+          btn.textContent = `⏳ CAPÍTULO ${n + 1} DE ${total} (${n + 2}/${total + 1})...`;
+          c.value = (avance.capitulos.join('\n\n') + `\n\n✍️ Escribiendo capítulo ${n + 1} de ${total}: ${avance.esquema[n].titulo}...`).trim();
+          const previo = avance.capitulos.length ? avance.capitulos[avance.capitulos.length - 1].split(/\s+/).slice(-70).join(' ') : '';
+          const esPrimero = n === 0, esUltimo = n === total - 1;
+          const prompt = `Actúa como guionista senior de YouTube y productor de Koffi Studio.
+${base}
+ESQUEMA COMPLETO DEL VIDEO:
+${listaEsquema}
+
+Escribe SOLO el capítulo ${n + 1} de ${total}: "${avance.esquema[n].titulo}".
+Reglas:
+- Longitud OBLIGATORIA: entre 600 y 700 palabras. Desarrolla con ejemplos, escenas y reflexiones; no resumas.
+- ${esPrimero ? 'Abre con un gancho psicológico en los primeros 15 segundos, sin saludos formales.' : 'Continúa de forma natural desde el final del capítulo anterior, sin saludar ni repetir lo ya dicho. Final del capítulo anterior: "' + previo + '"'}
+- ${esUltimo ? 'Cierra el video con un remate contundente y una invitación breve a suscribirse.' : 'Termina con un gancho que abra el siguiente capítulo. NO cierres ni te despidas.'}
+- Entrega solo texto corrido listo para locutar: sin títulos, sin números de capítulo, sin viñetas, sin acotaciones entre corchetes.`;
+          const r = await callGeminiSafe(prompt, esperando);
+          avance.capitulos.push(r.text.trim());
+          c.value = avance.capitulos.join('\n\n');
+          actualizarContador(c.value);
+          if (n < total - 1) await sleep(PAUSA_ENTRE_LLAMADAS_MS);
+        }
+
+        if (avance.capitulos.length) {
+          c.dataset.ready = '1';
+          const w = actualizarContador(avance.capitulos.join('\n\n'));
+          if (avance.capitulos.length === total) {
+            if (w < 3000) c.value += `\n\n[Nota: quedó en ${w} palabras. Para 20-25 min se necesitan 3000 a 3700.]`;
+            guionListo = { esquema: avance.esquema, capitulos: avance.capitulos.slice(), base };
+            document.getElementById('btn-alargar').style.display = 'block';
+            avance = null;
+          }
+        }
+      } catch (err) {
+        const parcial = avance && avance.capitulos.length ? avance.capitulos.join('\n\n') + '\n\n' : '';
+        c.value = parcial + '⚠️ ' + err.message;
+        if (parcial) { c.dataset.ready = '1'; actualizarContador(parcial); }
+      } finally {
+        btn.disabled = false;
+        stopBtn.style.display = 'none';
+        btn.textContent = (avance && avance.capitulos.length) ? "▶ CONTINUAR GUION" : "⚡ GENERAR GUION COMPLETO";
+      }
     }
-    async function copiarGuion() {
-      const text=el('script-console').textContent.trim(); if(!text){alert('No hay texto para copiar.');return;}
-      try { if(await copyText(text))alert('Guion copiado.');else alert('No fue posible copiar automáticamente.'); } catch(_) { alert('No fue posible copiar automáticamente.'); }
+
+    async function alargarGuion() {
+      if (!guionListo) { alert('Primero genera un guion largo.'); return; }
+      const g = guionListo;
+      const c = document.getElementById('script-console');
+      const btn = document.getElementById('btn-alargar');
+      let idx = 0, min = Infinity;
+      g.capitulos.forEach((t, i) => { const w = contarPalabras(t); if (w < min) { min = w; idx = i; } });
+      btn.disabled = true;
+      btn.textContent = `⏳ AMPLIANDO CAPÍTULO ${idx + 1}...`;
+      try {
+        const prompt = `Actúa como guionista senior de YouTube.\n${g.base}\nA continuación está el capítulo ${idx + 1} de ${g.capitulos.length} de un video. Reescríbelo AMPLIÁNDOLO a entre 850 y 1000 palabras: conserva el mismo inicio, el mismo hilo y el mismo final, pero agrega escenas, ejemplos concretos y reflexiones nuevas. No repitas ideas ya dichas. Entrega solo texto corrido listo para locutar, sin títulos ni viñetas.\n\nCAPÍTULO ACTUAL:\n${g.capitulos[idx]}`;
+        const r = await callGeminiSafe(prompt, (t) => { btn.textContent = `⏳ Google pidió calma (${t} s)...`; });
+        if (contarPalabras(r.text) > min) g.capitulos[idx] = r.text.trim();
+        else alert('La IA no logró ampliarlo esta vez. Vuelve a tocar el botón.');
+        c.value = g.capitulos.join('\n\n');
+        c.dataset.ready = '1';
+        actualizarContador(c.value);
+      } catch (e) {
+        alert(e.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '➕ ALARGAR (amplía el capítulo más corto)';
+      }
     }
+
+    function copiarGuion() {
+      const text = document.getElementById('script-console').value;
+      navigator.clipboard.writeText(text).then(() => alert('Guion copiado al portapapeles.'));
+    }
+
     function descargarGuionTxt() {
-      const text=el('script-console').textContent.trim(); if(!text){alert('No hay guion para descargar.');return;}
-      const topic=el('script-topic').value||'guion_koffi'; const blob=new Blob([text],{type:'text/plain;charset=utf-8'});
-      const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`${topic.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'_')}.txt`; a.click(); URL.revokeObjectURL(url);
+      const text = document.getElementById('script-console').value;
+      const topic = document.getElementById('script-topic').value || "guion_koffi";
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${topic.toLowerCase().replace(/[^a-z0-9]/g, '_')}.txt`;
+      a.click();
     }
 
-    // Estilos visuales seleccionables: el estilo activo se reutiliza en escenas e imágenes.
-    document.querySelectorAll('.style-card').forEach(card=>{
-      const name=card.querySelector('.style-name')?.textContent.replace(/^\S+\s*/,'').trim();
-      if(!name)return; card.tabIndex=0; card.setAttribute('role','button'); card.setAttribute('aria-label',`Seleccionar estilo ${name}`);
-      const select=()=>{activeStyle=name;document.querySelectorAll('.style-card').forEach(c=>c.classList.remove('selected'));card.classList.add('selected');localStorage.setItem('koffi_active_style',activeStyle);};
-      card.addEventListener('click',select); card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();select();}});
-    });
-    activeStyle=localStorage.getItem('koffi_active_style')||activeStyle;
-    document.querySelectorAll('.style-card').forEach(card=>{if(card.querySelector('.style-name')?.textContent.replace(/^\S+\s*/,'').trim()===activeStyle)card.classList.add('selected');});
+    // ===== ESCENAS VISUALES =====
+    async function generarEscenas() {
+      const c = document.getElementById('script-console');
+      const guion = c.dataset.ready ? c.value.trim() : '';
+      const note = document.getElementById('scene-note');
+      const cont = document.getElementById('scenes-container');
+      const btn = document.getElementById('btn-escenas');
+      if (guion.length < 200) { alert('Primero genera un guion en la Pestaña 1.'); return; }
+      const n = parseInt(document.getElementById('scene-count').value, 10);
+      const estilo = ESTILOS[estiloActual].en;
+      btn.disabled = true;
+      btn.textContent = '⏳ CREANDO ESCENAS...';
+      cont.innerHTML = '';
+      try {
+        const prompt = `Eres director de arte de videos de YouTube.\nDivide el siguiente guion en exactamente ${n} escenas consecutivas que cubran todo el guion en orden.\nPara cada escena entrega: "fragmento" (las primeras 10 palabras del tramo del guion, tal cual), "descripcion" (en español, qué se ve, 1 frase) y "prompt" (en inglés, para un generador de imágenes: sujeto, encuadre, luz; incluye este estilo: ${estilo}; sin texto, sin letras, sin marcas de agua).\nDevuelve ÚNICAMENTE un arreglo JSON válido, sin markdown: [{"fragmento":"...","descripcion":"...","prompt":"..."}]\n\nGUION:\n${guion}`;
+        const r = await callGeminiSafe(prompt,
+          (t) => { note.textContent = `Google pidió calma. Reintentando en ${t} s...`; },
+          (m) => { note.textContent = `Consultando a ${m}... (máx. 45 s)`; });
+        const t = r.text.replace(/```json/gi, '').replace(/```/g, '');
+        const i1 = t.indexOf('['), i2 = t.lastIndexOf(']');
+        if (i1 === -1 || i2 === -1) throw new Error('La IA no devolvió una lista válida. Intenta de nuevo.');
+        const escenas = JSON.parse(t.slice(i1, i2 + 1));
+        note.textContent = `✓ ${escenas.length} escenas listas. Toca "Usar en generador" para crear cada imagen.`;
+        escenas.forEach((e, k) => {
+          const card = document.createElement('div');
+          card.className = 'card-item';
+          const h = document.createElement('div');
+          h.style.cssText = 'font-size:10px; color:#10b981; font-weight:700; margin-bottom:4px;';
+          h.textContent = `ESCENA ${k + 1}`;
+          const d = document.createElement('div');
+          d.style.cssText = 'font-size:11px; color:#fff;';
+          d.textContent = e.descripcion || '';
+          const f = document.createElement('div');
+          f.style.cssText = 'font-size:10px; color:#71717a; margin:4px 0;';
+          f.textContent = e.fragmento ? '“' + e.fragmento + '…”' : '';
+          const p = document.createElement('div');
+          p.style.cssText = 'font-size:10px; color:#a1a1aa; font-family:monospace; margin-bottom:6px;';
+          p.textContent = e.prompt || '';
+          const row = document.createElement('div');
+          row.style.cssText = 'display:flex; gap:8px;';
+          const b1 = document.createElement('button');
+          b1.className = 'btn-secondary'; b1.style.marginTop = '0'; b1.textContent = '📋 COPIAR PROMPT';
+          b1.onclick = () => navigator.clipboard.writeText(e.prompt || '').then(() => alert('Prompt de la escena ' + (k + 1) + ' copiado.'));
+          const b2 = document.createElement('button');
+          b2.className = 'btn-secondary'; b2.style.marginTop = '0'; b2.textContent = '🎨 USAR EN GENERADOR';
+          b2.onclick = () => {
+            document.getElementById('img-prompt').value = e.prompt || '';
+            document.getElementById('img-use-style').checked = false;
+            openTab('tab-imagenes', document.querySelectorAll('.tab-btn')[2]);
+          };
+          row.appendChild(b1); row.appendChild(b2);
+          [h, d, f, p, row].forEach(x => card.appendChild(x));
+          cont.appendChild(card);
+        });
+      } catch (err) {
+        note.textContent = '⚠️ ' + err.message;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '🎬 CREAR ESCENAS DESDE EL GUION';
+      }
+    }
 
-    el('scene-source').addEventListener('input',()=>localStorage.setItem('koffi_scene_source',el('scene-source').value));
-    el('scene-count').addEventListener('change',()=>localStorage.setItem('koffi_scene_count',el('scene-count').value));
-
-    function renderScenes(scenes) {
-      const out=el('scenes-output'); out.innerHTML='';
-      scenes.forEach((scene,i)=>{
-        const card=document.createElement('div');card.className='scene-card';
-        const heading=document.createElement('strong');heading.textContent=`ESCENA ${i+1} · ${scene.title||'Sin título'}`;
-        const area=document.createElement('textarea');area.className='input-field';area.value=scene.prompt||'';
-        const use=document.createElement('button');use.className='btn-secondary';use.textContent='USAR EN GENERADOR VISUAL';use.addEventListener('click',()=>{el('img-prompt').value=area.value;openTab('tab-imagenes',document.querySelectorAll('.tab-btn')[2]);});
-        card.append(heading,area,use);out.appendChild(card);
+    // ===== GENERADOR DE IMÁGENES =====
+    function mostrarImagen(src, info) {
+      const img = document.getElementById('img-result');
+      const loader = document.getElementById('img-loading');
+      const inf = document.getElementById('img-info');
+      return new Promise((resolve, reject) => {
+        img.onload = () => { loader.style.display = 'none'; img.style.display = 'block'; inf.textContent = info; resolve(); };
+        img.onerror = () => reject(new Error('La imagen no cargó'));
+        img.src = src;
       });
     }
 
-    async function generarEscenas() {
-      const btn=el('btn-scenes'); const source=el('scene-source').value.trim()||el('script-console').textContent.trim();
-      if(source.length<80){alert('Primero genera un guion o pega un texto base.');return;}
-      if(!getApiKey()){toggleConfig();alert('Guarda tu clave de Gemini en CONFIG.');return;}
-      btn.disabled=true;btn.textContent='CREANDO ESCENAS…';el('scenes-output').textContent='Analizando el guion y construyendo escenas…';
-      try {
-        const count=Number(el('scene-count').value); const style=STYLE_PROMPTS[activeStyle]||activeStyle;
-        const prompt=`Convierte este guion en exactamente ${count} escenas visuales consecutivas, sin texto escrito dentro de la imagen. Estilo visual: ${style}. Devuelve únicamente JSON válido: [{"title":"...","prompt":"..."}]. Los prompts deben estar en inglés, ser cinematográficos, específicos y mantener continuidad visual. Evita repetir encuadres. Guion: ${source.slice(0,18000)}`;
-        const data=await geminiRequest(prompt); const scenes=extractJson(extractText(data));
-        if(!Array.isArray(scenes)||!scenes.length)throw new Error('La respuesta no contiene escenas válidas.');
-        renderScenes(scenes.slice(0,count));
-        localStorage.setItem('koffi_scenes_data',JSON.stringify(scenes.slice(0,count)));
-        localStorage.setItem('koffi_scene_source',el('scene-source').value);
-        localStorage.setItem('koffi_scene_count',String(count));
-      } catch(error){el('scenes-output').textContent=`No se pudieron generar las escenas: ${error.message}`;}
-      finally{btn.disabled=false;btn.textContent='GENERAR ESCENAS VISUALES';}
+    async function imagenFlux(prompt, ratio, w, h) {
+      const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + ', ' + ratio + ' aspect ratio')}?width=${w}&height=${h}&model=flux&nologo=true&seed=${Math.floor(Math.random() * 1e6)}`;
+      await Promise.race([
+        mostrarImagen(url, `✓ Imagen (${ratio}) generada con FLUX.\nMantén presionada la imagen para descargarla.`),
+        new Promise((_, rej) => setTimeout(() => rej(new Error('Flux tardó demasiado')), 60000))
+      ]);
+    }
+
+    async function imagenNanoBanana(prompt, ratio) {
+      const key = localStorage.getItem('koffi_gemini_key');
+      if (!key) throw new Error('Falta tu llave de Gemini en ⚙️ CONFIG');
+      const modelos = ['gemini-2.5-flash-image', 'gemini-2.5-flash-image-preview'];
+      let ultimo = 'Sin respuesta';
+      for (const m of modelos) {
+        try {
+          const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + m + ':generateContent', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: `${prompt}. Aspect ratio ${ratio}.` }] }],
+              generationConfig: { responseModalities: ['TEXT', 'IMAGE'] }
+            })
+          });
+          const data = await res.json();
+          if (data.error) { ultimo = data.error.message || 'Error de la API'; if (res.status === 429) break; continue; }
+          const ps = (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) || [];
+          const p = ps.find(x => x.inlineData || x.inline_data);
+          if (p) {
+            const d = p.inlineData || p.inline_data;
+            await mostrarImagen(`data:${d.mimeType || d.mime_type || 'image/png'};base64,${d.data}`, `✓ Imagen (${ratio}) generada con NANO BANANA.\nMantén presionada la imagen para descargarla.`);
+            return;
+          }
+          ultimo = 'Google no devolvió imagen (puede que tu plan gratis no la incluya o el prompt fue bloqueado).';
+        } catch (e) { ultimo = e.message; }
+      }
+      throw new Error(ultimo);
     }
 
     async function generarImagen() {
-      const engine=el('img-engine').value, ratio=el('img-ratio').value, prompt=el('img-prompt').value.trim();
-      const img=el('img-result'), info=el('img-info'), loader=el('img-loading');
-      if(!prompt){alert('Escribe o envía un prompt visual antes de renderizar.');return;}
-      let width=1280,height=720;if(ratio==='9:16'){width=720;height=1280;}else if(ratio==='1:1'){width=1024;height=1024;}
-      loader.style.display='block';img.style.display='none';info.textContent='';
-      try {
-        if(engine==='flux') {
-          const fluxPrompt = `${prompt}, ${STYLE_PROMPTS[activeStyle]||activeStyle}, ${ratio} aspect ratio`;
-          const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(fluxPrompt)}?width=${width}&height=${height}&model=flux&nologo=true`;
-          img.src=url; await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=()=>reject(new Error('El servicio Flux no respondió. Intenta de nuevo más tarde.'));});
-          img.style.display='block';info.textContent='Imagen recibida desde el servicio externo Flux. Mantén presionada la imagen para guardarla.';
-        } else if(engine==='banana') {
-          const model='gemini-2.5-flash-image';
-          const data=await geminiRequest(`Genera una imagen. ${prompt}. Estilo visual: ${STYLE_PROMPTS[activeStyle]||activeStyle}. Relación de aspecto solicitada: ${ratio}.`,{model,imageOutput:true});
-          const parts=data?.candidates?.[0]?.content?.parts||[];const imagePart=parts.find(p=>p.inlineData?.data);
-          if(!imagePart)throw new Error('El modelo no devolvió datos de imagen. Verifica que el modelo de imagen esté disponible para tu clave.');
-          img.src=`data:${imagePart.inlineData.mimeType||'image/png'};base64,${imagePart.inlineData.data}`;img.style.display='block';info.textContent='Imagen generada con Gemini Image (Nano Banana).';
-        } else {
-          const suffix=engine==='midjourney'?` --ar ${ratio} --style raw`:`\nRelación: ${ratio}\nEstilo: ${activeStyle}`;
-          info.textContent=engine==='midjourney'?`Prompt preparado para Midjourney:\n${prompt}${suffix}`:`Prompt preparado para Leonardo AI:\n${prompt}${suffix}`;
+      const engine = document.getElementById('img-engine').value;
+      const ratio = document.getElementById('img-ratio').value;
+      let prompt = document.getElementById('img-prompt').value.trim();
+      const img = document.getElementById('img-result');
+      const info = document.getElementById('img-info');
+      const loader = document.getElementById('img-loading');
+      if (!prompt) { alert('Escribe un prompt visual primero.'); return; }
+      if (document.getElementById('img-use-style').checked) prompt += ', ' + ESTILOS[estiloActual].en;
+
+      let w = 1280, h = 720;
+      if (ratio === '9:16') { w = 720; h = 1280; }
+      else if (ratio === '1:1') { w = 1024; h = 1024; }
+
+      if (engine === 'midjourney') {
+        img.style.display = 'none';
+        info.textContent = `[PROMPT MIDJOURNEY v6]:\n/imagine prompt: ${prompt} --ar ${ratio} --style raw --v 6.0\n\nCópialo y pégalo en Midjourney.`;
+        return;
+      }
+      if (engine === 'leonardo') {
+        img.style.display = 'none';
+        info.textContent = `[CONFIGURACIÓN LEONARDO AI]:\nPrompt: ${prompt}\nRatio: ${ratio} | Resolución: ${w}x${h}\n\nCópialo y pégalo en Leonardo.`;
+        return;
+      }
+
+      loader.style.display = 'block';
+      loader.textContent = 'Renderizando...';
+      img.style.display = 'none';
+      info.textContent = '';
+      const orden = engine === 'banana' ? ['banana', 'flux'] : ['flux', 'banana'];
+      const nombres = { flux: 'Flux', banana: 'Nano Banana' };
+      const errores = [];
+      for (let k = 0; k < orden.length; k++) {
+        const m = orden[k];
+        try {
+          loader.textContent = (k ? `Plan B: ${nombres[m]}...` : `Renderizando con ${nombres[m]}...`);
+          if (m === 'flux') await imagenFlux(prompt, ratio, w, h);
+          else await imagenNanoBanana(prompt, ratio);
+          return;
+        } catch (e) {
+          errores.push(`${nombres[m]}: ${e.message}`);
         }
-      } catch(error){info.textContent=`No se pudo generar la imagen: ${error.message}`;}
-      finally{loader.style.display='none';}
+      }
+      loader.style.display = 'none';
+      info.textContent = '⚠️ No se pudo generar la imagen.\n' + errores.join('\n') + '\n\nPuedes copiar el prompt y usarlo en Leonardo o Midjourney.';
     }
 
+    // ===== DIVISOR A2E =====
     function trocearGuionA2E() {
-      const text=el('script-console').textContent.trim(),container=el('chunks-container');container.innerHTML='';
-      if(text.length<50){alert('Primero genera o pega un guion en la pestaña Laboratorio de Guiones.');return;}
-      const sentences=text.match(/[^.!?]+[.!?]+|[^.!?]+$/g)||[text];let chunks=[],current='';
-      for(const sentence of sentences){const s=sentence.trim();if(!s)continue;
-        if(s.length>=900){if(current){chunks.push(current);current='';}for(let i=0;i<s.length;i+=850)chunks.push(s.slice(i,i+850));continue;}
-        if((current+' '+s).trim().length>850){chunks.push(current);current=s;}else current=(current+' '+s).trim();
-      }
-      if(current)chunks.push(current);
-      chunks.forEach((chunk,i)=>{
-        const card=document.createElement('div');card.className='card-item';
-        const label=document.createElement('strong');label.textContent=`BLOQUE ${i+1} · ${chunk.length} CARACTERES`;
-        const preview=document.createElement('p');preview.className='muted-note';preview.textContent=chunk.slice(0,140)+(chunk.length>140?'…':'');
-        const copy=document.createElement('button');copy.className='btn-secondary';copy.textContent='COPIAR BLOQUE';copy.addEventListener('click',async()=>{try{if(await copyText(chunk))alert(`Bloque ${i+1} copiado.`);else alert('No fue posible copiar automáticamente.');}catch(_){alert('No fue posible copiar automáticamente.');}});
-        card.append(label,preview,copy);container.appendChild(card);
+      const consola = document.getElementById('script-console');
+      const fullText = consola.value;
+      const container = document.getElementById('chunks-container');
+      container.innerHTML = "";
+      if (!consola.dataset.ready || fullText.length < 50) { alert('Primero genera un guion en la Pestaña 1.'); return; }
+      const sentences = fullText.split(/(?<=[.?!])\s+/);
+      const chunks = [];
+      let cur = "";
+      sentences.forEach(s => {
+        if ((cur + s).length < 900) cur += (cur ? " " : "") + s;
+        else { if (cur) chunks.push(cur); cur = s; }
+      });
+      if (cur) chunks.push(cur);
+      chunks.forEach((chunk, i) => {
+        const div = document.createElement('div');
+        div.style = "background:#09090b; border:1px solid #27272a; padding:8px; border-radius:6px; margin-bottom:8px;";
+        div.innerHTML = `
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <span style="font-size:10px; color:#10b981; font-weight:700;">BLOQUE ${i + 1} (${chunk.length} CARACTERES)</span>
+            <button style="background:#fff; color:#000; border:none; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:700; cursor:pointer;" onclick="navigator.clipboard.writeText(this.dataset.text); alert('Bloque ${i + 1} copiado.');" data-text="${esc(chunk)}">COPIAR</button>
+          </div>
+          <p style="font-size:10px; color:#a1a1aa; line-height:1.4;">${esc(chunk.substring(0, 100))}...</p>`;
+        container.appendChild(div);
       });
     }
 
-    // Instalación PWA y actualización del service worker.
-    window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();deferredPrompt=event;el('pwa-install-btn').style.display='inline-block';});
-    async function installPWA(){if(!deferredPrompt)return;deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;el('pwa-install-btn').style.display='none';}
-    if('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-      window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(err=>console.warn('No se pudo registrar el Service Worker:',err)));
-    }
+    // ===== INICIO =====
+    const editorGuion = document.getElementById('script-console');
+    editorGuion.addEventListener('input', () => {
+      actualizarContador(editorGuion.value);
+      editorGuion.dataset.ready = editorGuion.value.trim().length >= 50 ? '1' : '';
+      guionListo = null;
+      document.getElementById('btn-alargar').style.display = 'none';
+    });
+    construirUI();
+    checkKey();
   </script>
 </body>
 </html>
