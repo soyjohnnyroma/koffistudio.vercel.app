@@ -413,7 +413,7 @@
       const wantPro = choice && choice.value === 'pro';
       const models = wantPro
         ? ['gemini-pro-latest', 'gemini-2.5-pro', 'gemini-flash-latest']
-        : ['gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.0-flash'];
+        : ['gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.5-flash'];
       const limite = videoUrl ? 120000 : 45000;
       const partes = videoUrl ? [{ fileData: { fileUri: videoUrl } }, { text: prompt }] : [{ text: prompt }];
       let lastErr = 'Sin respuesta';
