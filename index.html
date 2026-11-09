@@ -50,7 +50,8 @@
     .btn-main{width:100%;background:#fff;color:#000;border:none;padding:10px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;}
     .btn-secondary{background:#18181b;color:#fff;border:1px solid #27272a;padding:8px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;width:100%;margin-top:8px;}
     .btn-accent{background:#27272a;color:#10b981;border:1px solid #10b981;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;width:100%;margin-bottom:10px;}
-    .console-out{background:#030303;border:1px solid #18181b;border-radius:6px;padding:12px;font-family:monospace;font-size:11px;line-height:1.6;color:#d4d4d8;height:380px;overflow-y:auto;white-space:pre-wrap;}
+    .console-out{display:block;width:100%;max-width:100%;background:#030303;border:1px solid #18181b;border-radius:6px;padding:12px;font-family:monospace;font-size:11px;line-height:1.6;color:#d4d4d8;height:380px;min-height:380px;overflow-y:auto;white-space:pre-wrap;}
+    #script-console{display:block;width:100%;max-width:100%;min-height:380px;resize:vertical;white-space:pre-wrap;overflow-wrap:break-word;}
     .card-item{background:#121214;border:1px solid #18181b;border-radius:6px;padding:12px;margin-bottom:10px;}
     .idea-card{background:#121214;border:1px solid #27272a;border-radius:6px;padding:8px 10px;margin-bottom:6px;cursor:pointer;}
     .idea-title{font-size:11px;font-weight:700;color:#fff;}
@@ -412,8 +413,8 @@
       const choice = document.querySelector('input[name="gem_model"]:checked');
       const wantPro = choice && choice.value === 'pro';
       const models = wantPro
-        ? ['gemini-pro-latest', 'gemini-2.5-pro', 'gemini-flash-latest']
-        : ['gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.5-flash'];
+        ? ['gemini-3.1-pro-preview', 'gemini-3.8-flash']
+        : ['gemini-3.8-flash', 'gemini-3.5-flash-lite'];
       const limite = videoUrl ? 120000 : 45000;
       const partes = videoUrl ? [{ fileData: { fileUri: videoUrl } }, { text: prompt }] : [{ text: prompt }];
       let lastErr = 'Sin respuesta';
@@ -846,7 +847,7 @@ Reglas:
     async function imagenNanoBanana(prompt, ratio) {
       const key = localStorage.getItem('koffi_gemini_key');
       if (!key) throw new Error('Falta tu llave de Gemini en ⚙️ CONFIG');
-      const modelos = ['gemini-2.5-flash-image', 'gemini-2.5-flash-image-preview'];
+      const modelos = ['gemini-3.1-flash-image'];
       let ultimo = 'Sin respuesta';
       for (const m of modelos) {
         try {
