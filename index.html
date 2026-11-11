@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#030303">
+  <title>Koffi Studio — Media Engine</title>
+  <link rel="icon" href="icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="manifest" href="manifest.json">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:#030303;color:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;min-height:100vh;line-height:1.5;}
+    header{background:#09090b;border-bottom:1px solid #18181b;padding:16px 16px 10px;text-align:center;}
+    .brand-logo-img{display:block;width:44px;height:44px;margin:0 auto 8px;border-radius:50%;background:#000;object-fit:cover;}
+    .brand-title{display:block;font-size:15px;font-weight:600;letter-spacing:5px;padding-left:5px;color:#f4f4f5;white-space:nowrap;}
+    .brand-sub{display:block;margin-top:5px;font-size:9px;letter-spacing:4px;padding-left:4px;color:#a1a1aa;text-transform:uppercase;white-space:nowrap;}
+    .brand-tag{display:block;margin-top:4px;font-size:clamp(6.5px,2vw,8.5px);letter-spacing:1.4px;color:#52525b;text-transform:uppercase;white-space:nowrap;}
+    .util-bar{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:8px;border-top:1px solid #18181b;}
+    #live-datetime{font-family:monospace;font-size:10px;letter-spacing:.5px;color:#71717a;}
+    .util-right{display:flex;align-items:center;gap:8px;}
+    .btn-cfg{background:none;border:1px solid #27272a;color:#a1a1aa;font-size:10px;padding:3px 8px;border-radius:4px;cursor:pointer;white-space:nowrap;}
+    #pwa-install-btn{display:none;background:#10b981;border:none;color:#000;font-size:10px;font-weight:700;padding:4px 8px;border-radius:4px;cursor:pointer;}
+    #api-status{font-family:monospace;font-size:10px;font-weight:700;letter-spacing:.5px;white-space:nowrap;}
+    .container{max-width:1200px;margin:0 auto;padding:14px 16px;}
+    .marquee-wrapper{overflow:hidden;position:relative;margin-bottom:8px;mask-image:linear-gradient(to right,transparent,black 8%,black 92%,transparent);-webkit-mask-image:linear-gradient(to right,transparent,black 8%,black 92%,transparent);}
+    .marquee-track{display:flex;width:max-content;gap:10px;}
+    .marquee-left{animation:scroll-left 45s linear infinite;}
+    .marquee-right{animation:scroll-right 45s linear infinite;}
+    .marquee-wrapper:hover .marquee-track,.marquee-wrapper:active .marquee-track{animation-play-state:paused;}
+    @keyframes scroll-left{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+    @keyframes scroll-right{0%{transform:translateX(-50%);}100%{transform:translateX(0);}}
+    .style-card{width:185px;background:#09090b;border:1px solid #18181b;border-radius:6px;padding:8px 10px;text-align:left;cursor:pointer;}
+    .style-card.active{border-color:#10b981;}
+    .style-name{font-size:11px;font-weight:700;color:#fff;}
+    .style-desc{font-size:10px;color:#71717a;margin-top:2px;}
+    #estilo-activo{font-size:10px;color:#71717a;text-align:center;margin:2px 0 4px;}
+    .tabs-nav{display:flex;overflow-x:auto;border-bottom:1px solid #18181b;gap:14px;padding-bottom:8px;margin-top:12px;}
+    .tab-btn{background:none;border:none;color:#71717a;font-size:12px;font-weight:600;cursor:pointer;padding-bottom:6px;white-space:nowrap;}
+    .tab-btn.active{color:#fff;border-bottom:2px solid #fff;}
+    .tab-content{display:none;margin-top:14px;}
+    .tab-content.active{display:block;}
+    .grid-workspace{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;width:100%;min-width:0;}
+    @media(min-width:900px){.grid-workspace{grid-template-columns:minmax(0,380px) minmax(0,1fr);}}
+    .panel-box{background:#09090b;border:1px solid #18181b;border-radius:8px;padding:14px;width:100%;min-width:0;box-sizing:border-box;}
+    .input-group{margin-bottom:10px;}
+    .input-label{display:block;font-size:11px;color:#a1a1aa;margin-bottom:4px;font-weight:600;text-transform:uppercase;}
+    .input-field{width:100%;background:#121214;border:1px solid #27272a;border-radius:6px;padding:8px 10px;color:#fff;font-size:12px;outline:none;}
+    .input-field:focus{border-color:#71717a;}
+    .btn-main{width:100%;background:#fff;color:#000;border:none;padding:10px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;}
+    .btn-secondary{background:#18181b;color:#fff;border:1px solid #27272a;padding:8px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;width:100%;margin-top:8px;}
+    .btn-accent{background:#27272a;color:#10b981;border:1px solid #10b981;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;width:100%;margin-bottom:10px;}
+    .console-out{display:block;width:100%;max-width:100%;min-width:0;box-sizing:border-box;background:#030303;border:1px solid #18181b;border-radius:6px;padding:12px;font-family:monospace;font-size:11px;line-height:1.6;color:#d4d4d8;height:380px;overflow-y:auto;overflow-x:hidden;white-space:pre-wrap;overflow-wrap:anywhere;}
+    #script-console{display:block;width:100%;max-width:100%;min-width:0;height:380px;min-height:380px;box-sizing:border-box;resize:vertical;white-space:pre-wrap;overflow-wrap:anywhere;overflow-x:hidden;overflow-y:auto;outline:none;cursor:text;}
+    .card-item{background:#121214;border:1px solid #18181b;border-radius:6px;padding:12px;margin-bottom:10px;}
+    .idea-card{background:#121214;border:1px solid #27272a;border-radius:6px;padding:8px 10px;margin-bottom:6px;cursor:pointer;}
+    .idea-title{font-size:11px;font-weight:700;color:#fff;}
+    .idea-hook{font-size:10px;color:#a1a1aa;margin-top:2px;}
+    .image-preview{width:100%;border-radius:6px;border:1px solid #27272a;margin-top:10px;display:none;}
+    .nota{font-size:10px;color:#71717a;margin:-4px 0 10px;}
+  </style>
+</head>
+<body>
+
+  <header>     <img src="icon-192.png" alt="Koffi Studio" class="brand-logo-img" onerror="this.onerror=null;this.src='data:image/png;base64,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'">     <span class="brand-title">KOFFI STUDIO</span>
+    <span class="brand-sub">Media Engine</span>
+    <span class="brand-tag">Ecosistema multi-nicho y multi-plataforma</span>
+    <div class="util-bar">
+      <span id="live-datetime">--/--/---- --:--:--</span>
+      <div class="util-right">
+        <button id="pwa-install-btn" onclick="installPWA()">📲 INSTALAR</button>
+        <button class="btn-cfg" onclick="toggleConfig()">⚙️ CONFIG</button>
+        <span id="api-status">API: OFF</span>
+      </div>
+    </div>
+  </header>
+
+  <div id="config-box" style="display:none; background:#0e0e11; border-bottom:1px solid #27272a; padding:12px 16px;">
+    <div style="max-width:600px; margin:0 auto;">
+      <label class="input-label">Clave Gratuita de Google Gemini (AI Studio):</label>
+      <div style="display:flex; gap:8px;">
+        <input type="password" id="gemini-key" class="input-field" placeholder="AIzaSy...">
+        <button class="btn-main" style="width:auto; padding:0 14px;" onclick="guardarKey()">GUARDAR Y PROBAR</button>
+      </div>
+      <div style="display:flex; gap:12px; margin-top:8px;">
+        <label style="font-size:11px; color:#a1a1aa;"><input type="radio" name="gem_model" value="flash" checked> Flash (Rápido & $0)</label>
+        <label style="font-size:11px; color:#a1a1aa;"><input type="radio" name="gem_model" value="pro"> Pro (Mayor Razonamiento)</label>
+      </div>
+      <p style="font-size:10px; color:#71717a; margin-top:4px;">La llave se guarda solo en el navegador de tu teléfono.</p>
+      <button class="btn-secondary" onclick="probarConexion()">🔧 PROBAR CONEXIÓN CON GEMINI</button>
+      <pre id="diag-out" style="display:none; margin-top:8px; background:#030303; border:1px solid #18181b; border-radius:6px; padding:8px; font-size:10px; color:#d4d4d8; white-space:pre-wrap;"></pre>
+    </div>
+  </div>
+
+  <main class="container">
+    <div class="marquee-wrapper"><div class="marquee-track marquee-left" id="track-1"></div></div>
+    <div class="marquee-wrapper"><div class="marquee-track marquee-right" id="track-2"></div></div>
+    <p id="estilo-activo"></p>
+
+    <nav class="tabs-nav">
+      <button class="tab-btn active" onclick="openTab('tab-guion', this)">1. Laboratorio de Guiones</button>
+      <button class="tab-btn" onclick="openTab('tab-escenas', this)">2. Escenas Visuales</button>
+      <button class="tab-btn" onclick="openTab('tab-imagenes', this)">3. Generador Visual</button>
+      <button class="tab-btn" onclick="openTab('tab-audio', this)">4. Motor Vocal</button>
+      <button class="tab-btn" onclick="openTab('tab-edicion', this)">5. Pautas de Montaje & Subtítulos</button>
+    </nav>
+
+    <div id="tab-guion" class="tab-content active">
+      <div class="grid-workspace">
+        <div class="panel-box">
+          <div class="input-group">
+            <label class="input-label">Nicho Objetivo:</label>
+            <select id="script-niche" class="input-field" onchange="cambiarNicho()"></select>
+          </div>
+
+          <button class="btn-accent" id="btn-ideas" onclick="generarIdeas()">🎲 GENERAR 5 IDEAS GANADORAS</button>
+          <div id="ideas-container" style="display:none; margin-bottom:10px;"></div>
+
+          <div class="input-group">
+            <label class="input-label">Tono de Comunicación:</label>
+            <select id="script-tone" class="input-field"></select>
+          </div>
+
+          <div class="input-group">
+            <label class="input-label">Tema o Ángulo Principal:</label>
+            <input type="text" id="script-topic" class="input-field" oninput="temaAuto=false" placeholder="Escribe tu tema o toca 🎲 para recibir ideas">
+          </div>
+
+          <div class="input-group">
+            <label class="input-label">Video de Referencia (Ingeniería Inversa):</label>
+            <input type="text" id="script-ref" class="input-field" placeholder="Enlace de YouTube (la IA lo analiza) o un título">
+          </div>
+          <p class="nota" id="ref-note">Opcional. Con un enlace de YouTube, la IA copia la mecánica de retención del video, no su contenido.</p>
+
+          <div class="input-group">
+            <label class="input-label">Formato de Producción:</label>
+            <select id="script-format" class="input-field" onchange="actualizarRelacionAspecto()">
+              <option value="youtube_long">Horizontal (16:9) — YouTube Largo (20 a 25 min)</option>
+              <option value="vertical_short">Vertical (9:16) — Shorts / TikTok / Reels (60 seg)</option>
+              <option value="facebook_square">Cuadrado (1:1 / 4:3) — Facebook Video</option>
+            </select>
+          </div>
+
+          <button class="btn-main" id="btn-generate-script" onclick="ejecutarGemini()">⚡ GENERAR GUION COMPLETO</button>
+          <button class="btn-secondary" id="btn-alargar" style="display:none;" onclick="alargarGuion()">➕ ALARGAR (amplía el capítulo más corto)</button>
+          <button class="btn-secondary" id="btn-stop" style="display:none;" onclick="detenerGuion()">⏹ DETENER (conserva lo avanzado)</button>
+          <div style="display:flex; gap:8px;">
+            <button class="btn-secondary" onclick="copiarGuion()">📋 COPIAR TODO</button>
+            <button class="btn-secondary" onclick="descargarGuionTxt()">💾 DESCARGAR TXT</button>
+          </div>
+        </div>
+
+        <div class="panel-box">
+          <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+            <label class="input-label" style="color:#fff;">Guion en Tiempo Real:</label>
+            <span id="script-counter" style="font-family:monospace; font-size:11px; color:#10b981;">0 palabras · 0 min</span>
+          </div>
+          <p id="save-status" style="font-size:10px;color:#71717a;margin:0 0 7px;">El trabajo se guarda automáticamente en este dispositivo.</p>
+          <textarea id="script-console" class="console-out" spellcheck="false" aria-label="Editor del guion">Toca ⚙️ CONFIG arriba para guardar tu llave de Gemini. Luego elige un nicho, toca 🎲 para recibir ideas (o escribe tu tema) y presiona 'Generar Guion Completo'.</textarea>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-escenas" class="tab-content">
+      <div class="panel-box">
+        <label class="input-label">Cantidad de escenas:</label>
+        <select id="scene-count" class="input-field" style="margin-bottom:10px;">
+          <option value="6">6 escenas maestras (mínimo)</option>
+          <option value="12">12 escenas (dinámico)</option>
+          <option value="18">18 escenas (muy dinámico)</option>
+        </select>
+        <p id="scene-style-label" class="nota" style="margin:0 0 10px;"></p>
+        <button class="btn-main" id="btn-escenas" onclick="generarEscenas()">🎬 CREAR ESCENAS DESDE EL GUION</button>
+        <p id="scene-note" class="nota" style="margin:6px 0 0;">Toma el guion de la pestaña 1 y lo divide en escenas, cada una con un prompt listo para el Generador Visual.</p>
+        <div id="scenes-container" style="margin-top:12px;"></div>
+      </div>
+    </div>
+
+    <div id="tab-imagenes" class="tab-content">
+      <div class="grid-workspace">
+        <div class="panel-box">
+          <label class="input-label">Relación de Aspecto:</label>
+          <select id="img-ratio" class="input-field" style="margin-bottom:10px;">
+            <option value="16:9">16:9 Panorámico (YouTube Largo)</option>
+            <option value="9:16">9:16 Vertical (Shorts / Reels / TikTok)</option>
+            <option value="1:1">1:1 Cuadrado (Facebook / Instagram)</option>
+          </select>
+
+          <label class="input-label">Motor de Inferencia:</label>
+          <select id="img-engine" class="input-field" style="margin-bottom:10px;" disabled>
+            <option value="flux">⚡ FLUX.2 Klein 4B · Cloudflare Workers AI</option>
+          </select>
+
+          <label class="input-label">Prompt Visual:</label>
+          <textarea id="img-prompt" class="input-field" rows="4">Describe la escena que deseas generar. El motor adaptará la composición al nicho y al formato seleccionados.</textarea>
+          <label style="display:flex; gap:6px; align-items:center; font-size:11px; color:#a1a1aa; margin-top:8px;"><input type="checkbox" id="img-use-style" checked> <span id="img-style-label">Aplicar estilo activo</span></label>
+
+          <button class="btn-main" style="margin-top:10px;" onclick="generarImagen()">🎨 RENDERIZAR IMAGEN</button>
+        </div>
+
+        <div class="panel-box">
+          <label class="input-label">Resultado Visual:</label>
+          <div id="turnstile-container" aria-hidden="true"></div>
+          <div id="img-loading" style="display:none; color:#10b981; font-family:monospace; font-size:11px; margin-bottom:8px;">Renderizando...</div>
+          <img id="img-result" class="image-preview" alt="Preview Visual">
+          <div id="img-info" class="console-out" style="height:140px; margin-top:10px;">Toca 'Renderizar Imagen' para generar cada toma. Mantén presionada la imagen para guardarla en tu móvil.</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-audio" class="tab-content">
+      <div class="panel-box">
+        <label class="input-label">Opciones para tu Voz Clonada</label>
+        <div class="card-item">
+          <strong style="color:#fff; font-size:12px;">Vía 1: Google Colab (25 Minutos Continuos de un Tirón)</strong>
+          <p style="font-size:11px; color:#a1a1aa; margin-top:4px;">Copia el guion con el botón de la pestaña 1, abre VoiceStudio en Colab, pega el texto y descarga el MP3 completo.</p>
+          <a href="https://colab.research.google.com/" target="_blank" style="text-decoration:none;">
+            <button class="btn-main" style="margin-top:8px;">🚀 ABRIR GOOGLE COLAB (VOICESTUDIO)</button>
+          </a>
+        </div>
+        <div class="card-item">
+          <strong style="color:#fff; font-size:12px;">Vía 2: Divisor Seguro para A2E.AI (~900 caracteres)</strong>
+          <p style="font-size:11px; color:#a1a1aa; margin-top:4px;">Divide el texto por oraciones completas para no cortar ideas.</p>
+          <button class="btn-secondary" onclick="trocearGuionA2E()">✂️ FRAGMENTAR GUION PARA A2E</button>
+          <div id="chunks-container" style="margin-top:10px;"></div>
+            </div>      </div>
+    </div>
+
+    <div id="tab-edicion" class="tab-content">
+      <div class="panel-box">
+        <label class="input-label">Pautas de Edición en CapCut Móvil</label>
+        <div class="card-item">
+          <strong style="color:#10b981; font-size:12px;">📝 Configuración de Subtítulos Automáticos:</strong>
+          <ul style="margin-left:18px; margin-top:6px; font-size:11px; color:#d4d4d8; line-height:1.7;">
+            <li><strong>Posición:</strong> Centro exacto vertical de la pantalla (evita la barra de tiempo inferior y las zonas ciegas de Shorts/Reels).</li>
+            <li><strong>Tipografía y Color:</strong> Letra blanca pura (#FFFFFF), peso Bold, tamaño mediano.</li>
+            <li><strong>Sombra:</strong> Sombra negra sutil al 40% para legibilidad sobre fondos oscuros.</li>
+          </ul>
+        </div>
+        <div class="card-item">
+          <strong style="color:#fff; font-size:12px;">🎞️ Cantidad de Imágenes y Dinamismo:</strong>
+          <p style="font-size:11px; color:#a1a1aa; margin-top:4px;">El mínimo son <strong>6 imágenes maestras</strong> con la regla de los 3 planos (general, medio y primer plano) y zoom lento de 30-50 segundos. Para más dinamismo, usa <strong>12 a 18 imágenes</strong> y cambia de plano cada 15 a 20 segundos.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // ===== DATOS =====
+    const NICHOS = [
+      ['Estoicismo y Filosofía Práctica', '🏛️ Estoicismo & Filosofía Práctica', 'Ej: Por qué Marco Aurelio escribía cada noche'],
+      ['Psicología Oscura y Conducta Humana', '🧠 Psicología Oscura & Conducta Humana', 'Ej: Las señales de una persona manipuladora'],
+      ['Terror y Misterio Real', '🕯️ Historias de Terror & Misterio', 'Ej: El caso sin resolver del faro abandonado'],
+      ['Finanzas y Riqueza', '📈 Finanzas, Economía & Alto RPM', 'Ej: Por qué la clase media nunca logra ahorrar'],
+      ['Historia Bélica y Civilizaciones', '📜 Historia Bélica & Civilizaciones', 'Ej: La batalla que cambió el destino de Roma'],
+      ['Inteligencia Artificial y Tecnología (explicado fácil)', '🤖 IA & Tecnología Explicada', 'Ej: Qué trabajos va a reemplazar la IA primero'],
+      ['Crimen Real y Casos Documentados', '🔎 Crimen Real & Casos Documentados', 'Ej: El robo perfecto que nadie pudo explicar'],
+      ['Historias para Dormir y Relajación', '🌙 Historias para Dormir & Relajación', 'Ej: Un viaje en tren nocturno por los Alpes'],
+      ['Mitología y Misterios Antiguos', '🔱 Mitología & Misterios Antiguos', 'Ej: Prometeo y el precio del conocimiento'],
+      ['Disciplina y Desarrollo Personal', '🔥 Disciplina & Desarrollo Personal', 'Ej: Por qué la motivación te abandona y qué hacer']
+    ];
+    const TONOS = [
+      ['Confrontativo, firme, sobrio y penetrante', '🔥 Confrontativo & Firme'],
+      ['Cínico, irreverente y desafiante de las convenciones sociales', '🏺 Cínico & Irreverente'],
+      ['Bofetada de realidad, directo al grano y desmitificador', '⚡ Bofetada de Realidad / Despertador'],
+      ['Académico, filosófico, riguroso y analítico', '🎓 Académico & Filosófico'],
+      ['Enigmático, oscuro, pausado y con tensión psicológica', '🕯️ Misterioso & Enigmático'],
+      ['Informal, cercano, como una charla honesta entre amigos', '☕ Informal & Conversacional'],
+      ['Épico, heroico y solemne', '⚔️ Épico & Solemne'],
+      ['Conciliador, comprensivo y reflexivo', '🤝 Conciliador & Reflexivo'],
+      ['Sarcástico, mordaz e incisivo', '😏 Sarcástico & Mordaz']
+    ];
+    const ESTILOS = [
+      { n: '🏛️ Claroscuro Romano', d: 'Mármol desgastado & sombras.', en: 'cinematic weathered dark marble, dramatic side chiaroscuro lighting, deep black background, moody atmospheric mist' },
+      { n: '🌆 Vaporwave 80s', d: 'Neón retro, púrpura y nostalgia.', en: 'vaporwave 80s retro aesthetic, neon purple and pink glow, synthwave grid, nostalgic atmosphere' },
+      { n: '🕯️ Terror Psicológico', d: 'Luz de vela y penumbra.', en: 'psychological horror, candlelight and deep shadows, desaturated colors, film grain' },
+      { n: '🎞️ Documental 35mm', d: 'Grano analógico retro.', en: '35mm documentary film still, analog grain, muted natural colors' },
+      { n: '💥 Cómic / Novela Gráfica', d: 'Tinta dura, viñetas y contraste.', en: 'graphic novel comic style, hard black ink, bold contrast, halftone pop art' },
+      { n: '📈 Finanzas & Alto RPM', d: 'Estética sobria y ejecutiva.', en: 'sober executive aesthetic, dark minimal, subtle gold accents' },
+      { n: '📜 Archivo Histórico', d: 'Mapas y pergaminos antiguos.', en: 'aged parchment, antique maps, historical archive look' },
+      { n: '🧠 Conducta Humana', d: 'Siluetas y psicología oscura.', en: 'dark psychology, human silhouettes, high contrast, moody lighting' },
+      { n: '🎨 Pintura al Óleo', d: 'Pincelada renacentista.', en: 'Renaissance oil painting, rich brushstrokes, dramatic warm light' },
+      { n: '⚔️ Épica Legendaria', d: 'Niebla, armaduras y batallas.', en: 'epic legendary scene, fog, armor, cinematic wide shot' }
+    ];
+    // ===== MOTOR VISUAL UNIVERSAL KOFFI =====
+    const PERFILES_VISUALES = {
+      'Estoicismo y Filosofía Práctica': 'Ancient Mediterranean philosophy, restrained Roman and Greek visual references, weathered stone, intimate human contemplation, authentic historical details, sober earthy palette; use statues only when the subject genuinely calls for them',
+      'Psicología Oscura y Conducta Humana': 'Cinematic human behavior study, expressive faces and body language, realistic contemporary environments, visual metaphors of perception and social dynamics, controlled shadows, psychologically evocative but non-supernatural',
+      'Terror y Misterio Real': 'Atmospheric investigative mystery, believable locations, unsettling environmental details, restrained dread, realistic cinematic lighting, deep shadows, documentary credibility, no gratuitous gore',
+      'Finanzas y Riqueza': 'Premium financial editorial imagery, modern architecture, global markets, business environments, meaningful economic objects and data-inspired visual metaphors, precise realistic materials, confident restrained palette',
+      'Historia Bélica y Civilizaciones': 'Historically grounded reconstruction, period-accurate clothing, architecture, tools and landscapes, large-scale cinematic staging, documentary realism, avoid anachronisms and fantasy embellishments',
+      'Inteligencia Artificial y Tecnología (explicado fácil)': 'Clear contemporary technology editorial, believable devices, interfaces represented without legible text, data centers, robotics and human interaction, clean modern lighting, accessible visual storytelling',
+      'Crimen Real y Casos Documentados': 'Responsible true-crime documentary visual language, evidence-led details, authentic investigative settings, archival atmosphere, realistic locations and objects, no sensationalized violence or invented identifiable victims',
+      'Historias para Dormir y Relajación': 'Peaceful immersive dreamlike environments, gentle natural scenery, quiet interiors, soft moonlight or sunrise, tranquil atmosphere, soothing colors, low visual tension and spacious compositions',
+      'Mitología y Misterios Antiguos': 'Mythological and ancient-world visual storytelling, culturally coherent symbols, monumental landscapes, legendary beings rendered with refined realism, archaeological textures, epic but tasteful atmosphere',
+      'Disciplina y Desarrollo Personal': 'Motivational yet grounded human-centered imagery, effort, practice, resilience and meaningful progress, contemporary believable settings, dynamic cinematic light, authentic emotion without clichés'
+    };
+    const CAPA_VISUAL_UNIVERSAL = 'high-end cinematic visual storytelling, coherent focal subject, clear visual hierarchy, intentional depth and perspective, physically plausible anatomy and objects, natural hands and faces, realistic materials, nuanced lighting, controlled color grading, crisp subject detail, professional composition, no text, no captions, no logos, no watermark';
+    const COMPOSICIONES_FORMATO = {
+      '16:9': 'Compose natively for a wide 16:9 horizontal frame: establish environment and spatial context, place the main subject with balanced lateral negative space, use layered foreground/midground/background, keep important action away from extreme edges; do not describe a vertical image or a crop',
+      '9:16': 'Compose natively for a tall 9:16 vertical frame: one dominant vertically readable subject, strong top-to-bottom visual flow, intentional foreground and background depth, keep face and key action in the central safe area, avoid relying on information at far left or right; do not describe a horizontal image or a crop',
+      '1:1': 'Compose natively for a balanced 1:1 square frame: compact central visual hierarchy, subject and supporting context balanced on all sides, controlled negative space, strong thumbnail readability at small size; do not describe a horizontal or vertical crop'
+    };
+    let escenasGuardadas = [];
+
+    function obtenerFormatoVisual() {
+      const ratio = document.getElementById('img-ratio')?.value || '16:9';
+      return COMPOSICIONES_FORMATO[ratio] ? ratio : '16:9';
+    }
+
+    function construirPromptVisual(promptBase, ratio, incluirEstilo = false) {
+      if (promptBase.includes(CAPA_VISUAL_UNIVERSAL)) return promptBase;
+      const nicho = document.getElementById('script-niche')?.value || NICHOS[0][0];
+      const perfil = PERFILES_VISUALES[nicho] || 'cinematic editorial visual storytelling, realistic subject-specific details';
+      const composicion = COMPOSICIONES_FORMATO[ratio] || COMPOSICIONES_FORMATO['16:9'];
+      const estilo = incluirEstilo ? ', ' + ESTILOS[estiloActual].en : '';
+      return [promptBase.trim(), perfil, composicion, CAPA_VISUAL_UNIVERSAL].filter(Boolean).join(', ') + estilo;
+    }
+
+    let estiloActual = 0;
+    let temaAuto = false;
+
+    // ===== INTERFAZ =====
+    function construirUI() {
+      document.getElementById('script-niche').innerHTML = NICHOS.map(n => `<option value="${n[0]}">${n[1]}</option>`).join('');
+      document.getElementById('script-tone').innerHTML = TONOS.map(t => `<option value="${t[0]}">${t[1]}</option>`).join('');
+      const card = (e) => `<div class="style-card" data-i="${ESTILOS.indexOf(e)}" onclick="elegirEstilo(${ESTILOS.indexOf(e)})"><p class="style-name">${e.n}</p><p class="style-desc">${e.d}</p></div>`;
+      const fila = (arr) => arr.concat(arr).map(card).join('');
+      document.getElementById('track-1').innerHTML = fila(ESTILOS.slice(0, 5));
+      document.getElementById('track-2').innerHTML = fila(ESTILOS.slice(5));
+      cambiarNicho();
+      elegirEstilo(0);
+    }
+
+    function elegirEstilo(i) {
+      estiloActual = i;
+      document.querySelectorAll('.style-card').forEach(c => c.classList.toggle('active', Number(c.dataset.i) === i));
+      const e = ESTILOS[i];
+      document.getElementById('estilo-activo').textContent = `Estilo visual activo: ${e.n} · se aplica a Escenas e Imágenes`;
+      document.getElementById('scene-style-label').textContent = `Estilo visual: ${e.n} (cámbialo tocando una tarjeta del carrusel de arriba)`;
+      document.getElementById('img-style-label').textContent = `Aplicar estilo activo: ${e.n}`;
+    }
+
+    function cambiarNicho() {
+      const v = document.getElementById('script-niche').value;
+      const n = NICHOS.find(x => x[0] === v);
+      const t = document.getElementById('script-topic');
+      t.placeholder = n ? n[2] : 'Escribe tu tema';
+      if (temaAuto) { t.value = ''; temaAuto = false; }
+      const ic = document.getElementById('ideas-container');
+      ic.style.display = 'none';
+      ic.innerHTML = '';
+    }
+
+    function openTab(id, btn) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    function actualizarRelacionAspecto() {
+      const fmt = document.getElementById('script-format').value;
+      const ratio = document.getElementById('img-ratio');
+      if (fmt === 'vertical_short') ratio.value = '9:16';
+      else if (fmt === 'facebook_square') ratio.value = '1:1';
+      else ratio.value = '16:9';
+    }
+
+    // ===== RELOJ, INSTALACIÓN, SERVICE WORKER =====
+    function updateClock() {
+      const el = document.getElementById('live-datetime');
+      if (!el) return;
+      const n = new Date();
+      const p = (v) => String(v).padStart(2, '0');
+      el.textContent = `${p(n.getDate())}/${p(n.getMonth() + 1)}/${n.getFullYear()}  ${p(n.getHours())}:${p(n.getMinutes())}:${p(n.getSeconds())}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const btn = document.getElementById('pwa-install-btn');
+      if (btn) btn.style.display = 'inline-block';
+    });
+    function installPWA() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(() => {
+          deferredPrompt = null;
+          document.getElementById('pwa-install-btn').style.display = 'none';
+        });
+      }
+    }
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+    }
+
+    // ===== AYUDAS =====
+    function esc(t) {
+      return String(t == null ? '' : t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+    const contarPalabras = (t) => (t.trim() ? t.trim().split(/\s+/).length : 0);
+
+    // Detecta si la referencia es un enlace de YouTube (que la IA sí puede analizar) o solo texto
+    function parseRef(ref) {
+      const r = (ref || '').trim();
+      if (!r) return { tipo: 'ninguna' };
+      const m = r.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:[^\s]*&)?v=|shorts\/|live\/|embed\/))([\w-]{11})/);
+      if (m) return { tipo: 'youtube', url: 'https://www.youtube.com/watch?v=' + m[1] };
+      return { tipo: 'texto' };
+    }
+
+    // ===== LLAVE Y ESTADO DE API =====
+    function marcarApi(ok) {
+      const st = document.getElementById('api-status');
+      st.textContent = ok ? 'API: ON' : 'API: OFF';
+      st.style.color = ok ? '#10b981' : '#ef4444';
+    }
+    function checkKey() {
+      const k = localStorage.getItem('koffi_gemini_key');
+      marcarApi(!!(k && k.length > 10));
+    }
+    function toggleConfig() {
+      const b = document.getElementById('config-box');
+      b.style.display = b.style.display === 'none' ? 'block' : 'none';
+      const k = localStorage.getItem('koffi_gemini_key');
+      if (k) document.getElementById('gemini-key').value = k;
+    }
+    function guardarKey() {
+      const k = document.getElementById('gemini-key').value.trim();
+      if (!k) { alert('Pega primero tu llave de Gemini.'); return; }
+      localStorage.setItem('koffi_gemini_key', k);
+      checkKey();
+      probarConexion();
+    }
+
+    // ===== LLAMADA A GEMINI =====
+    async function callGemini(prompt, onStatus, videoUrl) {
+      const key = localStorage.getItem('koffi_gemini_key');
+      const choice = document.querySelector('input[name="gem_model"]:checked');
+      const wantPro = choice && choice.value === 'pro';
+      const models = wantPro
+        ? ['gemini-pro-latest', 'gemini-2.5-pro', 'gemini-flash-latest']
+        : ['gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.0-flash'];
+      const limite = videoUrl ? 120000 : 45000;
+      const partes = videoUrl ? [{ fileData: { fileUri: videoUrl } }, { text: prompt }] : [{ text: prompt }];
+      let lastErr = 'Sin respuesta';
+      for (const m of models) {
+        let to;
+        try {
+          if (onStatus) onStatus(m);
+          const ctl = new AbortController();
+          to = setTimeout(() => ctl.abort(), limite);
+          const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + m + ':generateContent', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+            body: JSON.stringify({ contents: [{ parts: partes }] }),
+            signal: ctl.signal
+          });
+          const data = await res.json();
+          clearTimeout(to);
+          if (data.error) {
+            lastErr = data.error.message || 'Error de la API';
+            if (res.status === 429) {
+              const er = new Error(lastErr);
+              er.rateLimited = true;
+              er.daily = /per ?day|daily/i.test(lastErr);
+              throw er;
+            }
+            if (res.status === 400 || res.status === 401 || res.status === 403) {
+              if (/api key|permission|unauthenticated/i.test(lastErr)) marcarApi(false);
+              break;
+            }
+            continue;
+          }
+          const ps = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts;
+          const text = ps ? ps.map(p => p.text || '').join('') : '';
+          if (text) { marcarApi(true); return { text, model: m }; }
+          lastErr = 'La respuesta vino vacía (posible bloqueo de seguridad). Cambia el tema.';
+        } catch (e) {
+          clearTimeout(to);
+          if (e.rateLimited) throw e;
+          lastErr = e.name === 'AbortError'
+            ? 'Google tardó más de ' + (limite / 1000) + ' segundos en responder (' + m + ')'
+            : 'Sin conexión o bloqueo de red: ' + e.message;
+        }
+      }
+      throw new Error(lastErr);
+    } 
+    
+
+    // Barandilla: si Google dice "vas muy rápido" (429), espera y reintenta
+    const PAUSA_ENTRE_LLAMADAS_MS = 6000;
+    async function callGeminiSafe(prompt, onWait, onStatus, videoUrl) {
+      const esperas = videoUrl ? [] : [35, 65];
+      for (let intento = 0; ; intento++) {
+        try {
+          return await callGemini(prompt, onStatus, videoUrl);
+        } catch (e) {
+          if (!e.rateLimited) throw e;
+          if (e.daily) throw new Error('Se agotó el límite DIARIO gratis de Gemini. Tu avance quedó guardado: vuelve a tocar el botón mañana y continúa donde quedó.');
+          if (intento >= esperas.length) throw new Error('Google sigue pidiendo calma. Tu avance quedó guardado: espera unos minutos y toca el botón para continuar.');
+          for (let t = esperas[intento]; t > 0; t--) {
+            if (onWait) onWait(t);
+            await sleep(1000);
+          }
+        }
+      }
+    }
+
+    // ===== DIAGNÓSTICO =====
+    async function probarConexion() {
+      const out = document.getElementById('diag-out');
+      out.style.display = 'block';
+      const key = document.getElementById('gemini-key').value.trim() || localStorage.getItem('koffi_gemini_key');
+      if (!key) { out.textContent = 'Primero pega tu llave y toca GUARDAR Y PROBAR.'; marcarApi(false); return; }
+      const BASE = 'https://generativelanguage.googleapis.com/v1beta';
+      const L = [];
+      const show = () => { out.textContent = L.join('\n'); };
+      async function pedir(url, opts, ms) {
+        const ctl = new AbortController();
+        const t0 = Date.now();
+        const to = setTimeout(() => ctl.abort(), ms);
+        try {
+          const r = await fetch(url, Object.assign({}, opts, { signal: ctl.signal }));
+          const d = await r.json().catch(() => ({}));
+          return { status: r.status, data: d, ms: Date.now() - t0 };
+        } catch (e) {
+          return { error: e.name === 'AbortError' ? 'no respondió en ' + (ms / 1000) + ' s' : e.message, ms: Date.now() - t0 };
+        } finally { clearTimeout(to); }
+      }
+      L.push('1) Revisando la llave...'); show();
+      const r1 = await pedir(BASE + '/models?pageSize=100', { headers: { 'x-goog-api-key': key } }, 15000);
+      if (r1.error) { L.push('✗ No hay conexión con Google: ' + r1.error, '→ Es la red o el bloqueo del navegador, no el código.'); show(); return; }
+      if (r1.status !== 200) {
+        marcarApi(false);
+        L.push('✗ Google respondió ' + r1.status + ': ' + ((r1.data.error && r1.data.error.message) || 'error'), '→ Es la LLAVE. Crea o copia una en aistudio.google.com/apikey.');
+        show(); return;
+      }
+      marcarApi(true);
+      const nombres = (r1.data.models || []).map(m => m.name.replace('models/', '')).filter(n => /flash/.test(n) && !/image|tts|live|audio|embedding/.test(n));
+      L.push('✓ La llave es válida (' + r1.ms + ' ms).', 'Modelos flash: ' + (nombres.slice(0, 6).join(', ') || 'ninguno')); show();
+      L.push('2) Pidiendo una respuesta de prueba (puede tardar)...'); show();
+      const r2 = await pedir(BASE + '/models/gemini-flash-latest:generateContent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+        body: JSON.stringify({ contents: [{ parts: [{ text: 'Responde solo con la palabra: LISTO' }] }] })
+      }, 45000);
+      if (r2.error) { L.push('✗ La respuesta no llegó: ' + r2.error, '→ Google está lento o tu red se cortó. Reintenta.'); show(); return; }
+      if (r2.status === 429) { L.push('✗ Límite de uso gratis alcanzado (429).', '→ Espera unos minutos; si persiste, se acabó la cuota diaria.'); show(); return; }
+      if (r2.status !== 200) { L.push('✗ Error ' + r2.status + ': ' + ((r2.data.error && r2.data.error.message) || '')); show(); return; }
+      const p = r2.data.candidates && r2.data.candidates[0] && r2.data.candidates[0].content && r2.data.candidates[0].content.parts;
+      L.push('✓ Gemini respondió en ' + (r2.ms / 1000).toFixed(1) + ' s: ' + (p ? p.map(x => x.text || '').join('').trim() : '(vacío)'), '→ Todo bien de tu lado.');
+      show();
+    }
+
+    // ===== IDEAS GANADORAS =====
+    async function generarIdeas() {
+      const key = localStorage.getItem('koffi_gemini_key');
+      if (!key) { alert('Ingresa tu llave de Gemini en ⚙️ CONFIG.'); toggleConfig(); return; }
+      const niche = document.getElementById('script-niche').value;
+      const btn = document.getElementById('btn-ideas');
+      const container = document.getElementById('ideas-container');
+      btn.disabled = true;
+      btn.textContent = "⏳ EXPLORANDO IDEAS GANADORAS...";
+      container.style.display = "block";
+      container.innerHTML = "<p style='font-size:10px; color:#10b981; font-family:monospace;'>Conectando con Gemini...</p>";
+      const prompt = `Actúa como estratega de contenido viral en YouTube para el nicho: "${niche}".
+Genera exactamente 5 ideas de videos de alto impacto, psicológicamente irresistibles y con alto CTR.
+Devuelve ÚNICAMENTE un arreglo JSON válido con el siguiente formato exacto, sin explicaciones ni markdown adicional:
+[{"titulo": "Título de alto impacto", "gancho": "El gancho de los primeros 15 segundos"}]`;
+      try {
+        const aviso = (t) => { container.innerHTML = `<p style='font-size:10px; color:#10b981; font-family:monospace;'>${t}</p>`; };
+        const r = await callGeminiSafe(prompt,
+          (t) => aviso(`Google pidió calma. Reintentando en ${t} s...`),
+          (m) => aviso(`Consultando a ${esc(m)}... (máx. 45 s)`));
+        const raw = r.text.replace(/```json/gi, '').replace(/```/g, '').trim();
+        const i1 = raw.indexOf('['), i2 = raw.lastIndexOf(']');
+        if (i1 === -1 || i2 === -1) throw new Error('La IA no devolvió una lista válida. Intenta de nuevo.');
+        const ideas = JSON.parse(raw.slice(i1, i2 + 1));
+        container.innerHTML = "";
+        ideas.forEach((item, idx) => {
+          const card = document.createElement('div');
+          card.className = 'idea-card';
+          card.innerHTML = `<div class="idea-title">#${idx + 1}: ${esc(item.titulo)}</div><div class="idea-hook">${esc(item.gancho)}</div>`;
+          card.onclick = () => {
+            document.getElementById('script-topic').value = item.titulo;
+            temaAuto = true;
+            container.querySelectorAll('.idea-card').forEach(x => x.style.borderColor = '#27272a');
+            card.style.borderColor = '#10b981';
+          };
+          container.appendChild(card);
+        });
+      } catch (err) {
+        container.innerHTML = `<p style='font-size:10px; color:#f59e0b;'>Error al explorar ideas: ${esc(err.message)}. Puedes escribir el tema manualmente.</p>`;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "🎲 GENERAR 5 IDEAS GANADORAS";
+      }
+    }
+
+    // ===== GUION (por capítulos para llegar a 20-25 min) =====
+    const PALABRAS_POR_MIN = 145;
+    const KOFFI_PROJECT_KEY = 'koffi_studio_project_v2';
+    const PALABRAS_MIN_CAPITULO = 520;
+    const PALABRAS_MAX_CAPITULO = 600;
+    let detener = false;
+    let avance = null;
+    let guionListo = null;
+    let saveTimer = null;
+
+    function detenerGuion() { detener = true; guardarProyecto(); }
+
+    function actualizarContador(texto) {
+      const w = contarPalabras(texto);
+      document.getElementById('script-counter').textContent = `${w} palabras · ≈ ${(w / PALABRAS_POR_MIN).toFixed(1)} min`;
+      return w;
+    }
+
+    function estadoGuardado(mensaje, error = false) {
+      const el = document.getElementById('save-status');
+      if (!el) return;
+      el.textContent = mensaje;
+      el.style.color = error ? '#f59e0b' : '#71717a';
+    }
+
+    function guardarProyecto() {
+      try {
+        const proyecto = {
+          version: 2, actualizado: new Date().toISOString(),
+          controles: {
+            nicho: document.getElementById('script-niche')?.value || '',
+            tono: document.getElementById('script-tone')?.value || '',
+            tema: document.getElementById('script-topic')?.value || '',
+            referencia: document.getElementById('script-ref')?.value || '',
+            formato: document.getElementById('script-format')?.value || 'youtube_long'
+          },
+          editor: document.getElementById('script-console')?.value || '',
+          visual: {
+            escenas: escenasGuardadas,
+            cantidad: document.getElementById('scene-count')?.value || '6',
+            prompt: document.getElementById('img-prompt')?.value || '',
+            ratio: document.getElementById('img-ratio')?.value || '16:9',
+            estilo: estiloActual
+          },
+          avance, guionListo
+        };
+        localStorage.setItem(KOFFI_PROJECT_KEY, JSON.stringify(proyecto));
+        estadoGuardado('✓ Guardado automáticamente en este dispositivo.');
+        return true;
+      } catch (e) {
+        estadoGuardado('⚠️ No se pudo guardar. Descarga una copia TXT para proteger tu trabajo.', true);
+        console.warn('Koffi Studio: error al guardar el proyecto', e);
+        return false;
+      }
+    }
+
+    function programarGuardado() {
+      clearTimeout(saveTimer);
+      estadoGuardado('Guardando cambios…');
+      saveTimer = setTimeout(guardarProyecto, 350);
+    }
+
+    function restaurarProyecto() {
+      try {
+        const raw = localStorage.getItem(KOFFI_PROJECT_KEY);
+        if (!raw) return;
+        const proyecto = JSON.parse(raw);
+        if (!proyecto || proyecto.version !== 2) return;
+        const c = proyecto.controles || {};
+        const asignar = (id, valor) => {
+          const el = document.getElementById(id);
+          if (el && valor !== undefined && valor !== null && valor !== '') el.value = valor;
+        };
+        asignar('script-niche', c.nicho);
+        asignar('script-tone', c.tono);
+        asignar('script-topic', c.tema);
+        asignar('script-ref', c.referencia);
+        asignar('script-format', c.formato);
+        if (typeof proyecto.editor === 'string') {
+          const editor = document.getElementById('script-console');
+          editor.value = proyecto.editor;
+          editor.dataset.ready = editor.value.trim().length >= 50 ? '1' : '';
+          actualizarContador(editor.value);
+        }
+        const visual = proyecto.visual || {};
+        if (Array.isArray(visual.escenas)) escenasGuardadas = visual.escenas;
+        asignar('scene-count', visual.cantidad);
+        asignar('img-prompt', visual.prompt);
+        asignar('img-ratio', visual.ratio);
+        if (Number.isInteger(visual.estilo) && visual.estilo >= 0 && visual.estilo < ESTILOS.length) estiloActual = visual.estilo;
+        avance = proyecto.avance || null;
+        guionListo = proyecto.guionListo || null;
+        if (guionListo && Array.isArray(guionListo.capitulos)) {
+          document.getElementById('btn-alargar').style.display = 'block';
+        }
+        if (avance && Array.isArray(avance.capitulos)) {
+          const btn = document.getElementById('btn-generate-script');
+          btn.textContent = avance.capitulos.length ? '▶ CONTINUAR GUION' : '⚡ GENERAR GUION COMPLETO';
+          estadoGuardado(`✓ Proyecto recuperado. ${avance.capitulos.length} de 6 capítulos completados; puedes continuar.`);
+        } else {
+          estadoGuardado('✓ Último trabajo recuperado de este dispositivo.');
+        }
+      } catch (e) {
+        estadoGuardado('⚠️ No se pudo recuperar el último proyecto guardado.', true);
+        console.warn('Koffi Studio: error al recuperar el proyecto', e);
+      }
+    }
+
+    function conectarGuardadoAutomatico() {
+      ['script-niche','script-tone','script-topic','script-ref','script-format','script-console'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', () => {
+          if (id === 'script-console') actualizarContador(el.value);
+          programarGuardado();
+        });
+        if (el && el.tagName !== 'TEXTAREA') el.addEventListener('change', programarGuardado);
+      });
+      ['scene-count','img-prompt','img-ratio'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.addEventListener('input', programarGuardado); el.addEventListener('change', programarGuardado); }
+      });
+      window.addEventListener('beforeunload', guardarProyecto);
+    }
+
+    async function ejecutarGemini() {
+      const key = localStorage.getItem('koffi_gemini_key');
+      if (!key) { alert('Ingresa tu llave de Gemini en ⚙️ CONFIG.'); toggleConfig(); return; }      const topic = document.getElementById('script-topic').value.trim();
+      const niche = document.getElementById('script-niche').value;
+      const tone = document.getElementById('script-tone').value;
+      const ref = document.getElementById('script-ref').value.trim();
+      const formatVal = document.getElementById('script-format').value;
+      const c = document.getElementById('script-console');
+      const btn = document.getElementById('btn-generate-script');
+      const stopBtn = document.getElementById('btn-stop');
+      const nota = document.getElementById('ref-note');
+      if (!topic) { alert('Escribe un tema o toca 🎲 para elegir una idea.'); return; }
+
+      const refInfo = parseRef(ref);
+      const refTexto = refInfo.tipo === 'texto'
+        ? `Referencia de estructura y gancho (título o descripción del usuario): "${ref}". Úsala como inspiración de ritmo y retención, pero escribe contenido 100% original.`
+        : '';
+      const refVideo = `Se adjunta un video de referencia. Analiza cómo abre, cómo estructura el contenido, su ritmo, sus ganchos y los giros que retienen al espectador, y replica ESA mecánica, pero con contenido 100% original sobre el tema indicado (no copies frases ni datos).`;
+      const base = `Nicho: ${niche}\nTema principal: ${topic}\nTONO DE VOZ (obligatorio; debe notarse en el vocabulario, el ritmo de las frases y la forma de dirigirte al espectador): ${tone}\n${refTexto}`;
+
+      // Si hay enlace de YouTube, intenta que Gemini vea el video; si falla, sigue sin él
+      async function llamarConRef(conVideo, sinVideo, onWait) {
+        if (refInfo.tipo !== 'youtube') return callGeminiSafe(sinVideo, onWait);
+        nota.textContent = '🎬 Analizando el video de referencia (puede tardar)...';
+        try {
+          const r = await callGeminiSafe(conVideo, onWait, null, refInfo.url);
+          nota.textContent = '🎬 Video de referencia analizado por Gemini.';
+          return r;
+        } catch (e) {
+          nota.textContent = '⚠️ No pude analizar ese video (' + e.message.slice(0, 90) + '). Seguí solo con tu tema y tono.';
+          return callGeminiSafe(sinVideo, onWait);
+        }
+      }
+
+      detener = false;
+      btn.disabled = true;
+      document.getElementById('btn-alargar').style.display = 'none';
+      stopBtn.style.display = 'block';
+      c.dataset.ready = '';
+
+      try {
+        if (formatVal !== 'youtube_long') {
+          btn.textContent = "⏳ REDACTANDO GUION...";
+          c.value = "Conectando con Gemini...";
+          const reglas = formatVal === 'vertical_short'
+            ? `Formato: Short / Reel / TikTok (60 segundos). Gancho de 3 segundos que corte el scroll, argumento veloz sin pausas y remate final claro. Máximo 160 palabras.`
+            : `Formato: Video para Facebook. Estructura reflexiva cotidiana, párrafos breves, alta resonancia emocional sobre relaciones y conducta.`;
+          const pc = `Actúa como guionista senior y productor audiovisual de Koffi Studio.\n${base}\n${reglas}\nNo agregues introducciones meta ni explicaciones técnicas. Entrega directamente el guion listo para ser locutado, sin títulos ni marcas, solo texto corrido.`;
+          const r = await llamarConRef(pc + '\n' + refVideo, pc,
+            (t) => { c.value = `Google pidió calma. Reintentando en ${t} s...`; });
+          c.value = r.text;
+          actualizarContador(r.text);
+          c.dataset.ready = '1';
+          guardarProyecto();
+          return;
+        }
+
+        const llave = `${niche}|${topic}|${tone}|${ref}`;
+        if (!avance || avance.llave !== llave) avance = { llave, esquema: null, capitulos: [], base, estado: 'iniciado' };
+        avance.base = base;
+        avance.estado = 'generando';
+        guardarProyecto();
+        const esperando = (t) => { c.value = (avance.capitulos.join('\n\n') + `\n\n⏳ Google pidió calma. Reintentando en ${t} s...`).trim(); };
+
+        if (!avance.esquema) {
+          btn.textContent = "⏳ DISEÑANDO ESQUEMA (1/7)...";
+          c.value = "Diseñando el esquema de 6 capítulos...";
+          const pe = `Actúa como guionista senior de YouTube.\n${base}\nDiseña el esquema de un video de 22 minutos en exactamente 6 capítulos que se encadenan, cada uno con un giro o tensión que obligue a seguir viendo. Devuelve ÚNICAMENTE un arreglo JSON válido, sin markdown: [{"titulo":"...","resumen":"qué se cuenta en este capítulo, en 2 frases"}]`;
+          const r = await llamarConRef(pe + '\n' + refVideo, pe, esperando);
+          const t = r.text.replace(/```json/gi, '').replace(/```/g, '');
+          const i1 = t.indexOf('['), i2 = t.lastIndexOf(']');
+          if (i1 === -1 || i2 === -1) throw new Error('No pude armar el esquema. Intenta de nuevo.');
+          const esq = JSON.parse(t.slice(i1, i2 + 1));
+          if (!Array.isArray(esq) || esq.length !== 6 || esq.some(e => !e || !e.titulo || !e.resumen)) throw new Error('El esquema debe contener exactamente 6 capítulos completos. Intenta de nuevo.');
+          avance.esquema = esq;
+          avance.estado = 'esquema_listo';
+          guardarProyecto();
+          await sleep(PAUSA_ENTRE_LLAMADAS_MS);
+        }
+
+        const total = avance.esquema.length;
+        const listaEsquema = avance.esquema.map((e, k) => `${k + 1}. ${e.titulo}: ${e.resumen}`).join('\n');
+        for (let n = avance.capitulos.length; n < total; n++) {
+          if (detener) { c.value = avance.capitulos.join('\n\n') + '\n\n⏹ Detenido. Toca GENERAR para continuar desde el capítulo ' + (n + 1) + '.'; break; }
+          btn.textContent = `⏳ CAPÍTULO ${n + 1} DE ${total} (${n + 2}/${total + 1})...`;
+          c.value = (avance.capitulos.join('\n\n') + `\n\n✍️ Escribiendo capítulo ${n + 1} de ${total}: ${avance.esquema[n].titulo}...`).trim();
+          const previo = avance.capitulos.length ? avance.capitulos[avance.capitulos.length - 1].split(/\s+/).slice(-70).join(' ') : '';
+          const esPrimero = n === 0, esUltimo = n === total - 1;
+          const prompt = `Actúa como guionista senior de YouTube y productor de Koffi Studio.
+${base}
+ESQUEMA COMPLETO DEL VIDEO:
+${listaEsquema}
+
+Escribe SOLO el capítulo ${n + 1} de ${total}: "${avance.esquema[n].titulo}".
+REGLAS EDITORIALES OBLIGATORIAS:
+- Longitud: entre ${PALABRAS_MIN_CAPITULO} y ${PALABRAS_MAX_CAPITULO} palabras. Desarrolla con profundidad; no rellenes ni resumas.
+- Español latinoamericano neutro, tuteo natural, sin voseo ni expresiones propias de España.
+- El tono elegido debe sentirse en el vocabulario, el ritmo y la cercanía de la narración.
+- Cada capítulo debe aportar ideas, escenas, ejemplos y reflexiones nuevas. No repitas conceptos, ejemplos, metáforas, preguntas retóricas ni frases ya utilizadas.
+- Respeta la función de este capítulo dentro del esquema completo. No adelantes el contenido de capítulos posteriores ni vuelvas a explicar lo ya desarrollado.
+- ${esPrimero ? 'Abre con un gancho psicológico potente durante los primeros 15 segundos, sin saludos formales.' : 'Continúa orgánicamente desde el capítulo anterior, sin resumen ni recapitulación. Usa este cierre solo como punto de continuidad: "' + previo + '"'}
+- ${esUltimo ? 'Cierra con una conclusión contundente, emocional y natural. No incluyas invitaciones a suscribirse, seguir el canal, comentar ni llamadas promocionales.' : 'Termina con una transición o tensión que impulse al siguiente capítulo, sin cerrar el video ni despedirte.'}
+- No incluyas llamadas a suscribirse, comentar, compartir ni seguir el canal en ningún capítulo.
+- Entrega exclusivamente texto corrido listo para locución: sin títulos, números de capítulo, viñetas, acotaciones, corchetes, notas ni explicaciones meta.
+
+CONTENIDO YA DESARROLLADO (evita repetirlo):
+${avance.capitulos.map((texto, i) => `CAPÍTULO ${i + 1}:\n${texto.slice(-2200)}`).join('\n\n')}`;
+          const r = await callGeminiSafe(prompt, esperando);
+          avance.capitulos.push(r.text.trim());
+          avance.estado = 'capitulo_' + avance.capitulos.length + '_completado';
+          c.value = avance.capitulos.join('\n\n');
+          c.dataset.ready = '1';
+          actualizarContador(c.value);
+          guardarProyecto();
+          if (n < total - 1) await sleep(PAUSA_ENTRE_LLAMADAS_MS);
+        }
+
+        if (avance.capitulos.length) {
+          c.dataset.ready = '1';
+          const w = actualizarContador(avance.capitulos.join('\n\n'));
+          if (avance.capitulos.length === total) {
+            guionListo = { esquema: avance.esquema, capitulos: avance.capitulos.slice(), base, actualizado: new Date().toISOString() };
+            avance = null;
+            guardarProyecto();
+            document.getElementById('btn-alargar').style.display = 'block';
+          } else {
+            avance.estado = 'pausado';
+            guardarProyecto();
+          }
+        }
+      } catch (err) {
+        const parcial = avance && avance.capitulos.length ? avance.capitulos.join('\n\n') + '\n\n' : '';
+        c.value = parcial + '⚠️ ' + err.message;
+        if (parcial) { c.dataset.ready = '1'; actualizarContador(parcial); }
+        if (avance) { avance.estado = 'error_o_pausa'; guardarProyecto(); }
+      } finally {
+        btn.disabled = false;
+        stopBtn.style.display = 'none';
+        btn.textContent = (avance && avance.capitulos.length) ? "▶ CONTINUAR GUION" : "⚡ GENERAR GUION COMPLETO";
+      }
+    }
+
+    async function alargarGuion() {
+      if (!guionListo) { alert('Primero genera un guion largo.'); return; }
+      const g = guionListo;
+      const c = document.getElementById('script-console');
+      if (c.value.trim() !== g.capitulos.join('\n\n').trim()) {
+        alert('El editor tiene cambios manuales. Para protegerlos, no ampliaré el guion desde la versión anterior.');
+        return;
+      }
+      const btn = document.getElementById('btn-alargar');
+      let idx = 0, min = Infinity;
+      g.capitulos.forEach((t, i) => { const w = contarPalabras(t); if (w < min) { min = w; idx = i; } });
+      btn.disabled = true;
+      btn.textContent = `⏳ AMPLIANDO CAPÍTULO ${idx + 1}...`;
+      try {
+        const prompt = `Actúa como guionista senior de YouTube.\n${g.base}\nA continuación está el capítulo ${idx + 1} de ${g.capitulos.length} de un video. Reescríbelo y ajústalo a entre ${PALABRAS_MIN_CAPITULO} y ${PALABRAS_MAX_CAPITULO} palabras. Conserva su función narrativa, pero elimina repeticiones y no introduzcas ideas ya desarrolladas en los otros capítulos. Mantén español latinoamericano neutro y tuteo. No incluyas llamadas promocionales. Entrega solo texto corrido listo para locutar, sin títulos, viñetas ni notas.
+
+LOS OTROS CAPÍTULOS (no repetir):
+${g.capitulos.filter((_, i) => i !== idx).map((t, i) => t.slice(-1400)).join('\n\n')}\n\nCAPÍTULO ACTUAL:\n${g.capitulos[idx]}`;
+        const r = await callGeminiSafe(prompt, (t) => { btn.textContent = `⏳ Google pidió calma (${t} s)...`; });
+        const nuevasPalabras = contarPalabras(r.text);
+        if (nuevasPalabras >= PALABRAS_MIN_CAPITULO && nuevasPalabras <= PALABRAS_MAX_CAPITULO && nuevasPalabras > min) g.capitulos[idx] = r.text.trim();
+        else alert(`La ampliación no respetó el rango de ${PALABRAS_MIN_CAPITULO} a ${PALABRAS_MAX_CAPITULO} palabras. Conservé el capítulo anterior para no alterar el objetivo de duración.`);
+        c.value = g.capitulos.join('\n\n');
+        c.dataset.ready = '1';
+        actualizarContador(c.value);
+        guardarProyecto();
+      } catch (e) {
+        alert(e.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '➕ ALARGAR (amplía el capítulo más corto)';
+      }
+    }
+
+    function copiarGuion() {
+      const text = document.getElementById('script-console').value;
+      navigator.clipboard.writeText(text).then(() => alert('Guion copiado al portapapeles.'));
+    }
+
+    function descargarGuionTxt() {
+      const text = document.getElementById('script-console').value;
+      const topic = document.getElementById('script-topic').value || "guion_koffi";
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${topic.toLowerCase().replace(/[^a-z0-9]/g, '_')}.txt`;
+      a.click();
+    }
+
+    // ===== ESCENAS VISUALES =====
+    function renderizarEscenas(escenas) {
+      const cont = document.getElementById('scenes-container');
+      cont.innerHTML = '';
+      escenas.forEach((e, k) => {
+        const card = document.createElement('div');
+        card.className = 'card-item';
+        const h = document.createElement('div');
+        h.style.cssText = 'font-size:10px; color:#10b981; font-weight:700; margin-bottom:4px;';
+        h.textContent = `ESCENA ${k + 1}`;
+        const d = document.createElement('div');
+        d.style.cssText = 'font-size:11px; color:#fff;';
+        d.textContent = e.descripcion || '';
+        const f = document.createElement('div');
+        f.style.cssText = 'font-size:10px; color:#71717a; margin:4px 0;';
+        f.textContent = e.fragmento ? '“' + e.fragmento + '…”' : '';
+        const p = document.createElement('div');
+        p.style.cssText = 'font-size:10px; color:#a1a1aa; font-family:monospace; margin-bottom:6px;';
+        p.textContent = e.prompt || '';
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex; gap:8px;';
+        const b1 = document.createElement('button');
+        b1.className = 'btn-secondary'; b1.style.marginTop = '0'; b1.textContent = '📋 COPIAR PROMPT';
+        b1.onclick = () => navigator.clipboard.writeText(e.prompt || '').then(() => alert('Prompt de la escena ' + (k + 1) + ' copiado.'));
+        const b2 = document.createElement('button');
+        b2.className = 'btn-secondary'; b2.style.marginTop = '0'; b2.textContent = '🎨 USAR EN GENERADOR';
+        b2.onclick = () => {
+          document.getElementById('img-prompt').value = e.prompt || '';
+          document.getElementById('img-use-style').checked = false;
+          programarGuardado();
+          openTab('tab-imagenes', document.querySelectorAll('.tab-btn')[2]);
+        };
+        row.appendChild(b1); row.appendChild(b2);
+        [h, d, f, p, row].forEach(x => card.appendChild(x));
+        cont.appendChild(card);
+      });
+    }
+
+    async function generarEscenas() {
+      const c = document.getElementById('script-console');
+      const guion = c.dataset.ready ? c.value.trim() : '';
+      const note = document.getElementById('scene-note');
+      const btn = document.getElementById('btn-escenas');
+      if (guion.length < 200) { alert('Primero genera un guion en la Pestaña 1.'); return; }
+      const n = parseInt(document.getElementById('scene-count').value, 10);
+      const nicho = document.getElementById('script-niche').value;
+      const ratio = obtenerFormatoVisual();
+      const perfil = PERFILES_VISUALES[nicho] || '';
+      const composicion = COMPOSICIONES_FORMATO[ratio];
+      const estilo = ESTILOS[estiloActual].en;
+      btn.disabled = true;
+      btn.textContent = '⏳ CREANDO ESCENAS...';
+      note.textContent = 'Preparando escenas según el nicho y la composición seleccionados…';
+      try {
+        const prompt = `Eres director de arte y supervisor de continuidad visual.\nNicho editorial: ${nicho}. Perfil estético obligatorio: ${perfil}.\nFormato objetivo: ${ratio}. Regla de composición nativa: ${composicion}.\nEstilo adicional seleccionado: ${estilo}.\nDivide el siguiente guion en exactamente ${n} escenas consecutivas que cubran todo el guion en orden. Cada escena debe representar un momento específico del fragmento, ser visualmente distinta de las demás y mantener coherencia de época, personajes, vestuario, localización y objetos. Alterna planos generales, medios, primeros planos, detalles y perspectivas cuando la historia lo permita; evita repetir encuadre, sujeto y composición.\nPara cada escena entrega: "fragmento" (las primeras 10 palabras del tramo del guion, tal cual), "descripcion" (en español, qué se ve, 1 frase) y "prompt" (en inglés, con sujeto, acción, entorno, encuadre, perspectiva, luz y detalles específicos del nicho; integra el perfil, la composición y el estilo; sin texto, letras, logos ni marcas de agua).\nDevuelve ÚNICAMENTE un arreglo JSON válido, sin markdown: [{"fragmento":"...","descripcion":"...","prompt":"..."}]\n\nGUION:\n${guion}`;
+        const r = await callGeminiSafe(prompt,
+          (t) => { note.textContent = `Google pidió calma. Reintentando en ${t} s...`; },
+          (m) => { note.textContent = `Consultando a ${m}... (máx. 45 s)`; });
+        const t = r.text.replace(/```json/gi, '').replace(/```/g, '');
+        const i1 = t.indexOf('['), i2 = t.lastIndexOf(']');
+        if (i1 === -1 || i2 === -1) throw new Error('La IA no devolvió una lista válida. Intenta de nuevo.');
+        const escenas = JSON.parse(t.slice(i1, i2 + 1));
+        if (!Array.isArray(escenas) || escenas.length !== n) throw new Error(`Se esperaban ${n} escenas y se recibieron ${Array.isArray(escenas) ? escenas.length : 0}.`);
+        escenasGuardadas = escenas.map(e => ({...e, prompt: construirPromptVisual(e.prompt || '', ratio, false)}));
+        renderizarEscenas(escenasGuardadas);
+        note.textContent = `✓ ${escenasGuardadas.length} escenas listas para ${nicho} · ${ratio}. Se guardarán en este dispositivo.`;
+        guardarProyecto();
+      } catch (err) {
+        note.textContent = '⚠️ ' + err.message;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '🎬 CREAR ESCENAS DESDE EL GUION';
+      }
+    }
+
+    // ===== GENERADOR DE IMÁGENES =====
+    function mostrarImagen(src, info) {
+      const img = document.getElementById('img-result');
+      const loader = document.getElementById('img-loading');
+      const inf = document.getElementById('img-info');
+      return new Promise((resolve, reject) => {
+        img.onload = () => { loader.style.display = 'none'; img.style.display = 'block'; inf.textContent = info; resolve(); };
+        img.onerror = () => reject(new Error('La imagen no cargó'));
+        img.src = src;
+      });
+    }
+
+    // ===== GENERACIÓN FLUX.2 KLEIN MEDIANTE CLOUDFLARE WORKER =====
+    const KOFFI_FLUX_WORKER_URL = 'https://koffi-studio-flux.johnnyromasoyyo.workers.dev';
+    const KOFFI_TURNSTILE_SITE_KEY = '0x4AAAAAAF6v26dfwmFSw1ju';
+    let koffiTurnstileLoadPromise = null;
+    let koffiTurnstileWidgetId = null;
+    let koffiTurnstileResolver = null;
+    let koffiTurnstileRejecter = null;
+
+    function cargarTurnstile() {
+      if (window.turnstile) return Promise.resolve();
+      if (koffiTurnstileLoadPromise) return koffiTurnstileLoadPromise;
+      koffiTurnstileLoadPromise = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+        script.async = true;
+        script.defer = true;
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error('No se pudo cargar la validación de seguridad de Cloudflare.'));
+        document.head.appendChild(script);
+      });
+      return koffiTurnstileLoadPromise;
+    }
+
+    async function obtenerTokenTurnstile() {
+      await cargarTurnstile();
+      const contenedor = document.getElementById('turnstile-container');
+      if (!contenedor) throw new Error('No se encontró el espacio de validación de seguridad.');
+
+      if (koffiTurnstileWidgetId === null) {
+        koffiTurnstileWidgetId = window.turnstile.render(contenedor, {
+          sitekey: KOFFI_TURNSTILE_SITE_KEY,
+          size: 'invisible',
+          execution: 'execute',
+          action: 'koffi_flux',
+          callback: (token) => {
+            if (koffiTurnstileResolver) {
+              const resolver = koffiTurnstileResolver;
+              koffiTurnstileResolver = null;
+              koffiTurnstileRejecter = null;
+              resolver(token);
+            }
+          },
+          'error-callback': () => {
+            if (koffiTurnstileRejecter) {
+              const rejecter = koffiTurnstileRejecter;
+              koffiTurnstileResolver = null;
+              koffiTurnstileRejecter = null;
+              rejecter(new Error('Cloudflare no pudo completar la validación. Inténtalo otra vez.'));
+            }
+          },
+          'expired-callback': () => {
+            if (koffiTurnstileRejecter) {
+              const rejecter = koffiTurnstileRejecter;
+              koffiTurnstileResolver = null;
+              koffiTurnstileRejecter = null;
+              rejecter(new Error('La validación de seguridad venció. Vuelve a intentarlo.'));
+            }
+          }
+        });
+      }
+
+      return new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          koffiTurnstileResolver = null;
+          koffiTurnstileRejecter = null;
+          reject(new Error('La validación de seguridad tardó demasiado. Vuelve a intentarlo.'));
+        }, 120000);
+
+        koffiTurnstileResolver = (token) => {
+          clearTimeout(timeout);
+          resolve(token);
+        };
+        koffiTurnstileRejecter = (error) => {
+          clearTimeout(timeout);
+          reject(error);
+        };
+
+        try {
+          window.turnstile.reset(koffiTurnstileWidgetId);
+          window.turnstile.execute(koffiTurnstileWidgetId);
+        } catch (error) {
+          clearTimeout(timeout);
+          koffiTurnstileResolver = null;
+          koffiTurnstileRejecter = null;
+          reject(new Error('No se pudo iniciar la validación de Cloudflare: ' + error.message));
+        }
+      });
+    }
+
+    async function imagenFlux(prompt, ratio, w, h) {
+      const turnstileToken = await obtenerTokenTurnstile();
+      const response = await fetch(KOFFI_FLUX_WORKER_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt,
+          width: w,
+          height: h,
+          turnstileToken
+        })
+      });
+
+      let data;
+      try {
+        data = await response.json();
+      } catch {
+        throw new Error('El Worker respondió con un formato inesperado.');
+      }
+
+      if (!response.ok) {
+        throw new Error(data.error || data.detail || `Error del Worker (${response.status}).`);
+      }
+      if (typeof data.image !== 'string' || !data.image) {
+        throw new Error('El Worker no devolvió una imagen.');
+      }
+
+      await Promise.race([
+        mostrarImagen(data.image, `✓ Imagen (${ratio}) generada con FLUX.2 Klein 4B mediante Cloudflare.\nMantén presionada la imagen para guardarla en tu móvil.`),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('La imagen tardó demasiado en cargarse.')), 60000))
+      ]);
+    }
+
+    async function generarImagen() {
+      const ratio = document.getElementById('img-ratio').value;
+      let prompt = document.getElementById('img-prompt').value.trim();
+      const img = document.getElementById('img-result');
+      const info = document.getElementById('img-info');
+      const loader = document.getElementById('img-loading');
+      const button = document.querySelector('#tab-imagenes .panel-box .btn-main');
+      if (!prompt) { alert('Escribe un prompt visual primero.'); return; }
+      prompt = construirPromptVisual(prompt, ratio, document.getElementById('img-use-style').checked);
+
+      let w = 1280, h = 720;
+      if (ratio === '9:16') { w = 720; h = 1280; }
+      else if (ratio === '1:1') { w = 1024; h = 1024; }
+
+      loader.style.display = 'block';
+      loader.textContent = 'Validando seguridad y preparando FLUX.2 Klein 4B...';
+      img.style.display = 'none';
+      info.textContent = 'Conectando de forma segura con Cloudflare Workers AI. Esto puede tardar un poco.';
+      if (button) { button.disabled = true; button.textContent = '⏳ GENERANDO...'; }
+
+      try {
+        await imagenFlux(prompt, ratio, w, h);
+      } catch (error) {
+        loader.style.display = 'none';
+        info.textContent = '⚠️ No se pudo generar la imagen.\n' + (error.message || 'Error desconocido') + '\n\nComprueba tu conexión e inténtalo nuevamente.';
+      } finally {
+        loader.style.display = 'none';
+        if (button) { button.disabled = false; button.textContent = '🎨 RENDERIZAR IMAGEN'; }
+      }
+    }
+
+    // ===== DIVISOR A2E =====
+    function trocearGuionA2E() {
+      const consola = document.getElementById('script-console');
+      const fullText = consola.value;
+      const container = document.getElementById('chunks-container');
+      container.innerHTML = "";
+      if (!consola.dataset.ready || fullText.length < 50) { alert('Primero genera un guion en la Pestaña 1.'); return; }
+      const sentences = fullText.split(/(?<=[.?!])\s+/);
+      const chunks = [];
+      let cur = "";
+      sentences.forEach(s => {
+        if ((cur + s).length < 900) cur += (cur ? " " : "") + s;
+        else { if (cur) chunks.push(cur); cur = s; }
+      });
+      if (cur) chunks.push(cur);
+      chunks.forEach((chunk, i) => {
+        const div = document.createElement('div');
+        div.style = "background:#09090b; border:1px solid #27272a; padding:8px; border-radius:6px; margin-bottom:8px;";
+        div.innerHTML = `
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <span style="font-size:10px; color:#10b981; font-weight:700;">BLOQUE ${i + 1} (${chunk.length} CARACTERES)</span>
+            <button style="background:#fff; color:#000; border:none; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:700; cursor:pointer;" onclick="navigator.clipboard.writeText(this.dataset.text); alert('Bloque ${i + 1} copiado.');" data-text="${esc(chunk)}">COPIAR</button>
+          </div>
+          <p style="font-size:10px; color:#a1a1aa; line-height:1.4;">${esc(chunk.substring(0, 100))}...</p>`;
+        container.appendChild(div);
+      });
+    }
+
+    // ===== INICIO =====
+    construirUI();
+    restaurarProyecto();
+    elegirEstilo(estiloActual);
+    if (escenasGuardadas.length) renderizarEscenas(escenasGuardadas);
+    actualizarRelacionAspecto();
+    conectarGuardadoAutomatico();
+    checkKey();
+  </script>
+</body>
+</html>
