@@ -1,0 +1,1686 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#030303">
+  <title>Koffi Studio — Media Engine</title>
+  <link rel="icon" href="icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="manifest" href="manifest.json">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:#030303;color:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;min-height:100vh;line-height:1.5;}
+    header{background:#09090b;border-bottom:1px solid #18181b;padding:16px 16px 10px;text-align:center;}
+    .brand-logo-img{display:block;width:44px;height:44px;margin:0 auto 8px;border-radius:50%;background:#000;object-fit:cover;}
+    .brand-title{display:block;font-size:15px;font-weight:600;letter-spacing:5px;padding-left:5px;color:#f4f4f5;white-space:nowrap;}
+    .brand-sub{display:block;margin-top:5px;font-size:9px;letter-spacing:4px;padding-left:4px;color:#a1a1aa;text-transform:uppercase;white-space:nowrap;}
+    .brand-tag{display:block;margin-top:4px;font-size:clamp(6.5px,2vw,8.5px);letter-spacing:1.4px;color:#52525b;text-transform:uppercase;white-space:nowrap;}
+    .util-bar{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:8px;border-top:1px solid #18181b;}
+    #live-datetime{font-family:monospace;font-size:10px;letter-spacing:.5px;color:#71717a;}
+    .util-right{display:flex;align-items:center;gap:8px;}
+    .btn-cfg{background:none;border:1px solid #27272a;color:#a1a1aa;font-size:10px;padding:3px 8px;border-radius:4px;cursor:pointer;white-space:nowrap;}
+    #pwa-install-btn{display:none;background:#10b981;border:none;color:#000;font-size:10px;font-weight:700;padding:4px 8px;border-radius:4px;cursor:pointer;}
+    #api-status{font-family:monospace;font-size:10px;font-weight:700;letter-spacing:.5px;white-space:nowrap;}
+    .container{max-width:1200px;margin:0 auto;padding:14px 16px;}
+    .marquee-wrapper{overflow:hidden;position:relative;margin-bottom:8px;mask-image:linear-gradient(to right,transparent,black 8%,black 92%,transparent);-webkit-mask-image:linear-gradient(to right,transparent,black 8%,black 92%,transparent);}
+    .marquee-track{display:flex;width:max-content;gap:10px;}
+    .marquee-left{animation:scroll-left 45s linear infinite;}
+    .marquee-right{animation:scroll-right 45s linear infinite;}
+    .marquee-wrapper:hover .marquee-track,.marquee-wrapper:active .marquee-track{animation-play-state:paused;}
+    @keyframes scroll-left{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+    @keyframes scroll-right{0%{transform:translateX(-50%);}100%{transform:translateX(0);}}
+    .style-card{width:185px;background:#09090b;border:1px solid #18181b;border-radius:6px;padding:8px 10px;text-align:left;cursor:pointer;}
+    .style-card.active{border-color:#10b981;}
+    .style-name{font-size:11px;font-weight:700;color:#fff;}
+    .style-desc{font-size:10px;color:#71717a;margin-top:2px;}
+    #estilo-activo{font-size:10px;color:#71717a;text-align:center;margin:2px 0 4px;}
+    .tabs-nav{display:flex;overflow-x:auto;border-bottom:1px solid #18181b;gap:14px;padding-bottom:8px;margin-top:12px;}
+    .tab-btn{background:none;border:none;color:#71717a;font-size:12px;font-weight:600;cursor:pointer;padding-bottom:6px;white-space:nowrap;}
+    .tab-btn.active{color:#fff;border-bottom:2px solid #fff;}
+    .tab-content{display:none;margin-top:14px;}
+    .tab-content.active{display:block;}
+    .grid-workspace{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;width:100%;min-width:0;}
+    @media(min-width:900px){.grid-workspace{grid-template-columns:minmax(0,380px) minmax(0,1fr);}}
+    .panel-box{background:#09090b;border:1px solid #18181b;border-radius:8px;padding:14px;width:100%;min-width:0;box-sizing:border-box;}
+    .input-group{margin-bottom:10px;}
+    .input-label{display:block;font-size:11px;color:#a1a1aa;margin-bottom:4px;font-weight:600;text-transform:uppercase;}
+    .input-field{width:100%;background:#121214;border:1px solid #27272a;border-radius:6px;padding:8px 10px;color:#fff;font-size:12px;outline:none;}
+    .input-field:focus{border-color:#71717a;}
+    .btn-main{width:100%;background:#fff;color:#000;border:none;padding:10px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;}
+    .btn-main:disabled,.btn-secondary:disabled{opacity:.45;cursor:not-allowed;}
+    .btn-secondary{background:#18181b;color:#fff;border:1px solid #27272a;padding:8px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;width:100%;margin-top:8px;}
+    .btn-accent{background:#27272a;color:#10b981;border:1px solid #10b981;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;width:100%;margin-bottom:10px;}
+    .console-out{display:block;width:100%;max-width:100%;min-width:0;box-sizing:border-box;background:#030303;border:1px solid #18181b;border-radius:6px;padding:12px;font-family:monospace;font-size:11px;line-height:1.6;color:#d4d4d8;height:380px;overflow-y:auto;overflow-x:hidden;white-space:pre-wrap;overflow-wrap:anywhere;}
+    #script-console{display:block;width:100%;max-width:100%;min-width:0;height:380px;min-height:380px;box-sizing:border-box;resize:vertical;white-space:pre-wrap;overflow-wrap:anywhere;overflow-x:hidden;overflow-y:auto;outline:none;cursor:text;}
+    .card-item{background:#121214;border:1px solid #18181b;border-radius:6px;padding:12px;margin-bottom:10px;}
+    .idea-card{background:#121214;border:1px solid #27272a;border-radius:6px;padding:8px 10px;margin-bottom:6px;cursor:pointer;}
+    .idea-title{font-size:11px;font-weight:700;color:#fff;}
+    .idea-hook{font-size:10px;color:#a1a1aa;margin-top:2px;}
+    .image-preview{width:100%;border-radius:6px;border:1px solid #27272a;margin-top:10px;display:none;}
+    .nota{font-size:10px;color:#71717a;margin:-4px 0 10px;}
+  </style>
+</head>
+<body>
+
+  <header>     <img src="icon-192.png" alt="Koffi Studio" class="brand-logo-img" onerror="this.onerror=null;this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgBAMAAAAQtmoLAAAAMFBMVEX////7+/vx8fHe3t7FxcWfn59ycnJSUlItLS0PDw8FBQUEBAQDAwMCAgIBAQEAAADx+vdXAAAJJklEQVR42pVYa3gU1Rl+z9nVaszunt3YWoTsTiZBy0V2uVsk7AIK/oCIlxLaEqwNUqLtD6lWa+2DVYyo9BGVa4BUwCBiK81FCqXAbiIgQkI2CSBgNpNEbX1IZmezCwTYndMfswkz2QV1fs0zZ975Luc973zfR2Sku7gCe9oFmNM8k0M0V4QcksSc1EWSYkFufBjA0eg0AEdNOd8G4A334oOGtnCYMIc99xnsG3N9AG/yfbDv2HFHjh081JY7duKSrii7DkBtnvzG3sB0UcwqxpkDodCx2CNr453smgDeNOnJjTPGlgIIww5g+bGPZsybb0DoAbzpp0+++7PCOV1+kdkR5iHz1Msv7L2xZH70GgBpRMmWZ0rjtaP7n7TGfGt3XCjJd6QFJNjizc8u+08uMyZt+/qLnx7wpAGo0Yqlz718YPSANHbnvf/6T97r6P+K6dm+u6Y7FxauSHkfGV951RUouJQCSOT9nL2f+j6Q8dXM6ApX748HuhQ8+Jcy5+i0fGsdVdhbFRsAiFtGFL0QTU9QBCdaVrh8RkCg9nCdcUv1BOjc+nFzzACIW4a80PeNNFeXc3iR26cHBKsO18YAKKlGQiKAQMuqzpgOkMgc+VuXD0hkKSnuZLUxIG6dVOT2XAW0V29rigGI+AvIAEDg9DMRAIHmXZ/09AN41+Ipbh/AM6Yc7jA6FbdOmuXzAHGLZd00BoACgDrk4J98AHo2HC1WjQYOPt/QDgDm3fPrpH4LwcrwgtEAglUdVXuYoDdgGTbuREsEQHeGGIsmLajD6ryaqEj3Dd44Sk/WE098vSWUAAC7eeQWqc8lS0uRAIBPai4s3rG18SogPPFvJT1WCgD0UH6tknQpWBl+1AMgkWmLqXcPqopeZfxThztPLFngFgAkMhyxKEABPrjZy5I5N/3r4b2r/H2AzkNVi2skd6MWbTS7SgGIjMQt7HwUACLV+5YOsc3srU3SJmEtPNUca6/b9yYDgOBml9sHCkQ3je3QQg4JUvuuR46uTppo2VC9uLohu/iIEwDgGnvUDRAZgQB/wAMAwbcL8nOv8Jm9tZ0AkHDe31t7nh0b4orFACBxiz0WBWT57PTykCzLcvelvPjO0o8OrKZLOeec85fNb+4/vfjypbxWWZZlufubcfWyTOREpk0LIW5hUfVub37B3FNLAEBdP6hKybCuEDZ7vYIWhNvtMYOookY4ojpO1ATdNFiRWabt2tJqL7esbwlILm33cxrdMCO67U6NcLH3xw97bI7iojvm+AGAzf3m8dqWH555J3f7UgDAqPH3eSNEDgRs2mEKVvJbX964LhCf6l8JAJi5RV350t5bP6/Pivb5HIuaIWydnaRb+8x1JdNeNT+ec1jTnu7SbIFnVVjeUTkAgFInQLoz7zkSAQCeObJoWexKVrf9Uqt27hyk4ixRH9x8KvNDjQmRhfO9lPOmhMYLVfqoxE84+ePfw1QURdHWeu5ZH+zxbV9YKjVCNjoVxayqNHkqVcvJo22E3/wigDCAvDzgV5Uux5Eif6MLAMBskstMeA4FAMS2qyXV+eCJ56TIre9FENzVFskqjTC7Zc0tZ70aQKxn1BTOi2hMav3BGz5CbM1dx7v8AJRzDV3/HBxhzLHn0XqrxqYxsptGdjo0B51DF9eAEGcj+c0yBgD2ea8w3vEAI/eseUhjZ2L0F8ysyEmZsD+R6AE5b1P4DT4FAMJWn8IjlijMp7eFtRNLwpwqYSTFq7UJQNCmIJ6kd9wPEA4gu6H/zHKzApY04XAAUJgCc1JkzT5wAgA0WQ8QAk4xQBwZyP+WMgAg37zJwsSghITDDBikjrE28hoGAQBfh5tsTA8gaaoZ5vj3rEUwKQSuOxbBtEmMDBBbsrPS7fboxPrmrIvJnbYDeIw/oPtrqJnW2EALKk2c88M8hwBdB3CD5GWpBZYhakqdH3tv864BwCdPmfy0oFdaDsBsjBn0ZLZku6+eA2CTu9UOQ50BTmBmUAwmJEHKp2SuAHUD7CrlMFoglA0oBoUxZ3yfF7QvX5648Oe8cjs11l92Qpnd+CPMLm7grOKzF3vLS5qk7gkdxn2zg2Ja2GNMkwp2pmD78xfeEBQpp1G/ZmrLIjQz56zNEDWxvheJV5zdWVINtyQYrEf25wYpJ22G3xr9712SNC5jwcWVD6m3N7sEQ0JkJpkJVQ2ZQKMgecswPqMMD/Ke2YasKpKbmSkZZTKmKWe3d5lEbLvpry8bswrPKq9AyUnnFkn/1Pn7hoQqunpEKVYuGr7Fb+8oYhSSUzIAElQF+WXV4Boo3Xe0G1bkDhUUgtjoMbLJWgO57ZwERRKMWbWKFBTZxaedA9IUVKh5qgC3ZKAeOv46oQkUnIZS0gT0vgVcHpBVJSQooKDR/K0G+gniGYa4H+A9swwxD29xC6AgB7ODhqizlzQAJg/Qr7p92ts0m4EC7rGfuQwLJhXgClAuGrjas2lsD0ABS3G9IWoTdSqgAtA9IWiIuX5CEKAA7Zy8Ve8TOZkdweV3QSSmf6wOqxslABQgX48KDDh0wIhN4MascsuXC5imS3dNcGzUk8zTWQUosHW69ORuqZzXLCTrpegQg0+WYgVgsHXM0gHU4XVuJAssemp2IKz3tkfbJ0NWw5ktvxP6pHLkBPuGmC5NNg8A8DH6rLa8Mq/O01fC0S/vecWvW7yRMRCY5kZ01eL9NVMEXaFbU9EU08nPdLM16Alc0gGMhW5/Kd2HWCQBoNvt+no3WUprYmz6tOCD2qsmyFzCI0zRSdzBlvNPxq7TDmivhg3tgNczoOHY1XK14QjrYOkbDsQtwwtWfJ+WBsFPXvpeTRMS1sKLu/enQ3QNffrtMlefUPRvpunQttO/mHo89f3uoWtWPl/kSe0UbwtZVl8pPjwopbVcu8H7VsdNqQBimdG5+tLCgxk3GZrXcet28N0BId3UwRRcw18Pr4kH+scAPBS7d+2OCyWtnvRjCuHQWlIWLpzT5RftDGEeusF3+Q8f/ujaDbjW4o+/txRAiOQA/LXrt/iA2jzltb2B6aJ4xxxcKf/2IQLAm3x7/nHsuENk4KG23HETn7r+mOLqIAQg9u8yCOkftWjX3qxvHbVowxySyyC3Kd9tmJN0LXKN5vr/9GwVNvgX8cUAAAAASUVORK5CYII='">     <span class="brand-title">KOFFI STUDIO</span>
+    <span class="brand-sub">Media Engine</span>
+    <span class="brand-tag">Ecosistema multi-nicho y multi-plataforma</span>
+    <div class="util-bar">
+      <span id="live-datetime">--/--/---- --:--:--</span>
+      <div class="util-right">
+        <button id="pwa-install-btn" onclick="installPWA()">📲 INSTALAR</button>
+        <button class="btn-cfg" onclick="toggleConfig()">⚙️ CONFIG</button>
+        <span id="api-status">API: OFF</span>
+      </div>
+    </div>
+  </header>
+
+  <div id="config-box" style="display:none; background:#0e0e11; border-bottom:1px solid #27272a; padding:12px 16px;">
+    <div style="max-width:600px; margin:0 auto;">
+      <label class="input-label">Clave Gratuita de Google Gemini (AI Studio):</label>
+      <div style="display:flex; gap:8px;">
+        <input type="password" id="gemini-key" class="input-field" placeholder="AIzaSy...">
+        <button class="btn-main" style="width:auto; padding:0 14px;" onclick="guardarKey()">GUARDAR Y PROBAR</button>
+      </div>
+      <div style="display:flex; gap:12px; margin-top:8px;">
+        <label style="font-size:11px; color:#a1a1aa;"><input type="radio" name="gem_model" value="flash" checked> Flash (Rápido & $0)</label>
+        <label style="font-size:11px; color:#a1a1aa;"><input type="radio" name="gem_model" value="pro"> Pro (Mayor Razonamiento)</label>
+      </div>
+      <p style="font-size:10px; color:#71717a; margin-top:4px;">La llave se guarda solo en el navegador de tu teléfono.</p>
+      <button class="btn-secondary" onclick="probarConexion()">🔧 PROBAR CONEXIÓN CON GEMINI</button>
+      <pre id="diag-out" style="display:none; margin-top:8px; background:#030303; border:1px solid #18181b; border-radius:6px; padding:8px; font-size:10px; color:#d4d4d8; white-space:pre-wrap;"></pre>
+    </div>
+  </div>
+
+  <main class="container">
+    <div class="marquee-wrapper"><div class="marquee-track marquee-left" id="track-1"></div></div>
+    <div class="marquee-wrapper"><div class="marquee-track marquee-right" id="track-2"></div></div>
+    <p id="estilo-activo"></p>
+
+    <nav class="tabs-nav">
+      <button class="tab-btn active" onclick="openTab('tab-guion', this)">1. Laboratorio de Guiones</button>
+      <button class="tab-btn" onclick="openTab('tab-escenas', this)">2. Escenas Visuales</button>
+      <button class="tab-btn" onclick="openTab('tab-imagenes', this)">3. Generador Visual</button>
+      <button class="tab-btn" onclick="openTab('tab-audio', this)">4. Motor Vocal</button>
+      <button class="tab-btn" onclick="openTab('tab-edicion', this)">5. Pautas de Montaje & Subtítulos</button>
+    </nav>
+
+    <div id="tab-guion" class="tab-content active">
+      <div class="grid-workspace">
+        <div class="panel-box">
+          <div class="input-group">
+            <label class="input-label">Nicho Objetivo:</label>
+            <select id="script-niche" class="input-field" onchange="cambiarNicho()"></select>
+          </div>
+
+          <button class="btn-accent" id="btn-ideas" onclick="generarIdeas()">🎲 GENERAR 5 IDEAS GANADORAS</button>
+          <div id="ideas-container" style="display:none; margin-bottom:10px;"></div>
+
+          <div class="input-group">
+            <label class="input-label">Tono de Comunicación:</label>
+            <select id="script-tone" class="input-field"></select>
+          </div>
+
+          <div class="input-group">
+            <label class="input-label">Tema o Ángulo Principal:</label>
+            <input type="text" id="script-topic" class="input-field" oninput="temaAuto=false" placeholder="Escribe tu tema o toca 🎲 para recibir ideas">
+          </div>
+
+          <div class="input-group">
+            <label class="input-label">Video de Referencia (Ingeniería Inversa):</label>
+            <input type="text" id="script-ref" class="input-field" placeholder="Enlace de YouTube (la IA lo analiza) o un título">
+          </div>
+          <p class="nota" id="ref-note">Opcional. Con un enlace de YouTube, la IA copia la mecánica de retención del video, no su contenido.</p>
+
+          <div class="input-group">
+            <label class="input-label">Formato de Producción:</label>
+            <select id="script-format" class="input-field" onchange="actualizarRelacionAspecto()">
+              <option value="youtube_long">Horizontal (16:9) — YouTube Largo (20 a 25 min)</option>
+              <option value="vertical_short">Vertical (9:16) — Shorts / TikTok / Reels (60 seg)</option>
+              <option value="facebook_square">Cuadrado (1:1 / 4:3) — Facebook Video</option>
+            </select>
+          </div>
+
+          <button class="btn-main" id="btn-generate-script" onclick="ejecutarGemini()">⚡ GENERAR GUION COMPLETO</button>
+          <button class="btn-secondary" id="btn-alargar" style="display:none;" onclick="alargarGuion()">➕ ALARGAR (amplía el capítulo más corto)</button>
+          <button class="btn-secondary" id="btn-stop" style="display:none;" onclick="detenerGuion()">⏹ DETENER (conserva lo avanzado)</button>
+          <div style="display:flex; gap:8px;">
+            <button class="btn-secondary" onclick="copiarGuion()">📋 COPIAR TODO</button>
+            <button class="btn-secondary" onclick="descargarGuionTxt()">💾 DESCARGAR TXT</button>
+          </div>
+        </div>
+
+        <div class="panel-box">
+          <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+            <label class="input-label" style="color:#fff;">Guion en Tiempo Real:</label>
+            <span id="script-counter" style="font-family:monospace; font-size:11px; color:#10b981;">0 palabras · 0 min</span>
+          </div>
+          <p id="save-status" style="font-size:10px;color:#71717a;margin:0 0 7px;">El trabajo se guarda automáticamente en este dispositivo.</p>
+          <textarea id="script-console" class="console-out" spellcheck="false" aria-label="Editor del guion">Toca ⚙️ CONFIG arriba para guardar tu llave de Gemini. Luego elige un nicho, toca 🎲 para recibir ideas (o escribe tu tema) y presiona 'Generar Guion Completo'.</textarea>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-escenas" class="tab-content">
+      <div class="panel-box">
+        <label class="input-label">Cantidad de escenas:</label>
+        <select id="scene-count" class="input-field" style="margin-bottom:10px;">
+          <option value="6">6 escenas maestras (mínimo)</option>
+          <option value="12">12 escenas (dinámico)</option>
+          <option value="18">18 escenas (muy dinámico)</option>
+        </select>
+        <p id="scene-style-label" class="nota" style="margin:0 0 10px;"></p>
+        <button class="btn-main" id="btn-escenas" onclick="generarEscenas()">🎬 CREAR ESCENAS DESDE EL GUION</button>
+        <p id="scene-note" class="nota" style="margin:6px 0 0;">Toma el guion de la pestaña 1 y lo divide en escenas, cada una con un prompt listo para el Generador Visual.</p>
+        <div id="scenes-container" style="margin-top:12px;"></div>
+      </div>
+    </div>
+
+    <div id="tab-imagenes" class="tab-content">
+      <div class="grid-workspace">
+        <div class="panel-box">
+          <label class="input-label">Relación de Aspecto:</label>
+          <select id="img-ratio" class="input-field" style="margin-bottom:10px;">
+            <option value="16:9">16:9 Panorámico (YouTube Largo)</option>
+            <option value="9:16">9:16 Vertical (Shorts / Reels / TikTok)</option>
+            <option value="1:1">1:1 Cuadrado (Facebook / Instagram)</option>
+          </select>
+
+          <label class="input-label">Motor de Inferencia:</label>
+          <select id="img-engine" class="input-field" style="margin-bottom:10px;" disabled>
+            <option value="flux">⚡ FLUX.2 Klein 4B · Cloudflare Workers AI</option>
+          </select>
+
+          <label class="input-label">Prompt Visual:</label>
+          <textarea id="img-prompt" class="input-field" rows="4" placeholder="Opcional: describe una idea. Si lo dejas vacío, Koffi Studio creará una propuesta visual según el nicho y el formato."></textarea>
+          <p class="nota" style="margin-top:5px;">La idea es opcional. El motor puede concebir la escena automáticamente.</p>
+          <label style="display:flex; gap:6px; align-items:center; font-size:11px; color:#a1a1aa; margin-top:8px;"><input type="checkbox" id="img-use-style" checked> <span id="img-style-label">Aplicar estilo activo</span></label>
+
+          <button class="btn-secondary" id="btn-prepare-visual" style="margin-top:10px;" onclick="prepararDireccionVisual()">🧭 PREPARAR DIRECCIÓN VISUAL</button>
+          <p id="img-brief-status" class="nota" style="margin:4px 0 8px;">Primero prepara y revisa la propuesta. El render solo se habilitará cuando exista un brief aprobado para el contexto actual.</p>
+          <button class="btn-main" id="btn-render-visual" style="margin-top:4px;" onclick="generarImagen()" disabled>🎨 RENDERIZAR ESTA PROPUESTA</button>
+          <details id="img-brief-details" style="margin-top:10px;">
+            <summary style="cursor:pointer;font-size:11px;color:#a1a1aa;">🔎 Ver dirección visual y prompt técnico completo</summary>
+            <pre id="img-technical-brief" class="console-out" style="height:auto;max-height:460px;margin-top:8px;white-space:pre-wrap;">El brief técnico aparecerá aquí después de preparar la dirección visual y antes de renderizar.</pre>
+          </details>
+        </div>
+
+        <div class="panel-box">
+          <label class="input-label">Resultado Visual:</label>
+          <div id="turnstile-container" aria-hidden="true"></div>
+          <div id="img-loading" style="display:none; color:#10b981; font-family:monospace; font-size:11px; margin-bottom:8px;">Renderizando...</div>
+          <img id="img-result" class="image-preview" alt="Preview Visual">
+          <div id="img-info" class="console-out" style="height:140px; margin-top:10px;">Toca Renderizar Imagen: Koffi Studio puede crear la idea automáticamente según tu nicho, guion y formato. También puedes escribir una idea opcional.</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-audio" class="tab-content">
+      <div class="panel-box">
+        <label class="input-label">Opciones para tu Voz Clonada</label>
+        <div class="card-item">
+          <strong style="color:#fff; font-size:12px;">Vía 1: Google Colab (25 Minutos Continuos de un Tirón)</strong>
+          <p style="font-size:11px; color:#a1a1aa; margin-top:4px;">Copia el guion con el botón de la pestaña 1, abre VoiceStudio en Colab, pega el texto y descarga el MP3 completo.</p>
+          <a href="https://colab.research.google.com/" target="_blank" style="text-decoration:none;">
+            <button class="btn-main" style="margin-top:8px;">🚀 ABRIR GOOGLE COLAB (VOICESTUDIO)</button>
+          </a>
+        </div>
+        <div class="card-item">
+          <strong style="color:#fff; font-size:12px;">Vía 2: Divisor Seguro para A2E.AI (~900 caracteres)</strong>
+          <p style="font-size:11px; color:#a1a1aa; margin-top:4px;">Divide el texto por oraciones completas para no cortar ideas.</p>
+          <button class="btn-secondary" onclick="trocearGuionA2E()">✂️ FRAGMENTAR GUION PARA A2E</button>
+          <div id="chunks-container" style="margin-top:10px;"></div>
+            </div>      </div>
+    </div>
+
+    <div id="tab-edicion" class="tab-content">
+      <div class="panel-box">
+        <label class="input-label">Pautas de Edición en CapCut Móvil</label>
+        <div class="card-item">
+          <strong style="color:#10b981; font-size:12px;">📝 Configuración de Subtítulos Automáticos:</strong>
+          <ul style="margin-left:18px; margin-top:6px; font-size:11px; color:#d4d4d8; line-height:1.7;">
+            <li><strong>Posición:</strong> Centro exacto vertical de la pantalla (evita la barra de tiempo inferior y las zonas ciegas de Shorts/Reels).</li>
+            <li><strong>Tipografía y Color:</strong> Letra blanca pura (#FFFFFF), peso Bold, tamaño mediano.</li>
+            <li><strong>Sombra:</strong> Sombra negra sutil al 40% para legibilidad sobre fondos oscuros.</li>
+          </ul>
+        </div>
+        <div class="card-item">
+          <strong style="color:#fff; font-size:12px;">🎞️ Cantidad de Imágenes y Dinamismo:</strong>
+          <p style="font-size:11px; color:#a1a1aa; margin-top:4px;">El mínimo son <strong>6 imágenes maestras</strong> con la regla de los 3 planos (general, medio y primer plano) y zoom lento de 30-50 segundos. Para más dinamismo, usa <strong>12 a 18 imágenes</strong> y cambia de plano cada 15 a 20 segundos.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // ===== DATOS =====
+    const NICHOS = [
+      ['Estoicismo y Filosofía Práctica', '🏛️ Estoicismo & Filosofía Práctica', 'Ej: Por qué Marco Aurelio escribía cada noche'],
+      ['Psicología Oscura y Conducta Humana', '🧠 Psicología Oscura & Conducta Humana', 'Ej: Las señales de una persona manipuladora'],
+      ['Terror y Misterio Real', '🕯️ Historias de Terror & Misterio', 'Ej: El caso sin resolver del faro abandonado'],
+      ['Finanzas y Riqueza', '📈 Finanzas, Economía & Alto RPM', 'Ej: Por qué la clase media nunca logra ahorrar'],
+      ['Historia Bélica y Civilizaciones', '📜 Historia Bélica & Civilizaciones', 'Ej: La batalla que cambió el destino de Roma'],
+      ['Inteligencia Artificial y Tecnología (explicado fácil)', '🤖 IA & Tecnología Explicada', 'Ej: Qué trabajos va a reemplazar la IA primero'],
+      ['Crimen Real y Casos Documentados', '🔎 Crimen Real & Casos Documentados', 'Ej: El robo perfecto que nadie pudo explicar'],
+      ['Historias para Dormir y Relajación', '🌙 Historias para Dormir & Relajación', 'Ej: Un viaje en tren nocturno por los Alpes'],
+      ['Mitología y Misterios Antiguos', '🔱 Mitología & Misterios Antiguos', 'Ej: Prometeo y el precio del conocimiento'],
+      ['Disciplina y Desarrollo Personal', '🔥 Disciplina & Desarrollo Personal', 'Ej: Por qué la motivación te abandona y qué hacer']
+    ];
+    const TONOS = [
+      ['Confrontativo, firme, sobrio y cercano', '🔥 Confrontativo, sobrio & cercano'],
+      ['Cínico, irreverente y desafiante de las convenciones sociales', '🏺 Cínico & Irreverente'],
+      ['Bofetada de realidad, directo al grano y desmitificador', '⚡ Bofetada de Realidad / Despertador'],
+      ['Académico, filosófico, riguroso y analítico', '🎓 Académico & Filosófico'],
+      ['Enigmático, oscuro, pausado y con tensión psicológica', '🕯️ Misterioso & Enigmático'],
+      ['Informal, cercano, como una charla honesta entre amigos', '☕ Informal & Conversacional'],
+      ['Épico, heroico y solemne', '⚔️ Épico & Solemne'],
+      ['Conciliador, comprensivo y reflexivo', '🤝 Conciliador & Reflexivo'],
+      ['Sarcástico, mordaz e incisivo', '😏 Sarcástico & Mordaz']
+    ];
+    const ESTILOS = [
+      { n: '🏛️ Claroscuro Romano', d: 'Mármol desgastado & sombras.', en: 'cinematic weathered dark marble, dramatic side chiaroscuro lighting, deep black background, moody atmospheric mist' },
+      { n: '🌆 Vaporwave 80s', d: 'Neón retro, púrpura y nostalgia.', en: 'vaporwave 80s retro aesthetic, neon purple and pink glow, synthwave grid, nostalgic atmosphere' },
+      { n: '🕯️ Terror Psicológico', d: 'Luz de vela y penumbra.', en: 'psychological horror, candlelight and deep shadows, desaturated colors, film grain' },
+      { n: '🎞️ Documental 35mm', d: 'Grano analógico retro.', en: '35mm documentary film still, analog grain, muted natural colors' },
+      { n: '💥 Cómic / Novela Gráfica', d: 'Tinta dura, viñetas y contraste.', en: 'graphic novel comic style, hard black ink, bold contrast, halftone pop art' },
+      { n: '📈 Finanzas & Alto RPM', d: 'Estética sobria y ejecutiva.', en: 'sober executive aesthetic, dark minimal, subtle gold accents' },
+      { n: '📜 Archivo Histórico', d: 'Mapas y pergaminos antiguos.', en: 'aged parchment, antique maps, historical archive look' },
+      { n: '🧠 Conducta Humana', d: 'Siluetas y psicología oscura.', en: 'dark psychology, human silhouettes, high contrast, moody lighting' },
+      { n: '🎨 Pintura al Óleo', d: 'Pincelada renacentista.', en: 'Renaissance oil painting, rich brushstrokes, dramatic warm light' },
+      { n: '⚔️ Épica Legendaria', d: 'Niebla, armaduras y batallas.', en: 'epic legendary scene, fog, armor, cinematic wide shot' }
+    ];
+
+    // ===== MOTOR VISUAL UNIVERSAL Y AUTÓNOMO =====
+    // ===== MOTOR DE DIRECCIÓN VISUAL CONTEXTUAL =====
+    // Cada perfil contiene decisiones de producción propias; no es una etiqueta decorativa.
+    const PERFILES_VISUALES = {
+      'Estoicismo y Filosofía Práctica': {
+        lenguaje:'historical-philosophical editorial realism; Roman imperial material culture, restrained symbolism, contemplative human presence; atmospheric philosophical imagery rather than literal scene illustration',
+        sujetos:['a living Roman philosopher in a plain wool toga, standing in quiet contemplation','an elderly Roman philosopher seen in profile or from behind, looking toward a distant horizon','a solitary contemplative figure within a monumental Roman colonnade','a Roman archway, ancient forum or misty landscape as the primary subject, with no human figure required'],
+        acciones:['standing quietly while looking toward a distant horizon','walking slowly beneath a sequence of ancient Roman columns','remaining seated in silent contemplation','no literal action; a still atmospheric establishing view'],
+        entornos:['a quiet colonnaded courtyard at dawn','a monumental Roman terrace overlooking a distant misty landscape','a vast imperial forum after the crowd has dispersed','a historically grounded Roman study or library with restrained period-accurate details'],
+        luz:['dramatic motivated lateral light with deep controlled shadows and restrained warm highlights','soft dawn light entering a Roman colonnade through atmospheric haze','low-key natural side light with strong negative fill and readable shadow detail'],
+        optica:['50mm spherical lens, eye-level medium portrait, natural perspective','85mm portrait lens, intimate three-quarter profile, shallow but readable depth','28mm environmental frame, symmetrical architectural perspective'],
+        color:'deep charcoal, iron grey, dark umber and restrained aged-bronze highlights; natural skin tones when people are present',
+        detail:'historically plausible Roman textiles, worn stone, restrained architectural details, subtle period objects and understated philosophical atmosphere'
+      },
+      'Psicología Oscura y Conducta Humana': {
+        lenguaje:'psychological editorial realism, emotionally legible body language, subtle interpersonal tension, contemporary believable environments',
+        sujetos:['two people separated by a deliberate distance across a table','a person studying their reflection in a dark window','a solitary subject with guarded posture and restrained expression','a close portrait showing subtle tension around the eyes and jaw'],
+        acciones:['hesitating before responding to an unseen interlocutor','noticing a contradiction in a conversation','withdrawing from a manipulative social interaction','studying a reflection with conflicted self-awareness'],
+        entornos:['a restrained contemporary apartment with practical lamps','a quiet office after working hours','a public café with shallow background activity','a modern corridor with reflective glass and layered sightlines'],
+        luz:['motivated window side-light with controlled shadow detail','soft overhead practicals with negative fill on one side','cool ambient fill and a restrained warm edge light'],
+        optica:['85mm portrait lens, intimate eye-level close-up','50mm lens, over-the-shoulder two-person composition','35mm lens, medium environmental shot with spatial separation'],
+        color:'desaturated slate, neutral skin tones, muted olive and restrained amber accents',
+        detail:'micro-expressions, credible posture, natural hands, subtle spatial distance; avoid sensationalized villain clichés'
+      },
+      'Terror y Misterio Real': {
+        lenguaje:'grounded atmospheric horror cinematography, suspense through visual evidence and negative space, physically plausible locations',
+        sujetos:['a lone night watchman seen at a distance','an abandoned object that suggests a recent human presence','a small human silhouette at the end of a long corridor','a half-open doorway with an indistinct but plausible interior'],
+        acciones:['pausing after hearing an unexplained sound','approaching a source of weak light with caution','discovering a detail that contradicts the room’s apparent emptiness','looking back toward a darkened passage'],
+        entornos:['a decommissioned coastal lighthouse during a storm','a neglected rural house with damp plaster and old timber','an empty institutional corridor under failing fluorescent lights','a remote forest access road at blue hour'],
+        luz:['single motivated practical light with deep controlled falloff','cold moonlight through dirty glass and a faint tungsten source','low-key sidelight with atmospheric haze kept subtle'],
+        optica:['32mm lens, deep corridor perspective, controlled edge distortion','50mm lens, compressed medium shot with obscured background','24mm wide establishing frame with a small isolated subject'],
+        color:'cold blue-grey, dirty green, neutral blacks and minimal tungsten amber',
+        detail:'realistic damp surfaces, restrained film grain, environmental clues, suspense without gore or supernatural visual clutter'
+      },
+      'Finanzas y Riqueza': {
+        lenguaje:'premium financial editorial photography, credible business environments, material precision, restrained aspirational tone without false luxury',
+        sujetos:['a small business owner reviewing cash-flow documents','a financial analyst studying a clean data display','a professional examining a physical model of a city','a close still life of a ledger, calculator and carefully arranged documents'],
+        acciones:['comparing two investment scenarios','reviewing a monthly budget with focused attention','making a measured strategic decision','examining a business operation from a glass meeting room'],
+        entornos:['a contemporary but understated office with daylight','a credible small-business workspace','a modern financial district seen through architectural glass','a minimalist desk with paper records and a laptop'],
+        luz:['large soft window source with neutral fill','controlled studio key light and subtle rim on materials','bright overcast daylight with clean reflections'],
+        optica:['50mm lens, polished medium editorial portrait','35mm lens, environmental business photograph with straight verticals','70mm lens, precise still-life compression and crisp material detail'],
+        color:'graphite, warm neutral wood, restrained brass, clean whites and natural skin tones',
+        detail:'legible but non-specific charts only when needed, realistic paper and screens, no fabricated brand logos or piles of cash'
+      },
+      'Historia Bélica y Civilizaciones': {
+        lenguaje:'historically grounded documentary reconstruction, period-accurate material culture, believable military logistics and human scale',
+        sujetos:['a historically plausible group of soldiers in period-correct equipment','a commander studying a terrain map with officers','civilians moving through an ancient fortified settlement','a weathered standard-bearer seen within a larger formation'],
+        acciones:['coordinating movement before a battle','crossing a damaged stone passage after an engagement','studying terrain and supply routes','moving carefully through a historically plausible encampment'],
+        entornos:['a Roman frontier fort with accurate timber and stone construction','a late-medieval field encampment grounded in its period','an ancient city gate with historically plausible masonry','a muddy supply road beside a fortified settlement'],
+        luz:['overcast documentary daylight with smoke haze','low winter sun with long directional shadows','diffused dawn light through battlefield dust, no theatrical fireball'],
+        optica:['35mm documentary lens, human-scale wide composition','50mm lens, observational medium shot with layered ranks','85mm lens, compressed portrait within a contextual historical scene'],
+        color:'earth pigments, iron, aged linen, weathered wood and natural atmospheric haze',
+        detail:'period-correct armor, weapons, textiles, architecture and insignia; avoid anachronisms and fantasy equipment'
+      },
+      'Inteligencia Artificial y Tecnología (explicado fácil)': {
+        lenguaje:'human-centered technology editorial, plausible contemporary devices, accessible visual explanation, credible industrial and research settings',
+        sujetos:['an engineer testing a compact robotics prototype','a person interacting with a transparent but physically plausible display','a close view of a semiconductor board on an ESD-safe workbench','a researcher comparing a physical object with a digital model'],
+        acciones:['testing a prototype with measured concentration','explaining a system through a physical demonstration','inspecting a circuit board under task lighting','collaborating around a realistic workstation'],
+        entornos:['a clean applied-research laboratory','a contemporary home workspace with practical equipment','a robotics workshop with tools and safety details','a modern server facility with realistic rack geometry'],
+        luz:['neutral high-CRI laboratory lighting with controlled highlights','soft daylight mixed with restrained cool monitor spill','clean studio key light with subtle cyan environmental accents'],
+        optica:['35mm lens, environmental technology editorial frame','50mm lens, medium close-up with readable device detail','90mm macro lens for circuit and component textures'],
+        color:'cool neutral whites, graphite, restrained cyan and realistic metallic surfaces',
+        detail:'physically plausible hardware, coherent ports and cables, no gibberish interface text, impossible holograms or fake logos'
+      },
+      'Crimen Real y Casos Documentados': {
+        lenguaje:'responsible investigative documentary photography, evidence-led visual storytelling, neutral non-sensational tone, no depiction that asserts unsupported guilt',
+        sujetos:['an investigator reviewing a carefully documented case file','a sealed evidence envelope on a forensic work surface','an empty street connected to a documented investigation','a desk with maps, notes and neutral archival material'],
+        acciones:['cross-checking a timeline against documents','examining a scene from outside a secured perimeter','organizing evidence records under neutral task lighting','reconstructing a location without depicting identifiable victims'],
+        entornos:['a restrained police records office','a quiet archive with labeled storage boxes','a residential street photographed as a neutral establishing view','a forensic laboratory workbench without graphic material'],
+        luz:['neutral documentary daylight with accurate color','soft overhead task lighting with controlled reflections','overcast exterior light and restrained contrast'],
+        optica:['35mm documentary lens, observational wide shot','50mm lens, precise evidence still life','85mm lens, compressed detail with shallow background'],
+        color:'neutral grey, desaturated blue, archival beige and accurate material colors',
+        detail:'non-graphic evidence handling, no fabricated readable case details, no blood, no sensationalized victims or suspect stereotypes'
+      },
+      'Historias para Dormir y Relajación': {
+        lenguaje:'quiet cinematic storytelling, sensory calm, gentle naturalism, soft visual rhythm and restorative atmosphere',
+        sujetos:['a small warmly lit cabin beside a still lake','a solitary traveler resting by a train window','a peaceful moonlit garden with a small human presence','a cozy reading chair beside a rain-streaked window'],
+        acciones:['watching gentle rain move across the landscape','resting while distant lights pass slowly outside','walking along a quiet path at twilight','reading beside a softly glowing lamp'],
+        entornos:['an alpine railway carriage at night','a lakeside cabin surrounded by pine trees','a peaceful garden under a clear night sky','a warm wooden room during gentle rainfall'],
+        luz:['soft warm practical lamp balanced with cool moonlight','blue-hour ambient light with delicate warm window glow','diffused sunrise light with gentle atmospheric falloff'],
+        optica:['50mm lens, calm medium-wide composition','35mm lens, immersive environmental view with natural perspective','85mm lens, intimate detail with soft background separation'],
+        color:'deep twilight blue, muted pine green, warm amber and soft natural neutrals',
+        detail:'subtle mist, natural reflections, soft fabric and wood textures, no harsh contrast or visual overstimulation'
+      },
+      'Mitología y Misterios Antiguos': {
+        lenguaje:'mythic historical visual storytelling, culturally grounded ancient material culture, symbolic scale and monumental atmosphere',
+        sujetos:['a solitary mythic traveler carrying an ancient symbolic object','a monumental carved statue within its original cultural setting','a priestess or guardian in period-inspired but culturally coherent attire','an ancient artifact displayed within a sacred architectural space'],
+        acciones:['approaching a monumental threshold','presenting an offering before a carved relief','discovering an artifact in a sealed chamber','standing beneath a vast celestial or architectural symbol'],
+        entornos:['an ancient Mediterranean sanctuary with plausible stonework','a Bronze Age ceremonial chamber','a monumental desert temple courtyard','an archaic mountain shrine with weathered carvings'],
+        luz:['dramatic natural shaft of sunlight through an opening','warm firelight balanced with cool ambient stone bounce','dawn light revealing monumental relief and dust'],
+        optica:['24mm wide lens emphasizing monumental scale','50mm lens, balanced mythic portrait with environmental context','35mm lens, low-angle architectural composition'],
+        color:'weathered sandstone, lapis-inspired deep blue, aged gold and mineral earth pigments',
+        detail:'culturally coherent iconography, carved stone, bronze patina and historically plausible objects; avoid mixing unrelated pantheons'
+      },
+      'Disciplina y Desarrollo Personal': {
+        lenguaje:'authentic human-centered motivational editorial photography, visible effort, credible everyday environments, dignity without stock-photo clichés',
+        sujetos:['an athlete training alone before sunrise','a craftsperson practicing a demanding skill','a student working through a difficult problem','a person preparing for an early morning routine'],
+        acciones:['repeating a precise movement with concentration','returning to work after a setback','completing a demanding training session','choosing focused practice over distraction'],
+        entornos:['a modest training space with practical equipment','a quiet desk before sunrise','a workshop with tools showing signs of use','an urban stairway in early morning light'],
+        luz:['directional sunrise with natural contrast','soft window light with controlled shadow detail','overcast daylight revealing authentic surface texture'],
+        optica:['50mm lens, grounded medium portrait','35mm lens, environmental action frame','85mm lens, intimate detail of hands and focused expression'],
+        color:'natural skin tones, charcoal, muted earth colors and restrained warm highlights',
+        detail:'authentic effort, believable equipment, natural anatomy and restrained emotion; avoid exaggerated triumph poses'
+      }
+    };
+    const CAPA_VISUAL_UNIVERSAL = 'professional art direction, intentional production design, coherent visual hierarchy, physically plausible anatomy and perspective, natural hands and facial structure, realistic material response, controlled highlights and shadows, precise focal hierarchy. Render a clean image only: no letters, words, typography, captions, subtitles, labels, interface elements, UI panels, diagrams containing text, prompts, instructions, API or Gemini references, keys, logos, signatures or watermarks, unless the user explicitly requests visible text.';
+    const COMPOSICIONES_FORMATO = {
+      '16:9': 'Native landscape 16:9 composition, 1280x720 target canvas: design the full horizontal frame from the outset; use deliberate foreground, midground and background separation, readable lateral environment, balanced negative space, protect the primary subject from edge collisions; never simulate a crop',
+      '9:16': 'Native portrait 9:16 composition, 720x1280 target canvas: design vertically from the outset with a clear top-to-bottom visual path, dominant subject and action inside the central safe region, meaningful vertical depth, intentional headroom and footroom, avoid placing essential details at interface-obscured edges; never simulate a crop',
+      '1:1': 'Native square 1:1 composition, 1024x1024 target canvas: design a compact balanced frame with a clear center of interest, deliberate breathing room on all sides, controlled foreground and background, legibility at thumbnail scale; never simulate a crop'
+    };
+    const HISTORIAL_VISUAL_KEY = 'koffi_visual_concept_history_v2';
+    let escenasGuardadas = [];
+    let ultimoBriefVisual = null;
+    let conceptoVisualPendiente = null;
+    let firmaContextoVisualPendiente = '';
+
+    function obtenerFormatoVisual() {
+      const ratio = document.getElementById('img-ratio')?.value || '16:9';
+      return COMPOSICIONES_FORMATO[ratio] ? ratio : '16:9';
+    }
+
+    function obtenerContextoVisual() {
+      const niche = document.getElementById('script-niche')?.value || NICHOS[0][0];
+      const formatoGuion = document.getElementById('script-format')?.value || 'youtube_long';
+      const ratioControl = document.getElementById('img-ratio');
+      const ratio = ratioControl?.value || (formatoGuion === 'vertical_short' ? '9:16' : formatoGuion === 'facebook_square' ? '1:1' : '16:9');
+      const tema = document.getElementById('script-topic')?.value?.trim() || '';
+      const guionEl = document.getElementById('script-console');
+      const guion = guionEl?.dataset.ready ? guionEl.value.trim() : '';
+      const escenas = Array.isArray(escenasGuardadas) ? escenasGuardadas : [];
+      const perfil = PERFILES_VISUALES[niche] || PERFILES_VISUALES[NICHOS[0][0]];
+      return { niche, ratio: COMPOSICIONES_FORMATO[ratio] ? ratio : '16:9', tema, guion, escenas, estilo: ESTILOS[estiloActual]?.en || '', perfil };
+    }
+
+    function elegirVariacion(arr, semilla) {
+      if (!Array.isArray(arr) || !arr.length) return '';
+      let h = 2166136261;
+      for (let i=0;i<semilla.length;i++) { h ^= semilla.charCodeAt(i); h = Math.imul(h, 16777619); }
+      return arr[(h >>> 0) % arr.length];
+    }
+
+    function extraerAnclaVisual(contexto, escenaActiva) {
+      if (escenaActiva?.descripcion) return escenaActiva.descripcion;
+      if (contexto.tema) return contexto.tema;
+      if (contexto.guion) {
+        const frases = contexto.guion.match(/[^.!?]+[.!?]?/g) || [];
+        const frase = frases.find(x => x.trim().length > 35) || frases[0] || contexto.guion;
+        return frase.trim().slice(0, 420);
+      }
+      return '';
+    }
+
+    function crearBriefFotografico(contexto, ancla, semilla, preservarDireccion = false) {
+      const p = contexto.perfil;
+      const ratio = contexto.ratio;
+      const esEstoicismo = contexto.niche === 'Estoicismo y Filosofía Práctica';
+      // El claroscuro romano se mantiene condicionado al nicho y al estilo elegidos.
+      // La regla atmosférica, en cambio, pertenece al lenguaje narrativo del nicho estoico.
+      const aplicarClaroscuroEstoico = esEstoicismo
+        && estiloActual === 0
+        && Boolean(contexto.estilo);
+      const sujetosEstoicosAtmosfericos = [
+        'a photorealistic living Roman philosopher in a plain wool toga, standing quietly on a monumental terrace, seen from behind',
+        'a photorealistic elderly Roman philosopher seated in contemplative silence, with natural skin and historically plausible clothing',
+        'a monumental Roman colonnade and distant misty landscape as the primary subject, with no human figure required',
+        'an ancient Roman archway or quiet imperial forum at dusk, with no human figure required'
+      ];
+      const accionesEstoicasAtmosfericas = [
+        'standing still and looking toward the distant horizon',
+        'walking slowly beneath ancient columns',
+        'remaining seated in quiet contemplation',
+        'no literal action; a still atmospheric establishing composition'
+      ];
+      const entornosEstoicosAtmosfericos = [
+        'a Roman terrace overlooking a distant misty landscape',
+        'a quiet colonnaded courtyard with historically plausible stonework',
+        'a monumental forum after the crowd has dispersed',
+        'a restrained Roman study or library with period-accurate materials'
+      ];
+      const sujeto = preservarDireccion
+        ? 'Preserve the primary subject and focal point specified in the supplied creative direction; do not substitute it or introduce an unrelated subject'
+        : aplicarClaroscuroEstoico
+          ? elegirVariacion(sujetosEstoicosAtmosfericos, semilla+'|stoic-atmospheric-subject')
+          : elegirVariacion(p.sujetos, semilla+'|subject');
+      const accion = preservarDireccion
+        ? 'Preserve the specified action, stillness and emotional intention; do not invent a conflicting action'
+        : aplicarClaroscuroEstoico
+          ? elegirVariacion(accionesEstoicasAtmosfericas, semilla+'|stoic-atmospheric-action')
+          : elegirVariacion(p.acciones, semilla+'|action');
+      const entorno = preservarDireccion
+        ? 'Preserve the specified location, era, props and environmental details; do not add unrelated settings or objects'
+        : aplicarClaroscuroEstoico
+          ? elegirVariacion(entornosEstoicosAtmosfericos, semilla+'|stoic-atmospheric-setting')
+          : elegirVariacion(p.entornos, semilla+'|setting');
+      const luz = preservarDireccion
+        ? 'Follow the lighting direction and exposure specified in the supplied creative direction; do not introduce a conflicting light source or tonal treatment'
+        : aplicarClaroscuroEstoico
+          ? 'dramatic motivated lateral key light, strong negative fill, very low ambient fill, deep controlled shadows, subtle warm highlights on natural human skin when a person is present; preserve shadow detail without lifting the scene into beige daylight'
+          : elegirVariacion(p.luz, semilla+'|light');
+      const camara = preservarDireccion
+        ? 'Follow the specified shot size, camera angle, perspective and lens. If any camera detail is absent, choose a coherent setup that supports the described subject and framing'
+        : elegirVariacion(p.optica, semilla+'|camera');
+      const paleta = preservarDireccion
+        ? 'Preserve the supplied color palette, contrast and tonal range; do not add a conflicting color treatment'
+        : aplicarClaroscuroEstoico
+          ? 'deep charcoal and near-black shadows, iron grey, dark umber and restrained aged-bronze highlights; natural human skin tones when a person is present, no dominant beige or bright ivory exposure'
+          : p.color;
+      const textura = preservarDireccion
+        ? 'Preserve only the materials, textures and props specified or clearly implied by the supplied creative direction; do not add unrelated set dressing'
+        : p.detail;
+      const estilo = aplicarClaroscuroEstoico
+        ? 'Selected visual treatment: Roman chiaroscuro, human-centered photorealism when a person is present, dramatic lateral light and deep shadow; never render a living human as stone.'
+        : contexto.estilo ? `Selected visual treatment: ${contexto.estilo}.` : '';
+      const reglaEstoicaAtmosferica = esEstoicismo
+        ? 'Stoic visual-language rule: use atmospheric philosophical imagery by default. The image may accompany the broader Stoic theme without literally illustrating the narration, a sentence or an abstract concept. A human figure is optional: Roman architecture, colonnades, forums, libraries, roads, landscapes, mist and historically plausible material details may be the main subject. Use literal illustration only when the supplied creative direction explicitly requests a concrete event or action. Do not force symbolic objects into every image.'
+        : '';
+      const restriccionEstoica = aplicarClaroscuroEstoico
+        ? 'For Estoicismo y Filosofía Práctica with Claroscuro Romano only: whenever a human figure appears, depict a real living human with natural skin and anatomy, never a bust, statue, sculpture or marble figure. Architecture-only, landscape-only and period-detail compositions are also valid; do not insert a person when the creative direction does not call for one.'
+        : '';
+      const tema = ancla
+        ? `${preservarDireccion ? 'CREATIVE DIRECTION TO PRESERVE — keep its intended subject, action, setting and visual meaning without contradiction' : 'Narrative and thematic reference'}: ${ancla}.`
+        : `Create an original, niche-relevant visual concept for ${contexto.niche}; do not default to a generic stock-photo scene.`;
+      const prompt = [
+        `Create one finished, publication-ready image for the editorial niche: ${contexto.niche}.`,
+        `Art direction and visual language: ${p.lenguaje}.`,
+        tema,
+        `Primary subject: ${sujeto}. Specific action or stillness: ${accion}.`,
+        `Production design and location: ${entorno}. Ensure period, materials, props, architecture and clothing are internally coherent.`,
+        `Camera and framing: ${camara}. Establish deliberate perspective, natural proportions and a readable focal plane without contradicting the requested shot.`,
+        `Lighting plan: ${luz}. Preserve highlight texture and realistic material response.`,
+        `Color science and palette: ${paleta}.`,
+        `Texture and set dressing: ${textura}.`,
+        `Composition and delivery: ${COMPOSICIONES_FORMATO[ratio]}. Generate at the supported target dimensions; do not claim unsupported 4K/8K output or invent metadata.`,
+        `Quality control: ${CAPA_VISUAL_UNIVERSAL}. Avoid anatomical errors, duplicated objects, contradictory shadows, warped architecture, unrequested lettering and irrelevant decorative elements.`,
+        reglaEstoicaAtmosferica,
+        restriccionEstoica,
+        estilo
+      ].filter(Boolean).join('\n');
+      return { sujeto, accion, entorno, luz, camara, paleta, aplicarClaroscuroEstoico, reglaEstoicaAtmosferica, prompt };
+    }
+
+    function crearConceptoVisual(contexto, promptUsuario = '') {
+      const escenaActiva = contexto.escenas.length ? contexto.escenas[contexto.escenas.length - 1] : null;
+      const ancla = promptUsuario.trim() || extraerAnclaVisual(contexto, escenaActiva);
+      let historial = [];
+      try { historial = JSON.parse(localStorage.getItem(HISTORIAL_VISUAL_KEY) || '[]'); } catch (e) {}
+      let propuesta = null;
+      for (let intento = 0; intento < 12; intento++) {
+        const semilla = [contexto.niche, contexto.ratio, ancla, Date.now(), Math.random(), intento].join('|');
+        const brief = crearBriefFotografico(contexto, ancla, semilla, Boolean(promptUsuario.trim()));
+        const firma = brief.prompt.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().slice(0, 240);
+        propuesta = {
+          titulo: promptUsuario ? 'Desarrollo profesional de tu idea' : escenaActiva ? 'Dirección visual de escena' : ancla ? 'Interpretación visual contextual' : 'Concepto autónomo del nicho',
+          idea: `${brief.sujeto}; ${brief.accion}; ${brief.entorno}.`,
+          brief,
+          prompt: brief.prompt,
+          firma
+        };
+        if (!historial.some(item => item && item.firma === firma)) break;
+      }
+      ultimoBriefVisual = propuesta?.brief || null;
+      return propuesta;
+    }
+
+    function obtenerFirmaContextoBrief() {
+      const guion = document.getElementById('script-console');
+      return JSON.stringify({
+        niche: document.getElementById('script-niche')?.value || '',
+        scriptFormat: document.getElementById('script-format')?.value || '',
+        ratio: document.getElementById('img-ratio')?.value || '16:9',
+        topic: document.getElementById('script-topic')?.value || '',
+        scriptReady: Boolean(guion?.dataset.ready),
+        script: guion?.value || '',
+        scenes: escenasGuardadas,
+        styleIndex: estiloActual,
+        styleEnabled: Boolean(document.getElementById('img-use-style')?.checked),
+        userDirection: document.getElementById('img-prompt')?.value || ''
+      });
+    }
+
+    function invalidarBriefVisual(motivo = 'El contexto cambió.') {
+      if (!conceptoVisualPendiente) return;
+      conceptoVisualPendiente = null;
+      firmaContextoVisualPendiente = '';
+      const render = document.getElementById('btn-render-visual');
+      const estado = document.getElementById('img-brief-status');
+      if (render) render.disabled = true;
+      if (estado) estado.textContent = `${motivo} Vuelve a preparar la dirección visual antes de renderizar.`;
+    }
+
+    function conectarInvalidacionBrief() {
+      ['script-niche','script-format','img-ratio','script-topic','script-console','img-prompt','img-use-style'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('input', () => invalidarBriefVisual('La propuesta anterior quedó desactualizada.'));
+        el.addEventListener('change', () => invalidarBriefVisual('La propuesta anterior quedó desactualizada.'));
+      });
+    }
+
+    function prepararDireccionVisual() {
+      const ratio = obtenerFormatoVisual();
+      const contexto = obtenerContextoVisual();
+      const ideaUsuario = document.getElementById('img-prompt').value.trim();
+      if (!document.getElementById('img-use-style')?.checked) contexto.estilo = '';
+      const concepto = crearConceptoVisual(contexto, ideaUsuario);
+      if (!concepto || !concepto.prompt) {
+        alert('No pude preparar una dirección visual. Revisa el contexto e inténtalo de nuevo.');
+        return;
+      }
+
+      conceptoVisualPendiente = {
+        ratio,
+        contexto: {
+          niche: contexto.niche,
+          ratio: contexto.ratio,
+          tema: contexto.tema,
+          estilo: contexto.estilo,
+          perfil: contexto.perfil
+        },
+        ideaUsuario,
+        concepto,
+        prompt: concepto.prompt
+      };
+      firmaContextoVisualPendiente = obtenerFirmaContextoBrief();
+
+      const b = concepto.brief;
+      const lineas = [
+        'DIRECCIÓN VISUAL PREPARADA · PENDIENTE DE RENDER',
+        '',
+        `Nicho: ${contexto.niche}`,
+        `Formato: ${ratio}`,
+        `Concepto: ${concepto.titulo}`,
+        `Sujeto: ${b.sujeto}`,
+        `Acción: ${b.accion}`,
+        `Entorno: ${b.entorno}`,
+        `Iluminación: ${b.luz}`,
+        `Cámara y encuadre: ${b.camara}`,
+        `Paleta: ${b.paleta || contexto.perfil.color}`,
+        `Tratamiento de estilo: ${contexto.estilo || 'No aplicado'}`,
+        b.aplicarClaroscuroEstoico ? 'Regla contextual: figura humana realista; sin bustos, estatuas ni esculturas.' : '',
+        '',
+        'PROMPT TÉCNICO EXACTO QUE SE ENVIARÁ A FLUX.2 KLEIN 4B',
+        '────────────────────────────────────────',
+        concepto.prompt
+      ].filter(Boolean);
+      const preview = document.getElementById('img-technical-brief');
+      const details = document.getElementById('img-brief-details');
+      const estado = document.getElementById('img-brief-status');
+      const render = document.getElementById('btn-render-visual');
+      if (preview) preview.textContent = lineas.join('\n');
+      if (details) details.open = true;
+      if (estado) estado.textContent = '✓ Propuesta preparada. Revisa el brief completo: Renderizar enviará exactamente este prompt, sin reconstruirlo.';
+      if (render) render.disabled = false;
+    }
+
+    function registrarConceptoVisual(prompt) {
+      try {
+        const hist = JSON.parse(localStorage.getItem(HISTORIAL_VISUAL_KEY) || '[]');
+        const firma = prompt.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().slice(0, 240);
+        hist.unshift({ firma, fecha: Date.now() });
+        localStorage.setItem(HISTORIAL_VISUAL_KEY, JSON.stringify(hist.slice(0, 60)));
+      } catch (e) { console.warn('No se pudo actualizar el historial visual local', e); }
+    }
+
+    function construirPromptVisual(promptBase, ratio, incluirEstilo = false) {
+      const contexto = obtenerContextoVisual();
+      contexto.ratio = COMPOSICIONES_FORMATO[ratio] ? ratio : contexto.ratio;
+      if (incluirEstilo) contexto.estilo = ESTILOS[estiloActual]?.en || contexto.estilo;
+      // La idea del usuario es el ancla semántica; el motor desarrolla el resto del brief.
+      return crearConceptoVisual(contexto, (promptBase || '').trim()).prompt;
+    }
+
+    let estiloActual = 0;
+    let temaAuto = false;
+
+    // ===== INTERFAZ =====
+    function construirUI() {
+      document.getElementById('script-niche').innerHTML = NICHOS.map(n => `<option value="${n[0]}">${n[1]}</option>`).join('');
+      document.getElementById('script-tone').innerHTML = TONOS.map(t => `<option value="${t[0]}">${t[1]}</option>`).join('');
+      const card = (e) => `<div class="style-card" data-i="${ESTILOS.indexOf(e)}" onclick="elegirEstilo(${ESTILOS.indexOf(e)})"><p class="style-name">${e.n}</p><p class="style-desc">${e.d}</p></div>`;
+      const fila = (arr) => arr.concat(arr).map(card).join('');
+      document.getElementById('track-1').innerHTML = fila(ESTILOS.slice(0, 5));
+      document.getElementById('track-2').innerHTML = fila(ESTILOS.slice(5));
+      cambiarNicho();
+      elegirEstilo(0);
+    }
+
+    function elegirEstilo(i) {
+      if (estiloActual !== i) invalidarBriefVisual('El estilo visual cambió.');
+      estiloActual = i;
+      document.querySelectorAll('.style-card').forEach(c => c.classList.toggle('active', Number(c.dataset.i) === i));
+      const e = ESTILOS[i];
+      document.getElementById('estilo-activo').textContent = `Estilo visual activo: ${e.n} · se aplica a Escenas e Imágenes`;
+      document.getElementById('scene-style-label').textContent = `Estilo visual: ${e.n} (cámbialo tocando una tarjeta del carrusel de arriba)`;
+      document.getElementById('img-style-label').textContent = `Aplicar estilo activo: ${e.n}`;
+    }
+
+    function cambiarNicho() {
+      invalidarBriefVisual('El nicho cambió.');
+      const v = document.getElementById('script-niche').value;
+      const n = NICHOS.find(x => x[0] === v);
+      const t = document.getElementById('script-topic');
+      t.placeholder = n ? n[2] : 'Escribe tu tema';
+      if (temaAuto) { t.value = ''; temaAuto = false; }
+      const ic = document.getElementById('ideas-container');
+      ic.style.display = 'none';
+      ic.innerHTML = '';
+    }
+
+    function openTab(id, btn) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    function actualizarRelacionAspecto() {
+      const fmt = document.getElementById('script-format').value;
+      const ratio = document.getElementById('img-ratio');
+      if (fmt === 'vertical_short') ratio.value = '9:16';
+      else if (fmt === 'facebook_square') ratio.value = '1:1';
+      else ratio.value = '16:9';
+    }
+
+    // ===== RELOJ, INSTALACIÓN, SERVICE WORKER =====
+    function updateClock() {
+      const el = document.getElementById('live-datetime');
+      if (!el) return;
+      const n = new Date();
+      const p = (v) => String(v).padStart(2, '0');
+      el.textContent = `${p(n.getDate())}/${p(n.getMonth() + 1)}/${n.getFullYear()}  ${p(n.getHours())}:${p(n.getMinutes())}:${p(n.getSeconds())}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const btn = document.getElementById('pwa-install-btn');
+      if (btn) btn.style.display = 'inline-block';
+    });
+    function installPWA() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(() => {
+          deferredPrompt = null;
+          document.getElementById('pwa-install-btn').style.display = 'none';
+        });
+      }
+    }
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+    }
+
+    // ===== AYUDAS =====
+    function esc(t) {
+      return String(t == null ? '' : t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+    const contarPalabras = (t) => (t.trim() ? t.trim().split(/\s+/).length : 0);
+
+    // Detecta si la referencia es un enlace de YouTube (que la IA sí puede analizar) o solo texto
+    function parseRef(ref) {
+      const r = (ref || '').trim();
+      if (!r) return { tipo: 'ninguna' };
+      const m = r.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:[^\s]*&)?v=|shorts\/|live\/|embed\/))([\w-]{11})/);
+      if (m) return { tipo: 'youtube', url: 'https://www.youtube.com/watch?v=' + m[1] };
+      return { tipo: 'texto' };
+    }
+
+    // ===== LLAVE Y ESTADO DE API =====
+    function marcarApi(ok) {
+      const st = document.getElementById('api-status');
+      st.textContent = ok ? 'API: ON' : 'API: OFF';
+      st.style.color = ok ? '#10b981' : '#ef4444';
+    }
+    function checkKey() {
+      const k = localStorage.getItem('koffi_gemini_key');
+      marcarApi(!!(k && k.length > 10));
+    }
+    function toggleConfig() {
+      const b = document.getElementById('config-box');
+      b.style.display = b.style.display === 'none' ? 'block' : 'none';
+      const k = localStorage.getItem('koffi_gemini_key');
+      if (k) document.getElementById('gemini-key').value = k;
+    }
+    function guardarKey() {
+      const k = document.getElementById('gemini-key').value.trim();
+      if (!k) { alert('Pega primero tu llave de Gemini.'); return; }
+      localStorage.setItem('koffi_gemini_key', k);
+      checkKey();
+      probarConexion();
+    }
+
+    // ===== LLAMADA A GEMINI: DESCUBRIMIENTO Y SELECCIÓN VALIDADA =====
+    const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta';
+    let geminiModelsCache = null;
+    let geminiModelsCacheAt = 0;
+    let geminiModelsCacheKey = null;
+
+    async function listarModelosGemini(key, forzar = false) {
+      if (!forzar && geminiModelsCache && geminiModelsCacheKey === key && Date.now() - geminiModelsCacheAt < 5 * 60 * 1000) return geminiModelsCache;
+      const ctl = new AbortController();
+      const to = setTimeout(() => ctl.abort(), 15000);
+      try {
+        const res = await fetch(GEMINI_API_BASE + '/models?pageSize=100', {
+          headers: { 'x-goog-api-key': key }, signal: ctl.signal
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          const msg = data.error?.message || 'No se pudo consultar el catálogo de modelos.';
+          const e = new Error(msg); e.status = res.status; e.apiError = data.error; throw e;
+        }
+        geminiModelsCache = (data.models || []).map(x => ({
+          name: (x.name || '').replace(/^models\//, ''),
+          methods: Array.isArray(x.supportedGenerationMethods) ? x.supportedGenerationMethods : []
+        })).filter(x => x.name && x.methods.includes('generateContent'));
+        geminiModelsCacheAt = Date.now();
+        geminiModelsCacheKey = key;
+        return geminiModelsCache;
+      } catch (e) {
+        if (e.name === 'AbortError') throw new Error('Google no respondió al consultar los modelos en 15 segundos.');
+        throw e;
+      } finally { clearTimeout(to); }
+    }
+
+    function obtenerCandidatosGemini(modelos, wantPro) {
+      const validos = modelos.filter(x => !/image|tts|live|audio|embedding|aqa/i.test(x.name));
+      if (wantPro) {
+        const pro = validos.filter(x => /pro/i.test(x.name));
+        const prioridad = ['gemini-2.5-pro', 'gemini-pro-latest'];
+        pro.sort((a, b) => {
+          const ia = prioridad.indexOf(a.name), ib = prioridad.indexOf(b.name);
+          return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || a.name.localeCompare(b.name);
+        });
+        if (!pro.length) throw new Error('Tu llave no muestra ningún modelo Pro compatible con generateContent. Cambia a Flash o revisa el acceso de tu proyecto en Google AI Studio.');
+        return pro.map(x => x.name);
+      }
+      const flash = validos.filter(x => /flash/i.test(x.name) && !/gemini-2\.0-/i.test(x.name));
+      const prioridad = ['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-2.5-flash'];
+      flash.sort((a, b) => {
+        const ia = prioridad.indexOf(a.name), ib = prioridad.indexOf(b.name);
+        return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || a.name.localeCompare(b.name);
+      });
+      if (!flash.length) throw new Error('Tu llave no muestra modelos Flash compatibles con generateContent. Revisa el acceso de tu proyecto en Google AI Studio.');
+      return flash.map(x => x.name);
+    }
+
+    function crearErrorGemini(mensaje, status, model, apiError) {
+      const e = new Error(mensaje || 'Error de la API de Gemini.');
+      e.status = status; e.model = model; e.apiError = apiError;
+      const detalles = JSON.stringify(apiError?.details || []);
+      const texto = (mensaje || '') + ' ' + detalles;
+      e.daily = /per[_\s-]*day|daily|requests?[_\s-]+per[_\s-]+day|quota[^.\n]*day|day[^.\n]*quota/i.test(texto);
+      e.rateLimited = status === 429;
+      e.modelUnavailable = (status === 404 || status === 400) && /model[^.\n]*(not found|not available|no longer available|unsupported|does not exist)|no longer available|not supported for generatecontent/i.test(texto);
+      return e;
+    }
+
+    async function callGemini(prompt, onStatus, videoUrl) {
+      const key = localStorage.getItem('koffi_gemini_key');
+      if (!key) throw new Error('Falta la llave de Gemini.');
+      const choice = document.querySelector('input[name="gem_model"]:checked');
+      const wantPro = choice && choice.value === 'pro';
+      const catalogo = await listarModelosGemini(key);
+      const models = obtenerCandidatosGemini(catalogo, !!wantPro);
+      const limite = videoUrl ? 120000 : 45000;
+      const partes = videoUrl ? [{ fileData: { fileUri: videoUrl } }, { text: prompt }] : [{ text: prompt }];
+      let lastErr = 'Sin respuesta';
+      const diagnostico = [];
+      for (const m of models) {
+        let to;
+        try {
+          if (onStatus) onStatus(m);
+          const ctl = new AbortController();
+          to = setTimeout(() => ctl.abort(), limite);
+          const res = await fetch(GEMINI_API_BASE + '/models/' + m + ':generateContent', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+            body: JSON.stringify({ contents: [{ parts: partes }] }), signal: ctl.signal
+          });
+          const data = await res.json().catch(() => ({}));
+          clearTimeout(to);
+          if (!res.ok || data.error) {
+            const er = crearErrorGemini(data.error?.message || ('HTTP ' + res.status), res.status, m, data.error);
+            diagnostico.push(m + ': HTTP ' + res.status + ' — ' + er.message);
+            lastErr = er.message;
+            if (er.rateLimited || (res.status === 401 || res.status === 403) || (res.status === 400 && !er.modelUnavailable)) { if (res.status === 401 || res.status === 403) marcarApi(false); throw er; }
+            if (er.modelUnavailable) continue;
+            if (res.status >= 500) continue;
+            throw er;
+          }
+          const ps = data.candidates?.[0]?.content?.parts;
+          const resultText = ps ? ps.map(p => p.text || '').join('') : '';
+          if (resultText) {
+            marcarApi(true);
+            return { text: resultText, model: m, diagnostics: diagnostico };
+          }
+          const finish = data.candidates?.[0]?.finishReason || 'sin detalle';
+          lastErr = 'Gemini no devolvió texto (motivo: ' + finish + ').';
+          diagnostico.push(m + ': respuesta vacía (' + finish + ')');
+        } catch (e) {
+          clearTimeout(to);
+          if (e.rateLimited || e.status === 401 || e.status === 403 || (e.status === 400 && !e.modelUnavailable)) throw e;
+          if (e.modelUnavailable) { lastErr = e.message; continue; }
+          lastErr = e.name === 'AbortError'
+            ? 'Google tardó más de ' + (limite / 1000) + ' segundos en responder (' + m + ')'
+            : e.message || 'Error de conexión con Google.';
+          if (e.status && e.status < 500) throw e;
+        }
+      }
+      const resumen = diagnostico.length ? '\nDiagnóstico: ' + diagnostico.join(' | ') : '';
+      throw new Error(lastErr + resumen);
+    }
+
+    // Barandilla: solo los 429 ambiguos reciben espera y reintento; la cuota diaria exige evidencia explícita.
+    const PAUSA_ENTRE_LLAMADAS_MS = 6000;
+    async function callGeminiSafe(prompt, onWait, onStatus, videoUrl) {
+      const esperas = videoUrl ? [] : [35, 65];
+      for (let intento = 0; ; intento++) {
+        try {
+          return await callGemini(prompt, onStatus, videoUrl);
+        } catch (e) {
+          if (!e.rateLimited) throw e;
+          if (e.daily) throw new Error('Google informó que se alcanzó una cuota diaria de Gemini. Tu avance guardado no se ha borrado; podrás continuar cuando la cuota se restablezca.');
+          if (intento >= esperas.length) throw new Error('Google sigue limitando temporalmente las solicitudes (HTTP 429). No puedo confirmar que sea una cuota diaria. Espera unos minutos y vuelve a intentarlo.');
+          for (let t = esperas[intento]; t > 0; t--) {
+            if (onWait) onWait(t);
+            await sleep(1000);
+          }
+        }
+      }
+    }
+
+    // ===== DIAGNÓSTICO =====
+    async function probarConexion() {
+      const out = document.getElementById('diag-out');
+      out.style.display = 'block';
+      const key = document.getElementById('gemini-key').value.trim() || localStorage.getItem('koffi_gemini_key');
+      if (!key) { out.textContent = 'Primero pega tu llave y toca GUARDAR Y PROBAR.'; marcarApi(false); return; }
+      const L = [];
+      const show = () => { out.textContent = L.join('\n'); };
+      L.push('1) Consultando modelos habilitados para esta llave...'); show();
+      let catalogo;
+      try {
+        catalogo = await listarModelosGemini(key, true);
+      } catch (e) {
+        marcarApi(false);
+        L.push('✗ No se pudo consultar el catálogo: ' + e.message);
+        if (e.status) L.push('HTTP ' + e.status + '. Revisa la llave, permisos o proyecto de Google AI Studio.');
+        show(); return;
+      }
+      marcarApi(true);
+      const flash = catalogo.filter(x => /flash/i.test(x.name) && !/gemini-2\.0-/i.test(x.name));
+      const pro = catalogo.filter(x => /pro/i.test(x.name));
+      L.push('✓ Llave aceptada por el endpoint de modelos.',
+        'Modelos compatibles con generateContent: ' + catalogo.length,
+        'Flash disponibles: ' + (flash.map(x => x.name).join(', ') || 'ninguno'),
+        'Pro disponibles: ' + (pro.map(x => x.name).join(', ') || 'ninguno'),
+        ''); show();
+      let candidato;
+      try { candidato = obtenerCandidatosGemini(catalogo, false)[0]; }
+      catch (e) { L.push('✗ ' + e.message); show(); return; }
+      L.push('2) Probando generación real con ' + candidato + '...'); show();
+      const ctl = new AbortController();
+      const to = setTimeout(() => ctl.abort(), 45000);
+      const t0 = Date.now();
+      try {
+        const r = await fetch(GEMINI_API_BASE + '/models/' + candidato + ':generateContent', {
+          method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+          body: JSON.stringify({ contents: [{ parts: [{ text: 'Responde solo con la palabra: LISTO' }] }] }), signal: ctl.signal
+        });
+        const d = await r.json().catch(() => ({}));
+        if (!r.ok || d.error) {
+          const er = crearErrorGemini(d.error?.message || ('HTTP ' + r.status), r.status, candidato, d.error);
+          L.push('✗ ' + candidato + ': HTTP ' + r.status + ' — ' + er.message);
+          if (er.rateLimited) L.push(er.daily ? '→ Google identifica una cuota diaria.' : '→ Límite 429; no hay evidencia suficiente para llamarlo cuota diaria.');
+          else if (er.modelUnavailable) L.push('→ El modelo no está disponible para esta llave; el motor buscará otro candidato compatible.');
+          else if (r.status === 401 || r.status === 403) marcarApi(false);
+        } else {
+          const parts = d.candidates?.[0]?.content?.parts;
+          const answer = parts ? parts.map(x => x.text || '').join('').trim() : '(respuesta sin texto)';
+          L.push('✓ ' + candidato + ' respondió en ' + ((Date.now() - t0) / 1000).toFixed(1) + ' s: ' + answer);
+          L.push('→ Flash está operativo con esta llave. El modo Pro requiere una prueba independiente si se va a utilizar.');
+        }
+      } catch (e) {
+        L.push('✗ Prueba interrumpida: ' + (e.name === 'AbortError' ? 'timeout de 45 s' : e.message));
+      } finally { clearTimeout(to); show(); }
+    }
+
+    // Identidad editorial específica: solo se activa cuando el usuario elige este tono.
+    const TONO_CONFRONTATIVO_CERCANO = 'Confrontativo, firme, sobrio y cercano';
+    const REGLA_EDITORIAL_CONFRONTATIVA = `IDENTIDAD EDITORIAL ESPECÍFICA — CONFRONTATIVO, FIRME, SOBRIO Y CERCANO:
+Habla directamente al espectador, de tú a tú, como alguien cercano que le dice una verdad importante con respeto y firmeza. Suena natural al oído, como una conversación sincera, no como una conferencia, un ensayo académico ni un discurso grandilocuente. Usa español latinoamericano neutro, tuteo natural y palabras cotidianas. Explica cada idea filosófica con claridad y, cuando ayude, con una situación concreta de la vida diaria. Sé confrontativo con las excusas y las contradicciones, nunca con la dignidad de la persona. Mantén profundidad, precisión y elegancia. Evita tecnicismos innecesarios, abstracciones, solemnidad artificial, frases motivacionales vacías, muletillas, preguntas retóricas excesivas y metáforas acumuladas. No repitas una idea para alargar el texto. No inventes citas ni atribuciones. No presentes afirmaciones científicas dudosas como hechos absolutos. El resultado debe sentirse humano, claro, serio y fácil de comprender sin perder fuerza.`;
+    function obtenerReglaEditorial(tone) {
+      return tone === TONO_CONFRONTATIVO_CERCANO ? '\n' + REGLA_EDITORIAL_CONFRONTATIVA + '\n' : '';
+    }
+
+    // ===== IDEAS GANADORAS =====
+    async function generarIdeas() {
+      const key = localStorage.getItem('koffi_gemini_key');
+      if (!key) { alert('Ingresa tu llave de Gemini en ⚙️ CONFIG.'); toggleConfig(); return; }
+      const niche = document.getElementById('script-niche').value;
+      const tone = document.getElementById('script-tone').value;
+      const reglaEditorial = obtenerReglaEditorial(tone);
+      const btn = document.getElementById('btn-ideas');
+      const container = document.getElementById('ideas-container');
+      btn.disabled = true;
+      btn.textContent = "⏳ EXPLORANDO IDEAS GANADORAS...";
+      container.style.display = "block";
+      container.innerHTML = "<p style='font-size:10px; color:#10b981; font-family:monospace;'>Conectando con Gemini...</p>";
+      const prompt = `Actúa como estratega de contenido viral en YouTube para el nicho: "${niche}".
+TONO DE COMUNICACIÓN SELECCIONADO: ${tone}. Las ideas, los títulos y los ganchos deben nacer con esta identidad narrativa; no propongas ideas con una voz distinta a la que se usará en el guion.
+${reglaEditorial}
+Genera exactamente 5 ideas de videos de alto impacto, psicológicamente irresistibles y con alto CTR.
+Devuelve ÚNICAMENTE un arreglo JSON válido con el siguiente formato exacto, sin explicaciones ni markdown adicional:
+[{"titulo": "Título de alto impacto", "gancho": "El gancho de los primeros 15 segundos"}]`;
+      try {
+        const aviso = (t) => { container.innerHTML = `<p style='font-size:10px; color:#10b981; font-family:monospace;'>${t}</p>`; };
+        const r = await callGeminiSafe(prompt,
+          (t) => aviso(`Google pidió calma. Reintentando en ${t} s...`),
+          (m) => aviso(`Consultando a ${esc(m)}... (máx. 45 s)`));
+        const raw = r.text.replace(/```json/gi, '').replace(/```/g, '').trim();
+        const i1 = raw.indexOf('['), i2 = raw.lastIndexOf(']');
+        if (i1 === -1 || i2 === -1) throw new Error('La IA no devolvió una lista válida. Intenta de nuevo.');
+        const ideas = JSON.parse(raw.slice(i1, i2 + 1));
+        container.innerHTML = "";
+        ideas.forEach((item, idx) => {
+          const card = document.createElement('div');
+          card.className = 'idea-card';
+          card.innerHTML = `<div class="idea-title">#${idx + 1}: ${esc(item.titulo)}</div><div class="idea-hook">${esc(item.gancho)}</div>`;
+          card.onclick = () => {
+            document.getElementById('script-topic').value = item.titulo;
+            temaAuto = true;
+            container.querySelectorAll('.idea-card').forEach(x => x.style.borderColor = '#27272a');
+            card.style.borderColor = '#10b981';
+          };
+          container.appendChild(card);
+        });
+        const modelo = document.createElement('p');
+        modelo.style.cssText = 'font-size:10px;color:#71717a;margin-top:7px;font-family:monospace;';
+        modelo.textContent = 'Modelo Gemini: ' + r.model;
+        container.appendChild(modelo);
+      } catch (err) {
+        container.innerHTML = `<p style='font-size:10px; color:#f59e0b;'>Error al explorar ideas: ${esc(err.message)}. Puedes escribir el tema manualmente.</p>`;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "🎲 GENERAR 5 IDEAS GANADORAS";
+      }
+    }
+
+    // ===== GUION (por capítulos para llegar a 20-25 min) =====
+    const PALABRAS_POR_MIN = 145;
+    const KOFFI_PROJECT_KEY = 'koffi_studio_project_v2';
+    const PALABRAS_MIN_CAPITULO = 520;
+    const PALABRAS_MAX_CAPITULO = 600;
+    let detener = false;
+    let avance = null;
+    let guionListo = null;
+    let saveTimer = null;
+
+    function detenerGuion() { detener = true; guardarProyecto(); }
+
+    function actualizarContador(texto) {
+      const w = contarPalabras(texto);
+      document.getElementById('script-counter').textContent = `${w} palabras · ≈ ${(w / PALABRAS_POR_MIN).toFixed(1)} min`;
+      return w;
+    }
+
+    function estadoGuardado(mensaje, error = false) {
+      const el = document.getElementById('save-status');
+      if (!el) return;
+      el.textContent = mensaje;
+      el.style.color = error ? '#f59e0b' : '#71717a';
+    }
+
+    function guardarProyecto() {
+      try {
+        const proyecto = {
+          version: 2, actualizado: new Date().toISOString(),
+          controles: {
+            nicho: document.getElementById('script-niche')?.value || '',
+            tono: document.getElementById('script-tone')?.value || '',
+            tema: document.getElementById('script-topic')?.value || '',
+            referencia: document.getElementById('script-ref')?.value || '',
+            formato: document.getElementById('script-format')?.value || 'youtube_long'
+          },
+          editor: document.getElementById('script-console')?.value || '',
+          visual: {
+            escenas: escenasGuardadas,
+            cantidad: document.getElementById('scene-count')?.value || '6',
+            prompt: document.getElementById('img-prompt')?.value || '',
+            ratio: document.getElementById('img-ratio')?.value || '16:9',
+            estilo: estiloActual
+          },
+          avance, guionListo
+        };
+        localStorage.setItem(KOFFI_PROJECT_KEY, JSON.stringify(proyecto));
+        estadoGuardado('✓ Guardado automáticamente en este dispositivo.');
+        return true;
+      } catch (e) {
+        estadoGuardado('⚠️ No se pudo guardar. Descarga una copia TXT para proteger tu trabajo.', true);
+        console.warn('Koffi Studio: error al guardar el proyecto', e);
+        return false;
+      }
+    }
+
+    function programarGuardado() {
+      clearTimeout(saveTimer);
+      estadoGuardado('Guardando cambios…');
+      saveTimer = setTimeout(guardarProyecto, 350);
+    }
+
+    function restaurarProyecto() {
+      try {
+        const raw = localStorage.getItem(KOFFI_PROJECT_KEY);
+        if (!raw) return;
+        const proyecto = JSON.parse(raw);
+        if (!proyecto || proyecto.version !== 2) return;
+        const c = proyecto.controles || {};
+        const asignar = (id, valor) => {
+          const el = document.getElementById(id);
+          if (el && valor !== undefined && valor !== null && valor !== '') el.value = valor;
+        };
+        asignar('script-niche', c.nicho);
+        asignar('script-tone', c.tono);
+        asignar('script-topic', c.tema);
+        asignar('script-ref', c.referencia);
+        asignar('script-format', c.formato);
+        const visual = proyecto.visual || {};
+        asignar('scene-count', visual.cantidad);
+        const promptGuardado = typeof visual.prompt === 'string' ? visual.prompt.trim() : '';
+        if (promptGuardado && !/^(describe la escena que deseas generar|cinematic weathered dark marble bust of marcus aurelius)/i.test(promptGuardado)) asignar('img-prompt', promptGuardado);
+        asignar('img-ratio', visual.ratio);
+        if (Number.isInteger(visual.estilo) && visual.estilo >= 0 && visual.estilo < ESTILOS.length) estiloActual = visual.estilo;
+        escenasGuardadas = Array.isArray(visual.escenas) ? visual.escenas : [];
+        if (typeof proyecto.editor === 'string') {
+          const editor = document.getElementById('script-console');
+          editor.value = proyecto.editor;
+          editor.dataset.ready = editor.value.trim().length >= 50 ? '1' : '';
+          actualizarContador(editor.value);
+        }
+        avance = proyecto.avance || null;
+        guionListo = proyecto.guionListo || null;
+        if (guionListo && Array.isArray(guionListo.capitulos)) {
+          document.getElementById('btn-alargar').style.display = 'block';
+        }
+        if (avance && Array.isArray(avance.capitulos)) {
+          const btn = document.getElementById('btn-generate-script');
+          btn.textContent = avance.capitulos.length ? '▶ CONTINUAR GUION' : '⚡ GENERAR GUION COMPLETO';
+          estadoGuardado(`✓ Proyecto recuperado. ${avance.capitulos.length} de 6 capítulos completados; puedes continuar.`);
+        } else {
+          estadoGuardado('✓ Último trabajo recuperado de este dispositivo.');
+        }
+      } catch (e) {
+        estadoGuardado('⚠️ No se pudo recuperar el último proyecto guardado.', true);
+        console.warn('Koffi Studio: error al recuperar el proyecto', e);
+      }
+    }
+
+    function conectarGuardadoAutomatico() {
+      ['script-niche','script-tone','script-topic','script-ref','script-format','script-console','img-prompt','img-ratio','scene-count'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', () => {
+          if (id === 'script-console') actualizarContador(el.value);
+          programarGuardado();
+        });
+        if (el && el.tagName !== 'TEXTAREA') el.addEventListener('change', programarGuardado);
+      });
+      window.addEventListener('beforeunload', guardarProyecto);
+    }
+
+    async function ejecutarGemini() {
+      const key = localStorage.getItem('koffi_gemini_key');
+      if (!key) { alert('Ingresa tu llave de Gemini en ⚙️ CONFIG.'); toggleConfig(); return; }      const topic = document.getElementById('script-topic').value.trim();
+      const niche = document.getElementById('script-niche').value;
+      const tone = document.getElementById('script-tone').value;
+      const ref = document.getElementById('script-ref').value.trim();
+      const formatVal = document.getElementById('script-format').value;
+      const c = document.getElementById('script-console');
+      const btn = document.getElementById('btn-generate-script');
+      const stopBtn = document.getElementById('btn-stop');
+      const nota = document.getElementById('ref-note');
+      if (!topic) { alert('Escribe un tema o toca 🎲 para elegir una idea.'); return; }
+
+      const refInfo = parseRef(ref);
+      const refTexto = refInfo.tipo === 'texto'
+        ? `Referencia de estructura y gancho (título o descripción del usuario): "${ref}". Úsala como inspiración de ritmo y retención, pero escribe contenido 100% original.`
+        : '';
+      const refVideo = `Se adjunta un video de referencia. Analiza exclusivamente su arquitectura narrativa: cómo abre, organiza las ideas, desarrolla la tensión, utiliza los ganchos, conecta las transiciones, mantiene el ritmo y retiene al espectador. Utiliza esos recursos como referencia estructural para crear contenido 100% original sobre el tema indicado. ATENCIÓN: el video de referencia NO es un modelo de identidad, personalidad ni estilo editorial. No imites ni heredes la voz, personalidad, vocabulario, expresiones, opiniones, postura, tono, muletillas ni forma de hablar de su creador o narrador. La identidad editorial de Koffi Studio y el tono seleccionado tienen autoridad absoluta sobre la redacción final. La referencia solo puede influir en la estructura narrativa y los mecanismos de retención; nunca en la identidad de quien comunica. No copies frases, datos ni formulaciones del video.`;
+      const reglaEditorial = obtenerReglaEditorial(tone);
+      const base = `Nicho: ${niche}\nTema principal: ${topic}\nTONO DE VOZ (obligatorio; debe notarse en el vocabulario, el ritmo de las frases y la forma de dirigirte al espectador): ${tone}\n${reglaEditorial}${refTexto}`;
+
+      // Si hay enlace de YouTube, intenta que Gemini vea el video; si falla, sigue sin él
+      async function llamarConRef(conVideo, sinVideo, onWait) {
+  const estadoModelo = (m) => {
+    nota.textContent = 'Consultando Gemini: ' + m;
+  };
+
+  if (refInfo.tipo !== 'youtube') {
+    return callGeminiSafe(sinVideo, onWait, estadoModelo);
+  }
+
+  nota.textContent = '🎬 Analizando el video de referencia (puede tardar)...';
+
+  try {
+    const r = await callGeminiSafe(conVideo, onWait, estadoModelo, refInfo.url);
+    nota.textContent = '🎬 Video analizado por Gemini · modelo: ' + r.model;
+    return r;
+  } catch (e) {
+    const detalle = [
+      e?.message || '',
+      e?.apiError?.message || '',
+      JSON.stringify(e?.apiError?.details || [])
+    ].join(' ');
+
+    const errorExplicitoDeVideo =
+      (e?.status === 400 || e?.status === 404) &&
+      /video|youtube|filedata|file.?uri|media/i.test(detalle) &&
+      /invalid|unsupported|not found|not available|cannot|failed|unable|malformed/i.test(detalle);
+
+    if (!errorExplicitoDeVideo) {
+      nota.textContent = '❌ Error de Gemini: ' + (e.message || 'No se pudo completar la solicitud.');
+      throw e;
+    }
+
+    nota.textContent = '⚠️ Gemini no pudo procesar el video de referencia. Continuando únicamente con tu tema y tono editorial...';
+
+    return callGeminiSafe(sinVideo, onWait, estadoModelo);
+  }
+      }
+
+      detener = false;
+      btn.disabled = true;
+      document.getElementById('btn-alargar').style.display = 'none';
+      stopBtn.style.display = 'block';
+      c.dataset.ready = '';
+
+      try {
+        if (formatVal !== 'youtube_long') {
+          btn.textContent = "⏳ REDACTANDO GUION...";
+          c.value = "Conectando con Gemini...";
+          const reglas = formatVal === 'vertical_short'
+            ? `Formato: Short / Reel / TikTok (60 segundos). Gancho de 3 segundos que corte el scroll, argumento veloz sin pausas y remate final claro. Máximo 160 palabras.`
+            : `Formato: Video para Facebook. Estructura reflexiva cotidiana, párrafos breves, alta resonancia emocional sobre relaciones y conducta.`;
+          const pc = `Actúa como guionista senior y productor audiovisual de Koffi Studio.\n${base}\n${reglas}\nNo agregues introducciones meta ni explicaciones técnicas. Entrega directamente el guion listo para ser locutado, sin títulos ni marcas, solo texto corrido.`;
+          const r = await llamarConRef(pc + '\n' + refVideo, pc,
+            (t) => { c.value = `Google pidió calma. Reintentando en ${t} s...`; });
+          c.value = r.text;
+          c.dataset.model = r.model || '';
+          if (r.model) nota.textContent = 'Modelo Gemini utilizado: ' + r.model;
+          actualizarContador(r.text);
+          c.dataset.ready = '1';
+          guardarProyecto();
+          return;
+        }
+
+        const llave = `${niche}|${topic}|${tone}|${ref}`;
+        if (!avance || avance.llave !== llave) avance = { llave, esquema: null, capitulos: [], modelos: [], base, estado: 'iniciado' };
+        if (!Array.isArray(avance.modelos)) avance.modelos = [];
+        avance.base = base;
+        avance.estado = 'generando';
+        guardarProyecto();
+        const esperando = (t) => { c.value = (avance.capitulos.join('\n\n') + `\n\n⏳ Google pidió calma. Reintentando en ${t} s...`).trim(); };
+
+        if (!avance.esquema) {
+          btn.textContent = "⏳ DISEÑANDO ESQUEMA (1/7)...";
+          c.value = "Diseñando el esquema de 6 capítulos...";
+          const pe = `Actúa como guionista senior de YouTube.\n${base}\nDiseña el esquema de un video de 22 minutos en exactamente 6 capítulos que se encadenan, cada uno con un giro o tensión que obligue a seguir viendo. Devuelve ÚNICAMENTE un arreglo JSON válido, sin markdown: [{"titulo":"...","resumen":"qué se cuenta en este capítulo, en 2 frases"}]`;
+          const r = await llamarConRef(pe + '\n' + refVideo, pe, esperando);
+          const t = r.text.replace(/```json/gi, '').replace(/```/g, '');
+          const i1 = t.indexOf('['), i2 = t.lastIndexOf(']');
+          if (i1 === -1 || i2 === -1) throw new Error('No pude armar el esquema. Intenta de nuevo.');
+          const esq = JSON.parse(t.slice(i1, i2 + 1));
+          if (!Array.isArray(esq) || esq.length !== 6 || esq.some(e => !e || !e.titulo || !e.resumen)) throw new Error('El esquema debe contener exactamente 6 capítulos completos. Intenta de nuevo.');
+          avance.esquema = esq;
+          if (r.model) avance.modelos.push({ fase: 'esquema', modelo: r.model });
+          avance.estado = 'esquema_listo';
+          guardarProyecto();
+          await sleep(PAUSA_ENTRE_LLAMADAS_MS);
+        }
+
+        const total = avance.esquema.length;
+        const listaEsquema = avance.esquema.map((e, k) => `${k + 1}. ${e.titulo}: ${e.resumen}`).join('\n');
+        for (let n = avance.capitulos.length; n < total; n++) {
+          if (detener) { c.value = avance.capitulos.join('\n\n') + '\n\n⏹ Detenido. Toca GENERAR para continuar desde el capítulo ' + (n + 1) + '.'; break; }
+          btn.textContent = `⏳ CAPÍTULO ${n + 1} DE ${total} (${n + 2}/${total + 1})...`;
+          c.value = (avance.capitulos.join('\n\n') + `\n\n✍️ Escribiendo capítulo ${n + 1} de ${total}: ${avance.esquema[n].titulo}...`).trim();
+          const previo = avance.capitulos.length ? avance.capitulos[avance.capitulos.length - 1].split(/\s+/).slice(-70).join(' ') : '';
+          const esPrimero = n === 0, esUltimo = n === total - 1;
+          const prompt = `Actúa como guionista senior de YouTube y productor de Koffi Studio.
+${base}
+ESQUEMA COMPLETO DEL VIDEO:
+${listaEsquema}
+
+Escribe SOLO el capítulo ${n + 1} de ${total}: "${avance.esquema[n].titulo}".
+REGLAS EDITORIALES OBLIGATORIAS:
+- Longitud: entre ${PALABRAS_MIN_CAPITULO} y ${PALABRAS_MAX_CAPITULO} palabras. Desarrolla con profundidad; no rellenes ni resumas.
+- Español latinoamericano neutro, tuteo natural, sin voseo ni expresiones propias de España.
+- El tono elegido debe sentirse en el vocabulario, el ritmo y la cercanía de la narración.
+- Cada capítulo debe aportar ideas, escenas, ejemplos y reflexiones nuevas. No repitas conceptos, ejemplos, metáforas, preguntas retóricas ni frases ya utilizadas.
+- Respeta la función de este capítulo dentro del esquema completo. No adelantes el contenido de capítulos posteriores ni vuelvas a explicar lo ya desarrollado.
+- ${esPrimero ? 'Abre con un gancho psicológico potente durante los primeros 15 segundos, sin saludos formales.' : 'Continúa orgánicamente desde el capítulo anterior, sin resumen ni recapitulación. Usa este cierre solo como punto de continuidad: "' + previo + '"'}
+- ${esUltimo ? 'Cierra con una conclusión contundente, emocional y natural. No incluyas invitaciones a suscribirse, seguir el canal, comentar ni llamadas promocionales.' : 'Termina con una transición o tensión que impulse al siguiente capítulo, sin cerrar el video ni despedirte.'}
+- No incluyas llamadas a suscribirse, comentar, compartir ni seguir el canal en ningún capítulo.
+- Entrega exclusivamente texto corrido listo para locución: sin títulos, números de capítulo, viñetas, acotaciones, corchetes, notas ni explicaciones meta.
+
+CONTENIDO YA DESARROLLADO (evita repetirlo):
+${avance.capitulos.map((texto, i) => `CAPÍTULO ${i + 1}:\n${texto.slice(-2200)}`).join('\n\n')}`;
+          const r = await callGeminiSafe(prompt, esperando, (m) => { document.getElementById('save-status').textContent = 'Generando con Gemini: ' + m; });
+          if (r.model) avance.modelos.push({ fase: 'capitulo_' + (n + 1), modelo: r.model });
+          avance.capitulos.push(r.text.trim());
+          avance.estado = 'capitulo_' + avance.capitulos.length + '_completado';
+          c.value = avance.capitulos.join('\n\n');
+          c.dataset.ready = '1';
+          actualizarContador(c.value);
+          guardarProyecto();
+          if (n < total - 1) await sleep(PAUSA_ENTRE_LLAMADAS_MS);
+        }
+
+        if (avance.capitulos.length) {
+          c.dataset.ready = '1';
+          const w = actualizarContador(avance.capitulos.join('\n\n'));
+          if (avance.capitulos.length === total) {
+            guionListo = { esquema: avance.esquema, capitulos: avance.capitulos.slice(), modelos: (avance.modelos || []).slice(), base, actualizado: new Date().toISOString() };
+            avance = null;
+            guardarProyecto();
+            document.getElementById('btn-alargar').style.display = 'block';
+          } else {
+            avance.estado = 'pausado';
+            guardarProyecto();
+          }
+        }
+      } catch (err) {
+        const parcial = avance && avance.capitulos.length ? avance.capitulos.join('\n\n') + '\n\n' : '';
+        c.value = parcial + '⚠️ ' + err.message;
+        if (parcial) { c.dataset.ready = '1'; actualizarContador(parcial); }
+        if (avance) { avance.estado = 'error_o_pausa'; guardarProyecto(); }
+      } finally {
+        btn.disabled = false;
+        stopBtn.style.display = 'none';
+        btn.textContent = (avance && avance.capitulos.length) ? "▶ CONTINUAR GUION" : "⚡ GENERAR GUION COMPLETO";
+      }
+    }
+
+    async function alargarGuion() {
+      if (!guionListo) { alert('Primero genera un guion largo.'); return; }
+      const g = guionListo;
+      const c = document.getElementById('script-console');
+      if (c.value.trim() !== g.capitulos.join('\n\n').trim()) {
+        alert('El editor tiene cambios manuales. Para protegerlos, no ampliaré el guion desde la versión anterior.');
+        return;
+      }
+      const btn = document.getElementById('btn-alargar');
+      let idx = 0, min = Infinity;
+      g.capitulos.forEach((t, i) => { const w = contarPalabras(t); if (w < min) { min = w; idx = i; } });
+      btn.disabled = true;
+      btn.textContent = `⏳ AMPLIANDO CAPÍTULO ${idx + 1}...`;
+      try {
+        const prompt = `Actúa como guionista senior de YouTube.\n${g.base}\nA continuación está el capítulo ${idx + 1} de ${g.capitulos.length} de un video. Reescríbelo y ajústalo a entre ${PALABRAS_MIN_CAPITULO} y ${PALABRAS_MAX_CAPITULO} palabras. Conserva su función narrativa, pero elimina repeticiones y no introduzcas ideas ya desarrolladas en los otros capítulos. Mantén español latinoamericano neutro y tuteo. No incluyas llamadas promocionales. Entrega solo texto corrido listo para locutar, sin títulos, viñetas ni notas.
+
+LOS OTROS CAPÍTULOS (no repetir):
+${g.capitulos.filter((_, i) => i !== idx).map((t, i) => t.slice(-1400)).join('\n\n')}\n\nCAPÍTULO ACTUAL:\n${g.capitulos[idx]}`;
+        const r = await callGeminiSafe(prompt, (t) => { btn.textContent = `⏳ Google pidió calma (${t} s)...`; });
+        const nuevasPalabras = contarPalabras(r.text);
+        if (r.model) { g.modelos = Array.isArray(g.modelos) ? g.modelos : []; g.modelos.push({ fase: 'ampliacion_capitulo_' + (idx + 1), modelo: r.model }); }
+        if (nuevasPalabras >= PALABRAS_MIN_CAPITULO && nuevasPalabras <= PALABRAS_MAX_CAPITULO && nuevasPalabras > min) g.capitulos[idx] = r.text.trim();
+        else alert(`La ampliación no respetó el rango de ${PALABRAS_MIN_CAPITULO} a ${PALABRAS_MAX_CAPITULO} palabras. Conservé el capítulo anterior para no alterar el objetivo de duración.`);
+        c.value = g.capitulos.join('\n\n');
+        c.dataset.ready = '1';
+        actualizarContador(c.value);
+        guardarProyecto();
+      } catch (e) {
+        alert(e.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '➕ ALARGAR (amplía el capítulo más corto)';
+      }
+    }
+
+    function copiarGuion() {
+      const text = document.getElementById('script-console').value;
+      navigator.clipboard.writeText(text).then(() => alert('Guion copiado al portapapeles.'));
+    }
+
+    function descargarGuionTxt() {
+      const text = document.getElementById('script-console').value;
+      const topic = document.getElementById('script-topic').value || "guion_koffi";
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${topic.toLowerCase().replace(/[^a-z0-9]/g, '_')}.txt`;
+      a.click();
+    }
+
+    // Restaura las tarjetas de escenas guardadas sin volver a consumir Gemini.
+    function renderizarEscenasGuardadas() {
+      const cont = document.getElementById('scenes-container');
+      if (!cont) return;
+      cont.innerHTML = '';
+      escenasGuardadas.forEach((e, k) => {
+        const card = document.createElement('div'); card.className = 'card-item';
+        const h = document.createElement('div'); h.style.cssText = 'font-size:10px;color:#10b981;font-weight:700;margin-bottom:4px;'; h.textContent = `ESCENA ${k+1}`;
+        const d = document.createElement('div'); d.style.cssText = 'font-size:11px;color:#fff;'; d.textContent = e.descripcion || '';
+        const f = document.createElement('div'); f.style.cssText = 'font-size:10px;color:#71717a;margin:4px 0;'; f.textContent = e.fragmento ? '“'+e.fragmento+'…”' : '';
+        const p = document.createElement('div'); p.style.cssText = 'font-size:10px;color:#a1a1aa;font-family:monospace;margin-bottom:6px;'; p.textContent = e.prompt || '';
+        const row = document.createElement('div'); row.style.cssText = 'display:flex;gap:8px;';
+        const copy = document.createElement('button'); copy.className='btn-secondary'; copy.style.marginTop='0'; copy.textContent='📋 COPIAR PROMPT'; copy.onclick=()=>navigator.clipboard.writeText(e.prompt || '').then(()=>alert('Prompt copiado.'));
+        const use = document.createElement('button'); use.className='btn-secondary'; use.style.marginTop='0'; use.textContent='🎨 USAR EN GENERADOR'; use.onclick=()=>{ document.getElementById('img-prompt').value=e.prompt || ''; document.getElementById('img-use-style').checked=false; programarGuardado(); openTab('tab-imagenes',document.querySelectorAll('.tab-btn')[2]); };
+        row.append(copy,use); [h,d,f,p,row].forEach(x=>card.appendChild(x)); cont.appendChild(card);
+      });
+    }
+
+    // ===== ESCENAS VISUALES =====
+    async function generarEscenas() {
+      const c = document.getElementById('script-console');
+      const guion = c.dataset.ready ? c.value.trim() : '';
+      const note = document.getElementById('scene-note');
+      const cont = document.getElementById('scenes-container');
+      const btn = document.getElementById('btn-escenas');
+      if (guion.length < 200) { alert('Primero genera un guion en la Pestaña 1.'); return; }
+      const n = parseInt(document.getElementById('scene-count').value, 10);
+      const contexto = obtenerContextoVisual();
+      const ratio = contexto.ratio;
+      const estilo = contexto.estilo;
+      btn.disabled = true;
+      btn.textContent = '⏳ CREANDO ESCENAS...';
+      cont.innerHTML = '';
+      note.textContent = `Diseñando ${n} escenas para ${contexto.niche} en formato ${ratio}...`;
+      try {
+        const esEstoicismo = contexto.niche === 'Estoicismo y Filosofía Práctica';
+        const instruccionesNarrativas = esEstoicismo
+          ? `Para este nicho aplica NARRATIVA ATMOSFÉRICA como modalidad predeterminada. Las imágenes acompañan el universo del estoicismo y la filosofía práctica; NO tienen que ilustrar literalmente cada frase, concepto o argumento del narrador. Usa el guion para reconocer el tema general, el tono emocional y el recorrido global, no para convertir cada párrafo en una ilustración literal. Crea una secuencia visual de acompañamiento, variada y cinematográfica: filósofos romanos vivos en retratos solemnes o de cuerpo entero, figuras de pie mirando al horizonte, caminando bajo columnas, sentadas en contemplación, vistas de perfil o desde atrás; también foros, templos, bibliotecas, pórticos, caminos, paisajes, arcos, arquitectura y detalles materiales romanos. No es obligatorio que aparezca el mismo personaje en todas las imágenes; mantén continuidad de identidad solo cuando decidas deliberadamente repetir a un personaje. La modalidad ilustrativa es opcional y debe reservarse para un momento concreto que realmente gane valor al representarse. Evita simbolizar literalmente cada idea, repetir objetos alegóricos o forzar una correspondencia frase-imagen. El campo fragmento solo indica la ubicación aproximada en el guion para facilitar el montaje; NO obliga a que la imagen represente ese texto. Cada prompt debe ser autónomo, visualmente coherente con el universo estoico y técnicamente consistente: el plano, la lente, el ángulo, la perspectiva y la iluminación deben corresponder entre sí, sin instrucciones contradictorias. Si aparece una persona, debe ser un ser humano vivo y fotorrealista, nunca un busto o estatua. También son válidas escenas de arquitectura o paisaje sin personas. No incluyas texto, letras, logos ni marcas de agua.`
+          : `Divide el guion en exactamente ${n} escenas consecutivas que cubran su desarrollo en orden. Mantén continuidad cuando haya personajes, época, vestuario, localización u objetos recurrentes. Varía de verdad sujetos, escalas de plano, perspectivas y composición; no repitas la misma fórmula. Cada prompt debe ser autónomo y contener sujeto, acción, entorno, encuadre, perspectiva, iluminación, atmósfera y detalles del nicho. No incluyas texto, letras, logos ni marcas de agua.`;
+        const prompt = `Eres director de arte y supervisor de continuidad visual de Koffi Studio.
+Nicho: ${contexto.niche}. Perfil visual: ${contexto.perfil.lenguaje}. Formato nativo: ${ratio}. Composición obligatoria: ${COMPOSICIONES_FORMATO[ratio]}. Estilo: ${estilo}.
+${instruccionesNarrativas}
+Devuelve ÚNICAMENTE JSON válido: [{"fragmento":"...","descripcion":"...","prompt":"..."}]
+
+GUION:
+${guion}`;
+        const r = await callGeminiSafe(prompt,
+          (t) => { note.textContent = `Google pidió calma. Reintentando en ${t} s...`; },
+          (m) => { note.textContent = `Consultando a ${m}... (máx. 45 s)`; });
+        const t = r.text.replace(/```json/gi, '').replace(/```/g, '').trim();
+        const i1 = t.indexOf('['), i2 = t.lastIndexOf(']');
+        if (i1 === -1 || i2 === -1) throw new Error('La IA no devolvió una lista válida. Intenta de nuevo.');
+        const escenas = JSON.parse(t.slice(i1, i2 + 1));
+        if (!Array.isArray(escenas) || escenas.length !== n) throw new Error(`Se esperaban ${n} escenas y se recibieron ${Array.isArray(escenas) ? escenas.length : 0}.`);
+        escenasGuardadas = escenas.map(e => ({...e, prompt: construirPromptVisual(e.prompt || '', ratio, false)}));
+        invalidarBriefVisual('Las escenas visuales cambiaron.');
+        escenasGuardadas.forEach((e,k) => {
+          const card = document.createElement('div'); card.className = 'card-item';
+          const h = document.createElement('div'); h.style.cssText = 'font-size:10px;color:#10b981;font-weight:700;margin-bottom:4px;'; h.textContent = `ESCENA ${k+1}`;
+          const d = document.createElement('div'); d.style.cssText = 'font-size:11px;color:#fff;'; d.textContent = e.descripcion || '';
+          const f = document.createElement('div'); f.style.cssText = 'font-size:10px;color:#71717a;margin:4px 0;'; f.textContent = e.fragmento ? '“'+e.fragmento+'…”' : '';
+          const p = document.createElement('div'); p.style.cssText = 'font-size:10px;color:#a1a1aa;font-family:monospace;margin-bottom:6px;'; p.textContent = e.prompt;
+          const row = document.createElement('div'); row.style.cssText = 'display:flex;gap:8px;';
+          const copy = document.createElement('button'); copy.className='btn-secondary'; copy.style.marginTop='0'; copy.textContent='📋 COPIAR PROMPT'; copy.onclick=()=>navigator.clipboard.writeText(e.prompt).then(()=>alert('Prompt copiado.'));
+          const use = document.createElement('button'); use.className='btn-secondary'; use.style.marginTop='0'; use.textContent='🎨 USAR EN GENERADOR'; use.onclick=()=>{ document.getElementById('img-prompt').value=e.prompt; document.getElementById('img-ratio').value=ratio; document.getElementById('img-use-style').checked=false; programarGuardado(); openTab('tab-imagenes',document.querySelectorAll('.tab-btn')[2]); };
+          row.append(copy,use); [h,d,f,p,row].forEach(x=>card.appendChild(x)); cont.appendChild(card);
+        });
+        note.textContent = `✓ ${escenasGuardadas.length} escenas listas · ${contexto.niche} · ${ratio} · Gemini: ${r.model}. Se conservarán al recargar.`;
+        guardarProyecto();
+      } catch (err) { note.textContent = '⚠️ ' + err.message; }
+      finally { btn.disabled=false; btn.textContent='🎬 CREAR ESCENAS DESDE EL GUION'; }
+    }
+
+    // ===== GENERADOR DE IMÁGENES =====
+    function mostrarImagen(src, info) {
+      const img = document.getElementById('img-result');
+      const loader = document.getElementById('img-loading');
+      const inf = document.getElementById('img-info');
+      return new Promise((resolve, reject) => {
+        img.onload = () => { loader.style.display = 'none'; img.style.display = 'block'; inf.textContent = info; resolve(); };
+        img.onerror = () => reject(new Error('La imagen no cargó'));
+        img.src = src;
+      });
+    }
+
+    // ===== GENERACIÓN FLUX.2 KLEIN MEDIANTE CLOUDFLARE WORKER =====
+    const KOFFI_FLUX_WORKER_URL = 'https://koffi-studio-flux.johnnyromasoyyo.workers.dev';
+    const KOFFI_TURNSTILE_SITE_KEY = '0x4AAAAAAF6v26dfwmFSw1ju';
+    let koffiTurnstileLoadPromise = null;
+    let koffiTurnstileWidgetId = null;
+    let koffiTurnstileResolver = null;
+    let koffiTurnstileRejecter = null;
+
+    function cargarTurnstile() {
+      if (window.turnstile) return Promise.resolve();
+      if (koffiTurnstileLoadPromise) return koffiTurnstileLoadPromise;
+      koffiTurnstileLoadPromise = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+        script.async = true;
+        script.defer = true;
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error('No se pudo cargar la validación de seguridad de Cloudflare.'));
+        document.head.appendChild(script);
+      });
+      return koffiTurnstileLoadPromise;
+    }
+
+    async function obtenerTokenTurnstile() {
+      await cargarTurnstile();
+      const contenedor = document.getElementById('turnstile-container');
+      if (!contenedor) throw new Error('No se encontró el espacio de validación de seguridad.');
+
+      if (koffiTurnstileWidgetId === null) {
+        koffiTurnstileWidgetId = window.turnstile.render(contenedor, {
+          sitekey: KOFFI_TURNSTILE_SITE_KEY,
+          size: 'invisible',
+          execution: 'execute',
+          action: 'koffi_flux',
+          callback: (token) => {
+            if (koffiTurnstileResolver) {
+              const resolver = koffiTurnstileResolver;
+              koffiTurnstileResolver = null;
+              koffiTurnstileRejecter = null;
+              resolver(token);
+            }
+          },
+          'error-callback': () => {
+            if (koffiTurnstileRejecter) {
+              const rejecter = koffiTurnstileRejecter;
+              koffiTurnstileResolver = null;
+              koffiTurnstileRejecter = null;
+              rejecter(new Error('Cloudflare no pudo completar la validación. Inténtalo otra vez.'));
+            }
+          },
+          'expired-callback': () => {
+            if (koffiTurnstileRejecter) {
+              const rejecter = koffiTurnstileRejecter;
+              koffiTurnstileResolver = null;
+              koffiTurnstileRejecter = null;
+              rejecter(new Error('La validación de seguridad venció. Vuelve a intentarlo.'));
+            }
+          }
+        });
+      }
+
+      return new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          koffiTurnstileResolver = null;
+          koffiTurnstileRejecter = null;
+          reject(new Error('La validación de seguridad tardó demasiado. Vuelve a intentarlo.'));
+        }, 120000);
+
+        koffiTurnstileResolver = (token) => {
+          clearTimeout(timeout);
+          resolve(token);
+        };
+        koffiTurnstileRejecter = (error) => {
+          clearTimeout(timeout);
+          reject(error);
+        };
+
+        try {
+          window.turnstile.reset(koffiTurnstileWidgetId);
+          window.turnstile.execute(koffiTurnstileWidgetId);
+        } catch (error) {
+          clearTimeout(timeout);
+          koffiTurnstileResolver = null;
+          koffiTurnstileRejecter = null;
+          reject(new Error('No se pudo iniciar la validación de Cloudflare: ' + error.message));
+        }
+      });
+    }
+
+    async function imagenFlux(prompt, ratio, w, h) {
+      const turnstileToken = await obtenerTokenTurnstile();
+      const response = await fetch(KOFFI_FLUX_WORKER_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt,
+          width: w,
+          height: h,
+          turnstileToken
+        })
+      });
+
+      let data;
+      try {
+        data = await response.json();
+      } catch {
+        throw new Error('El Worker respondió con un formato inesperado.');
+      }
+
+      if (!response.ok) {
+        throw new Error(data.error || data.detail || `Error del Worker (${response.status}).`);
+      }
+      if (typeof data.image !== 'string' || !data.image) {
+        throw new Error('El Worker no devolvió una imagen.');
+      }
+
+      await Promise.race([
+        mostrarImagen(data.image, `✓ Imagen (${ratio}) generada con FLUX.2 Klein 4B mediante Cloudflare.\nMantén presionada la imagen para guardarla en tu móvil.`),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('La imagen tardó demasiado en cargarse.')), 60000))
+      ]);
+    }
+
+    async function generarImagen() {
+      const aprobado = conceptoVisualPendiente;
+      const firmaActual = obtenerFirmaContextoBrief();
+      if (!aprobado || !firmaContextoVisualPendiente || firmaActual !== firmaContextoVisualPendiente) {
+        invalidarBriefVisual('El brief no existe o quedó desactualizado.');
+        alert('Primero toca PREPARAR DIRECCIÓN VISUAL, revisa la propuesta y después renderízala.');
+        return;
+      }
+
+      // No se reconstruye el concepto aquí: se usa literalmente el prompt que se mostró y aprobó.
+      const ratio = aprobado.ratio;
+      const prompt = aprobado.prompt;
+      const concepto = aprobado.concepto;
+      const contexto = aprobado.contexto;
+      const ideaUsuario = aprobado.ideaUsuario;
+      let w = 1280, h = 720;
+      if (ratio === '9:16') { w = 720; h = 1280; }
+      else if (ratio === '1:1') { w = 1024; h = 1024; }
+
+      const img = document.getElementById('img-result');
+      const info = document.getElementById('img-info');
+      const loader = document.getElementById('img-loading');
+      const button = document.getElementById('btn-render-visual');
+      registrarConceptoVisual(prompt);
+
+      loader.style.display = 'block';
+      loader.textContent = 'Validando seguridad y preparando FLUX.2 Klein 4B...';
+      img.style.display = 'none';
+      info.textContent = ideaUsuario
+        ? `Koffi Studio está renderizando la dirección aprobada para ${contexto.niche} · ${ratio}...`
+        : `Koffi Studio está renderizando el concepto aprobado para ${contexto.niche} · ${ratio}...`;
+      if (button) { button.disabled = true; button.textContent = '⏳ GENERANDO...'; }
+
+      try {
+        await imagenFlux(prompt, ratio, w, h);
+        info.textContent = `✓ ${concepto.titulo}: ${concepto.idea} · ${contexto.niche} · ${ratio}. Imagen generada con FLUX.2 Klein 4B usando exactamente el prompt aprobado.`;
+      } catch (error) {
+        loader.style.display = 'none';
+        info.textContent = '⚠️ No se pudo generar la imagen.\n' + (error.message || 'Error desconocido') + '\n\nComprueba tu conexión e inténtalo nuevamente.';
+      } finally {
+        loader.style.display = 'none';
+        if (button) { button.disabled = obtenerFirmaContextoBrief() !== firmaContextoVisualPendiente; button.textContent = '🎨 RENDERIZAR ESTA PROPUESTA'; }
+      }
+    }
+
+    // ===== DIVISOR A2E =====
+    function trocearGuionA2E() {
+      const consola = document.getElementById('script-console');
+      const fullText = consola.value;
+      const container = document.getElementById('chunks-container');
+      container.innerHTML = "";
+      if (!consola.dataset.ready || fullText.length < 50) { alert('Primero genera un guion en la Pestaña 1.'); return; }
+      const sentences = fullText.split(/(?<=[.?!])\s+/);
+      const chunks = [];
+      let cur = "";
+      sentences.forEach(s => {
+        if ((cur + s).length < 900) cur += (cur ? " " : "") + s;
+        else { if (cur) chunks.push(cur); cur = s; }
+      });
+      if (cur) chunks.push(cur);
+      chunks.forEach((chunk, i) => {
+        const div = document.createElement('div');
+        div.style = "background:#09090b; border:1px solid #27272a; padding:8px; border-radius:6px; margin-bottom:8px;";
+        div.innerHTML = `
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <span style="font-size:10px; color:#10b981; font-weight:700;">BLOQUE ${i + 1} (${chunk.length} CARACTERES)</span>
+            <button style="background:#fff; color:#000; border:none; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:700; cursor:pointer;" onclick="navigator.clipboard.writeText(this.dataset.text); alert('Bloque ${i + 1} copiado.');" data-text="${esc(chunk)}">COPIAR</button>
+          </div>
+          <p style="font-size:10px; color:#a1a1aa; line-height:1.4;">${esc(chunk.substring(0, 100))}...</p>`;
+        container.appendChild(div);
+      });
+    }
+
+    // ===== INICIO =====
+    construirUI();
+    actualizarRelacionAspecto();
+    restaurarProyecto();
+    elegirEstilo(estiloActual);
+    if (escenasGuardadas.length) {
+      const note = document.getElementById('scene-note');
+      if (note) note.textContent = `✓ ${escenasGuardadas.length} escenas recuperadas del dispositivo.`;
+      renderizarEscenasGuardadas();
+    }
+    conectarGuardadoAutomatico();
+    conectarInvalidacionBrief();
+    checkKey();
+  </script>
+</body>
+</html>
