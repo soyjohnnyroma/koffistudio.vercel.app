@@ -1161,17 +1161,41 @@ Devuelve ÚNICAMENTE un arreglo JSON válido con el siguiente formato exacto, si
 
       // Si hay enlace de YouTube, intenta que Gemini vea el video; si falla, sigue sin él
       async function llamarConRef(conVideo, sinVideo, onWait) {
-        const estadoModelo = (m) => { nota.textContent = 'Consultando Gemini: ' + m; };
-        if (refInfo.tipo !== 'youtube') return callGeminiSafe(sinVideo, onWait, estadoModelo);
-        nota.textContent = '🎬 Analizando el video de referencia (puede tardar)...';
-        try {
-          const r = await callGeminiSafe(conVideo, onWait, estadoModelo, refInfo.url);
-          nota.textContent = '🎬 Video analizado por Gemini · modelo: ' + r.model;
-          return r;
-        } catch (e) {
-          nota.textContent = '⚠️ No pude analizar ese video (' + e.message.slice(0, 90) + '). Seguí solo con tu tema y tono.';
-          return callGeminiSafe(sinVideo, onWait, estadoModelo);
-        }
+  const estadoModelo = (m) => {
+    nota.textContent = 'Consultando Gemini: ' + m;
+  };
+
+  if (refInfo.tipo !== 'youtube') {
+    return callGeminiSafe(sinVideo, onWait, estadoModelo);
+  }
+
+  nota.textContent = '🎬 Analizando el video de referencia (puede tardar)...';
+
+  try {
+    const r = await callGeminiSafe(conVideo, onWait, estadoModelo, refInfo.url);
+    nota.textContent = '🎬 Video analizado por Gemini · modelo: ' + r.model;
+    return r;
+  } catch (e) {
+    const detalle = [
+      e?.message || '',
+      e?.apiError?.message || '',
+      JSON.stringify(e?.apiError?.details || [])
+    ].join(' ');
+
+    const errorExplicitoDeVideo =
+      (e?.status === 400 || e?.status === 404) &&
+      /video|youtube|filedata|file.?uri|media/i.test(detalle) &&
+      /invalid|unsupported|not found|not available|cannot|failed|unable|malformed/i.test(detalle);
+
+    if (!errorExplicitoDeVideo) {
+      nota.textContent = '❌ Error de Gemini: ' + (e.message || 'No se pudo completar la solicitud.');
+      throw e;
+    }
+
+    nota.textContent = '⚠️ Gemini no pudo procesar el video de referencia. Continuando únicamente con tu tema y tono editorial...';
+
+    return callGeminiSafe(sinVideo, onWait, estadoModelo);
+  }
       }
 
       detener = false;
