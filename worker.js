@@ -13,8 +13,7 @@ const ALLOWED_ORIGINS = new Set([
   "https://koffistudiovercelapp-git-estabilizacion-ko-c1622d-soyjohnnyroma.vercel.app",
   "https://koffistudiovercel-jxa4wgosq-soyjohnnyroma.vercel.app",
   "https://koffistudiovercel-fzh1qew0h-soyjohnnyroma.vercel.app",
-
-"https://koffistudiovercel-9ibnhu7c6-soyjohnroma.vercel.app",
+  "https://koffistudiovercel-9ibnhu7c6-soyjohnroma.vercel.app",
 ]);
 
 const ALLOWED_HOSTNAMES = new Set([
@@ -22,8 +21,7 @@ const ALLOWED_HOSTNAMES = new Set([
   "koffistudiovercelapp-git-estabilizacion-ko-c1622d-soyjohnnyroma.vercel.app",
   "koffistudiovercel-jxa4wgosq-soyjohnnyroma.vercel.app",
   "koffistudiovercel-fzh1qew0h-soyjohnnyroma.vercel.app",
-
-koffistudiovercel-9ibnhu7c6-soyjohnroma.vercel.app,
+  "koffistudiovercel-9ibnhu7c6-soyjohnroma.vercel.app",
 ]);
 
       
