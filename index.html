@@ -1679,30 +1679,48 @@ Devuelve ÚNICAMENTE un arreglo JSON válido con el siguiente formato exacto, si
     }
 
     function restaurarProyecto() {
+      let proyecto = null;
       try {
         if (!window.KoffiCoreProjectStore) throw new Error('No se pudo cargar el módulo Project Store.');
+        // Inicializar y resolver el registro local antes de tocar los módulos visuales.
         coreStore = window.KoffiCoreProjectStore.createStore(window.localStorage, { key: KOFFI_CORE_STORE_KEY });
         const active = coreStore.getActive();
         const projects = coreStore.list();
         if (active && !active.archivedAt) {
-          coreActiveProjectId = active.projectId;
-          coreLoadProject(active);
+          proyecto = active;
         } else if (projects.length) {
-          const selected = coreStore.select(projects[0].projectId);
-          coreActiveProjectId = selected.projectId;
-          coreLoadProject(selected);
+          proyecto = coreStore.select(projects[0].projectId);
         } else {
-          const editor = document.getElementById('script-console');
-          if (editor) editor.value = '';
-          coreCreateProject('Nueva producción');
+          proyecto = coreStore.create({
+            title: 'Nueva producción',
+            niche: document.getElementById('script-niche')?.value || '',
+            format: document.getElementById('script-format')?.value || 'youtube_long',
+            platforms: ['youtube'],
+            language: 'es'
+          });
         }
+        coreActiveProjectId = proyecto.projectId;
+        // El selector queda sincronizado aunque falle después la hidratación visual.
         coreRenderSelector();
       } catch (e) {
         coreRestoring = false;
         coreStore = null;
         const detalle = e && e.message ? e.message : String(e || 'error desconocido');
-        coreMostrarError('Koffi Core no pudo iniciar: ' + detalle + '. El almacenamiento V2 permanece intacto.');
-        console.error('Koffi Core: error de inicialización', e);
+        coreMostrarError('Koffi Core no pudo leer el almacenamiento local: ' + detalle + '. No se modificaron los datos V2.');
+        console.error('Koffi Core: error de lectura inicial', e);
+        return;
+      }
+
+      try {
+        coreLoadProject(proyecto);
+        coreRenderSelector();
+      } catch (e) {
+        coreRestoring = false;
+        // No invalidar el almacén: el registro sigue disponible y no debe parecer perdido.
+        try { coreRenderSelector(); } catch (_) {}
+        const detalle = e && e.message ? e.message : String(e || 'error desconocido');
+        coreMostrarError('Producción encontrada (' + proyecto.title + '), pero falló la carga visual: ' + detalle);
+        console.error('Koffi Core: error al hidratar la interfaz', e);
       }
     }
 
@@ -2476,7 +2494,6 @@ Devuelve ÚNICAMENTE un array JSON con EXACTAMENTE ${faltan.length} objetos nuev
     // Así, un fallo al leer/cargar una producción no deja la interfaz sin eventos.
     coreConectarControles();
     conectarGuardadoAutomatico();
-    restaurarProyecto();
     elegirEstilo(estiloActual);
     if (escenasGuardadas.length) {
       const note = document.getElementById('scene-note');
@@ -2485,6 +2502,8 @@ Devuelve ÚNICAMENTE un array JSON con EXACTAMENTE ${faltan.length} objetos nuev
     }
     conectarInvalidacionBrief();
     checkKey();
+    // Restaurar al final: todos los módulos y sus controles ya están inicializados.
+    restaurarProyecto();
   </script>
 </body>
 </html>
