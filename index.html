@@ -101,7 +101,7 @@
         <select id="core-project-select" class="input-field" style="margin:0;min-width:0;" onchange="coreSeleccionarProduccion(this.value)"></select>
         <span id="core-project-status" style="font-size:10px;color:#71717a;">Almacenamiento local de Koffi Core</span>
       </div>
-      <button type="button" id="core-project-new" class="btn-secondary" style="width:auto;">＋ NUEVA</button>
+      <button type="button" id="core-project-new" class="btn-secondary" style="width:auto;" onclick="coreClickNuevaProduccion()">＋ NUEVA</button>
       <button type="button" id="core-project-confirm-script" class="btn-secondary" style="width:auto;">CONFIRMAR GUION</button>
       <button type="button" id="core-project-import-v2" class="btn-secondary" style="width:auto;">IMPORTAR V2</button>
       <button type="button" id="core-project-export" class="btn-secondary" style="width:auto;">RESPALDO JSON</button>
@@ -1657,20 +1657,22 @@ Devuelve ÚNICAMENTE un arreglo JSON válido con el siguiente formato exacto, si
       }
     }
 
+    function coreClickNuevaProduccion() {
+      const status = document.getElementById('core-project-status');
+      try {
+        if (status) status.textContent = 'Abriendo nueva producción…';
+        if (!coreStore) restaurarProyecto();
+        if (!coreStore) throw new Error('El almacén local no está disponible. Revisa el estado de Koffi Core.');
+        coreAbrirDialogoNuevaProduccion();
+      } catch (e) {
+        coreMostrarError('No se pudo abrir Nueva producción: ' + (e.message || 'error desconocido'));
+      }
+    }
+
     function coreConectarControles() {
       if (window.__koffiCoreControlsConnected) return;
       window.__koffiCoreControlsConnected = true;
-      // Nueva producción y selector usan manejadores inline en el HTML para
-      // no depender de que la fase de inicialización alcance este punto.
-      document.getElementById('core-project-new')?.addEventListener('click', () => {
-        try {
-          if (!coreStore) restaurarProyecto();
-          if (!coreStore) throw new Error('El almacén de proyectos sigue sin inicializarse. Revisa el mensaje de estado.');
-          coreAbrirDialogoNuevaProduccion();
-        } catch (e) {
-          coreMostrarError('No se pudo abrir Nueva producción: ' + (e.message || 'error desconocido'));
-        }
-      });
+      // El botón Nueva producción usa onclick directo como ruta de ejecución principal.
       document.getElementById('core-project-confirm-script')?.addEventListener('click', confirmarRevisionGuion);
       document.getElementById('core-project-import-v2')?.addEventListener('click', coreImportarV2);
       document.getElementById('core-project-export')?.addEventListener('click', coreExportarRespaldo);
