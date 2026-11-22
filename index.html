@@ -1371,16 +1371,21 @@ Devuelve ÚNICAMENTE un arreglo JSON válido con el siguiente formato exacto, si
         coreStore = window.KoffiCoreProjectStore.createStore(window.localStorage, { key: KOFFI_CORE_STORE_KEY });
         const active = coreStore.getActive();
         const projects = coreStore.list();
-        if (active && !active.archivedAt) coreLoadProject(active);
-        else if (projects.length) coreLoadProject(coreStore.select(projects[0].projectId));
-        else {
+        if (active && !active.archivedAt) {
+          coreActiveProjectId = active.projectId;
+          coreLoadProject(active);
+        } else if (projects.length) {
+          const selected = coreStore.select(projects[0].projectId);
+          coreActiveProjectId = selected.projectId;
+          coreLoadProject(selected);
+        } else {
           const editor = document.getElementById('script-console');
           if (editor) editor.value = '';
           coreCreateProject('Nueva producción');
         }
-        coreConectarControles();
         coreRenderSelector();
       } catch (e) {
+        coreRestoring = false;
         estadoGuardado('⚠️ Koffi Core no pudo iniciar. No se alteró el trabajo V2.', true);
         console.error('Koffi Core: error de inicialización', e);
         alert('Koffi Core no pudo iniciar: ' + e.message + '. El almacenamiento V2 permanece intacto.');
@@ -2153,6 +2158,10 @@ Devuelve ÚNICAMENTE un array JSON con EXACTAMENTE ${faltan.length} objetos nuev
     // ===== INICIO =====
     construirUI();
     actualizarRelacionAspecto();
+    // Los controles y el autosave se conectan antes de restaurar datos locales.
+    // Así, un fallo al leer/cargar una producción no deja la interfaz sin eventos.
+    coreConectarControles();
+    conectarGuardadoAutomatico();
     restaurarProyecto();
     elegirEstilo(estiloActual);
     if (escenasGuardadas.length) {
@@ -2160,7 +2169,6 @@ Devuelve ÚNICAMENTE un array JSON con EXACTAMENTE ${faltan.length} objetos nuev
       if (note) note.textContent = `✓ ${escenasGuardadas.length} escenas recuperadas del dispositivo.`;
       renderizarEscenasGuardadas();
     }
-    conectarGuardadoAutomatico();
     conectarInvalidacionBrief();
     checkKey();
   </script>
