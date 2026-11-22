@@ -2503,6 +2503,18 @@ Devuelve ÚNICAMENTE un array JSON con EXACTAMENTE ${faltan.length} objetos nuev
     conectarInvalidacionBrief();
     checkKey();
     // Restaurar al final: todos los módulos y sus controles ya están inicializados.
+    // En PWA/móvil, pageshow ofrece un segundo punto de recuperación si el primer
+    // intento ocurrió antes de que el navegador terminara de presentar la página.
+    window.addEventListener('pageshow', () => {
+      if (!coreStore) {
+        setTimeout(() => {
+          if (!coreStore) {
+            console.info('Koffi Core: reintento de restauración tras pageshow.');
+            restaurarProyecto();
+          }
+        }, 250);
+      }
+    }, { once: true });
     restaurarProyecto();
   </script>
 </body>
