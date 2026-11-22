@@ -2487,24 +2487,41 @@ Devuelve ÚNICAMENTE un array JSON con EXACTAMENTE ${faltan.length} objetos nuev
       });
     }
 
-    // ===== INICIO =====
-    construirUI();
-    actualizarRelacionAspecto();
-    // Los controles y el autosave se conectan antes de restaurar datos locales.
-    // Así, un fallo al leer/cargar una producción no deja la interfaz sin eventos.
-    coreConectarControles();
-    conectarGuardadoAutomatico();
-    elegirEstilo(estiloActual);
-    if (escenasGuardadas.length) {
-      const note = document.getElementById('scene-note');
-      if (note) note.textContent = `✓ ${escenasGuardadas.length} escenas recuperadas del dispositivo.`;
-      renderizarEscenasGuardadas();
+    // ===== INICIO ROBUSTO =====
+    // Cada paso se aísla: un fallo de interfaz no debe impedir el autosalvado
+    // ni la recuperación del proyecto local.
+    const coreInitErrors = [];
+    function coreInitStep(nombre, tarea) {
+      try {
+        tarea();
+        return true;
+      } catch (error) {
+        const detalle = error && error.message ? error.message : String(error || 'error desconocido');
+        coreInitErrors.push({ paso: nombre, detalle });
+        console.error('Koffi Core: fallo durante inicialización (' + nombre + ')', error);
+        const status = document.getElementById('core-project-status');
+        if (status) status.textContent = '⚠️ Inicialización parcial: ' + nombre + ' — ' + detalle;
+        return false;
+      }
     }
-    conectarInvalidacionBrief();
-    checkKey();
-    // Restaurar al final: todos los módulos y sus controles ya están inicializados.
-    // En PWA/móvil, pageshow ofrece un segundo punto de recuperación si el primer
-    // intento ocurrió antes de que el navegador terminara de presentar la página.
+
+    coreInitStep('construir interfaz', construirUI);
+    coreInitStep('relación de aspecto', actualizarRelacionAspecto);
+    // Conectar controles y autosalvado incluso si falla un módulo visual.
+    coreInitStep('controles de Koffi Core', coreConectarControles);
+    coreInitStep('guardado automático', conectarGuardadoAutomatico);
+    coreInitStep('estilo visual', () => elegirEstilo(estiloActual));
+    coreInitStep('escenas guardadas', () => {
+      if (escenasGuardadas.length) {
+        const note = document.getElementById('scene-note');
+        if (note) note.textContent = `✓ ${escenasGuardadas.length} escenas recuperadas del dispositivo.`;
+        renderizarEscenasGuardadas();
+      }
+    });
+    coreInitStep('invalidación del brief', conectarInvalidacionBrief);
+    coreInitStep('estado de API', checkKey);
+
+    // Registrar el respaldo de pageshow antes de restaurar el proyecto.
     window.addEventListener('pageshow', () => {
       if (!coreStore) {
         setTimeout(() => {
@@ -2515,7 +2532,13 @@ Devuelve ÚNICAMENTE un array JSON con EXACTAMENTE ${faltan.length} objetos nuev
         }, 250);
       }
     }, { once: true });
-    restaurarProyecto();
+
+    // La restauración no depende del éxito de los pasos visuales anteriores.
+    coreInitStep('restauración de producción', restaurarProyecto);
+    if (coreInitErrors.length) {
+      console.warn('Koffi Core: inicialización parcial. Pasos con error:', coreInitErrors);
+      estadoGuardado('⚠️ Inicialización parcial. Revisa el estado de producción y la consola.', true);
+    }
   </script>
 </body>
 </html>
