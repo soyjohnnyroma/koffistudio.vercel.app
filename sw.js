@@ -1,4 +1,4 @@
-const CACHE_NAME = 'koffi-studio-v4';
+const CACHE_NAME = 'koffi-studio-v5';
 const APP_SHELL = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', event => {
