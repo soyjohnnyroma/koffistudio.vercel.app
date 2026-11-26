@@ -963,11 +963,35 @@
       ic.innerHTML = '';
     }
 
-    function openTab(id, btn) {
+    function openTab(id, btn, guardar = true) {
+      const panel = document.getElementById(id);
+      if (!panel || !panel.classList.contains('tab-content')) return;
+
+      const botones = Array.from(document.querySelectorAll('.tab-btn'));
+      const botonActivo = btn || botones.find(b => (b.getAttribute('onclick') || '').includes("'" + id + "'"));
+      if (!botonActivo) return;
+
       document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-      btn.classList.add('active');
+      botones.forEach(b => b.classList.remove('active'));
+      panel.classList.add('active');
+      botonActivo.classList.add('active');
+
+      if (guardar) {
+        try { localStorage.setItem('koffi_active_tab_v1', id); }
+        catch (error) { console.warn('Koffi: no se pudo guardar la pestaña activa.', error); }
+      }
+    }
+
+    function restaurarUltimaPestana() {
+      let id = 'tab-guion';
+      try {
+        const guardada = localStorage.getItem('koffi_active_tab_v1');
+        const panel = guardada ? document.getElementById(guardada) : null;
+        if (panel && panel.classList.contains('tab-content')) id = guardada;
+      } catch (error) {
+        console.warn('Koffi: no se pudo leer la última pestaña.', error);
+      }
+      openTab(id, null, false);
     }
 
     function actualizarRelacionAspecto() {
@@ -2611,6 +2635,8 @@ Devuelve ÚNICAMENTE un array JSON con EXACTAMENTE ${faltan.length} objetos nuev
 
     // La restauración no depende del éxito de los pasos visuales anteriores.
     coreInitStep('restauración de producción', restaurarProyecto);
+    // Recuperar la última pestaña sin alterar el estado de la producción.
+    coreInitStep('restauración de pestaña', restaurarUltimaPestana);
     if (coreInitErrors.length) {
       console.warn('Koffi Core: inicialización parcial. Pasos con error:', coreInitErrors);
       estadoGuardado('⚠️ Inicialización parcial. Revisa el estado de producción y la consola.', true);
