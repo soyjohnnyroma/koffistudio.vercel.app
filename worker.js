@@ -16,6 +16,7 @@ const ALLOWED_ORIGINS = new Set([
   "https://koffistudiovercel-fzh1qew0h-soyjohnnyroma.vercel.app",
   "https://koffistudiovercel-9ibnhu7c6-soyjohnnyroma.vercel.app",
   "https://koffistudiovercelapp-git-dev-soyjohnnyroma.vercel.app",
+  "https://koffistudiovercelapp-git-koffi-core-mvp1b-preview-soyjohnnyroma.vercel.app",
 ]);
 
 const ALLOWED_HOSTNAMES = new Set([
@@ -25,6 +26,7 @@ const ALLOWED_HOSTNAMES = new Set([
   "koffistudiovercel-fzh1qew0h-soyjohnnyroma.vercel.app",
   "koffistudiovercel-9ibnhu7c6-soyjohnnyroma.vercel.app",
   "koffistudiovercelapp-git-dev-soyjohnnyroma.vercel.app",
+  "koffistudiovercelapp-git-koffi-core-mvp1b-preview-soyjohnnyroma.vercel.app",
 ]);
       
       const ALLOWED_SIZES = new Set([512, 720, 768, 1024, 1280]);
