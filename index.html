@@ -2964,6 +2964,8 @@ Devuelve ÚNICAMENTE un array JSON con EXACTAMENTE ${faltan.length} objetos nuev
       const galeria = document.getElementById('img-gallery');
       if (!galeria) return;
       const tarjeta = document.createElement('div');
+      tarjeta.id = `card-lote-${item.indice}`;
+      tarjeta.dataset.batchSceneId = item.sceneId || '';
       tarjeta.style.cssText = 'border:1px solid #633;border-radius:10px;padding:8px;background:#211;';
       const titulo = document.createElement('div');
       titulo.textContent = `Escena ${item.indice + 1} · No generada`;
