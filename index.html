@@ -2228,10 +2228,10 @@ ${g.capitulos.filter((_, i) => i !== idx).map((t, i) => t.slice(-1400)).join('\n
           const parsed = JSON.parse(t.slice(i1, i2 + 1));
           if (Array.isArray(parsed)) return parsed;
         } catch (_) {
-          throw new Error('Gemini devolvió una respuesta JSON incompleta o mal formada. Posible truncamiento. Fragmento: ' + t.slice(0, 240).replace(/\\s+/g, ' '));
+          throw new Error('Gemini devolvió una respuesta JSON incompleta o mal formada. Posible truncamiento. Fragmento: ' + t.slice(0, 240).replace(/\s+/g, ' '));
         }
       }
-      throw new Error('Gemini respondió, pero no entregó un arreglo JSON de escenas. Fragmento: ' + t.slice(0, 240).replace(/\\s+/g, ' '));
+      throw new Error('Gemini respondió, pero no entregó un arreglo JSON de escenas. Fragmento: ' + t.slice(0, 240).replace(/\s+/g, ' '));
     }
 
     function escenaValida(escena) {
