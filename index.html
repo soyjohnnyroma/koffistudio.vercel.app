@@ -2854,6 +2854,8 @@ Devuelve ÚNICAMENTE un array JSON con EXACTAMENTE ${faltan.length} objetos nuev
       const galeria = document.getElementById('img-gallery');
       if (!galeria) return;
       const tarjeta = document.createElement('div');
+      tarjeta.id = `card-lote-${item.indice}`;
+      tarjeta.dataset.batchSceneId = item.sceneId || '';
       tarjeta.style.cssText = 'border:1px solid #333;border-radius:10px;padding:8px;background:#111;';
       const titulo = document.createElement('div');
       titulo.textContent = `Escena ${item.indice + 1}`;
@@ -3002,9 +3004,9 @@ Devuelve ÚNICAMENTE un array JSON con EXACTAMENTE ${faltan.length} objetos nuev
           etiqueta = '✓ Generada · no guardada';
           console.warn('Koffi: imagen regenerada, pero no persistida.', persistError);
         }
-        const existente = document.getElementById(`img-lote-${item.indice}`);
-        if (existente) existente.src = imagen;
-        else agregarImagenLote(item, imagen, etiqueta);
+        const tarjetaAnterior = document.getElementById(`card-lote-${item.indice}`);
+        if (tarjetaAnterior) tarjetaAnterior.remove();
+        agregarImagenLote(item, imagen, etiqueta);
         const urlAnterior = koffiBatchImageUrls.get(item.sceneId);
         if (urlAnterior) { URL.revokeObjectURL(urlAnterior); koffiBatchImageUrls.delete(item.sceneId); }
         pintarEstadoLote(`✓ Escena ${item.indice + 1} regenerada correctamente.`);
