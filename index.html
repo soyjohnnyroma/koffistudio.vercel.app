@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#030303">
-  <title>Koffi Studio — Media Engine</title>
+  <title>Koffi Studio — Producción audiovisual inteligente</title>
   <!-- Candidato Index V5 · control preventivo de longitud de prompt FLUX -->
   <link rel="icon" href="icon-192.png" type="image/png">
   <link rel="apple-touch-icon" href="icon-192.png">
@@ -16,7 +16,7 @@
     .brand-logo-img{display:block;width:44px;height:44px;margin:0 auto 8px;border-radius:50%;background:#000;object-fit:cover;}
     .brand-title{display:block;font-size:15px;font-weight:600;letter-spacing:5px;padding-left:5px;color:#f4f4f5;white-space:nowrap;}
     .brand-sub{display:block;margin-top:5px;font-size:9px;letter-spacing:4px;padding-left:4px;color:#a1a1aa;text-transform:uppercase;white-space:nowrap;}
-    .brand-tag{display:block;margin-top:4px;font-size:clamp(6.5px,2vw,8.5px);letter-spacing:1.4px;color:#52525b;text-transform:uppercase;white-space:nowrap;}
+    .brand-tag{display:block;margin-top:4px;font-size:9px;letter-spacing:.35px;color:#71717a;text-transform:none;white-space:nowrap;}
     .util-bar{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:8px;border-top:1px solid #18181b;}
     #live-datetime{font-family:monospace;font-size:10px;letter-spacing:.5px;color:#71717a;}
     .util-right{display:flex;align-items:center;gap:8px;}
@@ -65,8 +65,7 @@
 <body>
 
   <header>     <img src="icon-192.png" alt="Koffi Studio" class="brand-logo-img" onerror="this.onerror=null;this.src='data:image/png;base64,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'">     <span class="brand-title">KOFFI STUDIO</span>
-    <span class="brand-sub">Media Engine</span>
-    <span class="brand-tag">Ecosistema multi-nicho y multi-plataforma</span>
+    <span class="brand-tag">Producción audiovisual inteligente</span>
     <div class="util-bar">
       <span id="live-datetime">--/--/---- --:--:--</span>
       <div class="util-right">
