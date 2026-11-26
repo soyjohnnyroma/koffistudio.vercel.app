@@ -794,7 +794,7 @@
         const firma = brief.prompt.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().slice(0, 240);
         propuesta = {
           titulo: promptUsuario ? 'Desarrollo profesional de tu idea' : escenaActiva ? 'Dirección visual de escena' : ancla ? 'Interpretación visual contextual' : 'Concepto autónomo del nicho',
-          idea: (preservarDireccion ? ancla : `${brief.sujeto}; ${brief.accion}; ${brief.entorno}.`),
+          idea: (escenaActiva ? ancla : `${brief.sujeto}; ${brief.accion}; ${brief.entorno}.`),
           brief,
           prompt: brief.prompt,
           firma
