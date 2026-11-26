@@ -738,17 +738,16 @@
         ? `${preservarDireccion ? 'CREATIVE DIRECTION TO PRESERVE — keep its intended subject, action, setting and visual meaning without contradiction' : 'Narrative and thematic reference'}: ${ancla}.`
         : `Create an original, niche-relevant visual concept for ${contexto.niche}; do not default to a generic stock-photo scene.`;
       const promptCompacto = [
-        'Create one finished, publication-ready medieval European narrative illustration. Use the selected niche only as internal thematic context; never display or write its name in the image.',
-        `Art direction: ${p.lenguaje}. ${estilo}`,
-        `Scene to preserve faithfully: ${ancla || 'Create a scene relevant to the script'}.`,
-        `Subject: ${sujeto}. Action: ${accion}. Setting: ${entorno}. Keep historical period, clothing, architecture and props coherent.`,
-        `Framing: ${camara}. Composition: ${COMPOSICIONES_FORMATO[ratio]}.`,
-        `Lighting: ${luz}. Palette: ${paleta}. Texture: ${textura}.`,
-        `Quality: ${CAPA_VISUAL_UNIVERSAL}. Natural, anatomically correct human body with exactly two arms and two hands, natural fingers; no extra, missing, fused or duplicated limbs.`,
-        ...(esEstoicismo ? ['SER ESTOICO — NON-NEGOTIABLE: show exactly ONE living, clearly visible, recognizable mature man aged 40–65 as the sole protagonist. No women, girls, boys, teenagers, youthful-looking adults, other people, background figures, crowds, silhouettes, reflections, statues, busts or sculptures. The man must have a full natural head of hair; short, medium and long hair are all allowed, with varied colors. Never depict baldness, shaved heads, receding hairlines or visibly thinning hair. Avoid repeating the same face or defaulting to the same grey-haired bearded man. European medieval illustrated graphic-novel style, visible ink contours, rich balanced colors. Vary facial identity, hair, beard, clothing, activity, framing and medieval settings. Never default to Roman emperors or Marco Aurelius unless the scene explicitly requires it; depict any required historical figure as a living man.'] : []),
-        'NO EDITORIAL OVERLAY: never add a title, headline, subtitle, caption, banner, floating text, typography, logo or watermark over the illustration, especially at the top. Do not make the image resemble a YouTube thumbnail, poster, book cover or title card. Writing is allowed only when it belongs naturally to a physical object in the scene, such as a manuscript, book, scroll, map, letter or document; do not turn that writing into a separate overlay.'
+        'Create one full-bleed medieval European graphic-novel illustration, expressive ink contours, painterly texture and balanced natural colors. The niche is thematic context only; never display its name.',
+        `Scene: ${ancla || 'Create a scene faithful to the script'}.`,
+        `Visual language: ${p.lenguaje}. ${estilo}`,
+        `Subject: ${sujeto}. Action: ${accion}. Setting: ${entorno}. Preserve the scene meaning, period and relevant props.`,
+        `Composition: ${COMPOSICIONES_FORMATO[ratio]}. Camera: ${camara}. Light: ${luz}. Palette: ${paleta}. Texture: ${textura}.`,
+        ...(esEstoicismo ? ['Exactly ONE living, visible, recognizable mature man aged 40–65; sole human figure and protagonist. No women, minors, other people, crowds, silhouettes, human reflections, statues or busts. Full natural hair required: short, medium or long, any natural color; never bald, shaved, receding or visibly thinning. Vary face, age, hair, beard, build, clothing and activity; avoid repeating the same grey-haired bearded face or consecutive occupations. Medieval European settings must vary: castles, keeps, towers, walled towns, squares, monasteries, cathedrals, libraries, gardens, ports, bridges, forests, mountains, workshops and everyday life.'] : []),
+        'Anatomy must be natural, with exactly two arms and two hands. No editorial overlay of any kind: no title, headline, subtitle, caption, banner, floating text, typography, logo or watermark; never resemble a thumbnail, poster, cover or title card. Writing is allowed only as part of physical scene props such as books, scrolls, manuscripts, maps, letters or documents.'
       ].filter(Boolean).join('\\n');
-      const prompt = compacto ? promptCompacto : [
+      const usarCompactoEfectivo = compacto || esEstoicismo;
+      const prompt = usarCompactoEfectivo ? promptCompacto : [
         'Create one finished, publication-ready medieval European narrative illustration. Use the selected niche only as internal thematic context; never display or write its name in the image.',
         `Art direction and visual language: ${p.lenguaje}.`,
         tema,
