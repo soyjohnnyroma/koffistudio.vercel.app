@@ -59,6 +59,11 @@
     .idea-title{font-size:11px;font-weight:700;color:#fff;}
     .idea-hook{font-size:10px;color:#a1a1aa;margin-top:2px;}
     .image-preview{width:100%;border-radius:6px;border:1px solid #27272a;margin-top:10px;display:none;}
+    .image-action-menu{position:relative;display:none;text-align:right;margin:8px 0 4px;z-index:5;}
+    .image-action-menu>summary{display:inline-flex;align-items:center;justify-content:center;width:34px;height:30px;border:1px solid #3f3f46;border-radius:7px;background:#18181b;color:#fff;font-size:22px;line-height:1;cursor:pointer;list-style:none;}
+    .image-action-menu>summary::-webkit-details-marker{display:none;}
+    .image-action-list{position:absolute;right:0;top:34px;min-width:158px;padding:6px;background:#18181b;border:1px solid #3f3f46;border-radius:8px;box-shadow:0 8px 24px #0009;display:grid;gap:4px;}
+    .image-action-list button{background:#27272a;color:#f4f4f5;border:1px solid #3f3f46;border-radius:5px;padding:8px 10px;text-align:left;font-size:11px;cursor:pointer;}
     .nota{font-size:10px;color:#71717a;margin:-4px 0 10px;}
   </style>
 </head>
@@ -217,6 +222,7 @@
           <details id="img-brief-details" style="margin-top:10px;">
             <summary style="cursor:pointer;font-size:11px;color:#a1a1aa;">🔎 Ver dirección visual y prompt técnico completo</summary>
             <pre id="img-technical-brief" class="console-out" style="height:auto;max-height:460px;margin-top:8px;white-space:pre-wrap;">El brief técnico aparecerá aquí después de preparar la dirección visual y antes de renderizar.</pre>
+            <button type="button" class="btn-secondary" style="margin-top:8px;" onclick="copiarBriefTecnico()">📋 COPIAR DIRECCIÓN VISUAL</button>
           </details>
         </div>
 
@@ -1370,19 +1376,30 @@ Devuelve ÚNICAMENTE un arreglo JSON válido con el siguiente formato exacto, si
     }
 
     function coreEscenasConMetadatos(items, sourceRevision, statusDefault) {
-      return (Array.isArray(items) ? items : []).map((item, index) => ({
-        sceneId: item.sceneId || `scene-${Date.now()}-${index}-${Math.random().toString(36).slice(2,7)}`,
-        order: Number.isInteger(item.order) ? item.order : index + 1,
-        fragmento: typeof item.fragmento === 'string' ? item.fragmento : '',
-        descripcion: typeof item.descripcion === 'string' ? item.descripcion : '',
-        prompt: typeof item.prompt === 'string' ? item.prompt : '',
-        legacyPrompt: typeof item.legacyPrompt === 'string' ? item.legacyPrompt : '',
-        visualDirection: typeof item.visualDirection === 'string' ? item.visualDirection : '',
-        directionHistory: Array.isArray(item.directionHistory) ? item.directionHistory : [],
-        promptVersion: item.promptVersion || 'raw-v1',
-        sourceScriptRevision: Number.isInteger(item.sourceScriptRevision) ? item.sourceScriptRevision : sourceRevision,
-        status: item.status || statusDefault || 'ready'
-      }));
+      const idsUsados = new Set();
+      return (Array.isArray(items) ? items : []).map((item, index) => {
+        let sceneId = typeof item.sceneId === 'string' ? item.sceneId.trim() : '';
+        if (!sceneId || idsUsados.has(sceneId)) {
+          const base = `scene-${Date.now()}-${index}`;
+          sceneId = base;
+          let suffix = 1;
+          while (idsUsados.has(sceneId)) sceneId = `${base}-${suffix++}`;
+        }
+        idsUsados.add(sceneId);
+        return {
+          sceneId,
+          order: Number.isInteger(item.order) ? item.order : index + 1,
+          fragmento: typeof item.fragmento === 'string' ? item.fragmento : '',
+          descripcion: typeof item.descripcion === 'string' ? item.descripcion : '',
+          prompt: typeof item.prompt === 'string' ? item.prompt : '',
+          legacyPrompt: typeof item.legacyPrompt === 'string' ? item.legacyPrompt : '',
+          visualDirection: typeof item.visualDirection === 'string' ? item.visualDirection : '',
+          directionHistory: Array.isArray(item.directionHistory) ? item.directionHistory : [],
+          promptVersion: item.promptVersion || 'raw-v1',
+          sourceScriptRevision: Number.isInteger(item.sourceScriptRevision) ? item.sourceScriptRevision : sourceRevision,
+          status: item.status || statusDefault || 'ready'
+        };
+      });
     }
 
     function coreRenderSelector() {
@@ -1468,6 +1485,7 @@ Devuelve ÚNICAMENTE un arreglo JSON válido con el siguiente formato exacto, si
         const editorText = document.getElementById('script-console')?.value || '';
         const current = coreStore.get(coreActiveProjectId);
         if (!current) throw new Error('No se encontró la producción activa.');
+        escenasGuardadas = coreEscenasConMetadatos(escenasGuardadas, current.sourceRevision || 1);
         coreStore.update(coreActiveProjectId, project => {
           project.title = (document.getElementById('script-topic')?.value || '').trim() || project.title || 'Producción sin título';
           project.context.niche = document.getElementById('script-niche')?.value || '';
@@ -2083,37 +2101,40 @@ ${g.capitulos.filter((_, i) => i !== idx).map((t, i) => t.slice(-1400)).join('\n
         const h = document.createElement('div'); h.style.cssText = `font-size:10px;color:${e.status === 'stale' ? '#f59e0b' : '#10b981'};font-weight:700;margin-bottom:4px;`; h.textContent = e.status === 'stale' ? `ESCENA ${k+1} · DESACTUALIZADA` : `ESCENA ${k+1}`;
         const d = document.createElement('div'); d.style.cssText = 'font-size:11px;color:#fff;'; d.textContent = e.descripcion || '';
         const f = document.createElement('div'); f.style.cssText = 'font-size:10px;color:#71717a;margin:4px 0;'; f.textContent = e.fragmento ? '“'+e.fragmento+'…”' : '';
-        const p = document.createElement('div'); p.style.cssText = 'font-size:10px;color:#a1a1aa;font-family:monospace;margin-bottom:6px;'; p.textContent = e.visualDirection || e.prompt || '';
+        const direccion = e.visualDirection || e.prompt || '';
+        const p = document.createElement('div'); p.style.cssText = 'font-size:10px;color:#a1a1aa;font-family:monospace;margin-bottom:6px;'; p.textContent = direccion;
         const row = document.createElement('div'); row.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;';
-        const copy = document.createElement('button'); copy.className='btn-secondary'; copy.style.marginTop='0'; copy.textContent='📋 COPIAR DIRECCIÓN'; copy.onclick=()=>navigator.clipboard.writeText(e.visualDirection || e.prompt || '').then(()=>alert('Dirección copiada.'));
-        const use = document.createElement('button'); use.className='btn-secondary'; use.style.marginTop='0'; use.textContent='🎨 USAR EN GENERADOR'; use.onclick=()=>{ document.getElementById('img-prompt').value=e.visualDirection || e.prompt || ''; document.getElementById('img-use-style').checked=false; programarGuardado(); openTab('tab-imagenes',document.querySelectorAll('.tab-btn')[2]); };
-        const refresh = document.createElement('button'); refresh.className='btn-secondary'; refresh.style.marginTop='0'; refresh.textContent = e.visualDirection ? '↻ REVISAR DIRECCIÓN' : '↻ CREAR DIRECCIÓN BREVE'; refresh.onclick=()=>actualizarDireccionEscena(e.sceneId);
+        const copy = document.createElement('button'); copy.className='btn-secondary'; copy.style.marginTop='0'; copy.textContent='📋 COPIAR DIRECCIÓN'; copy.onclick=()=>copiarTextoKoffi(direccion, 'Dirección copiada.');
+        const use = document.createElement('button'); use.className='btn-secondary'; use.style.marginTop='0'; use.textContent='🎨 USAR EN GENERADOR'; use.onclick=()=>{ document.getElementById('img-prompt').value=direccion; document.getElementById('img-use-style').checked=false; programarGuardado(); openTab('tab-imagenes',document.querySelectorAll('.tab-btn')[2]); };
+        const refresh = document.createElement('button'); refresh.className='btn-secondary'; refresh.style.marginTop='0'; refresh.textContent = e.visualDirection ? '↻ REVISAR DIRECCIÓN' : '↻ CREAR DIRECCIÓN BREVE'; refresh.onclick=()=>actualizarDireccionEscena(e.sceneId, refresh, e);
         row.append(copy,use,refresh); [h,d,f,p,row].forEach(x=>card.appendChild(x)); cont.appendChild(card);
       });
     }
 
-    async function actualizarDireccionEscena(sceneId) {
-      const escena = escenasGuardadas.find(item => item.sceneId === sceneId);
-      if (!escena) return;
+    async function actualizarDireccionEscena(sceneId, botonRef, escenaRef) {
+      const escena = escenaRef && escenasGuardadas.includes(escenaRef)
+        ? escenaRef
+        : escenasGuardadas.find(item => item.sceneId === sceneId);
+      if (!escena) { alert('No se pudo identificar esta escena. No se modificó ninguna.'); return; }
       if (!localStorage.getItem('koffi_gemini_key')) { alert('Primero configura Gemini en la pestaña de diagnóstico.'); return; }
       if (!confirm('Gemini preparará una dirección visual breve para esta escena. Se conservarán la descripción, el fragmento y todas las direcciones anteriores. ¿Continuar?')) return;
-      const boton = [...document.querySelectorAll('#scenes-container button')].find(b => /DIRECCIÓN BREVE|REVISAR DIRECCIÓN/.test(b.textContent));
+      const boton = botonRef || null;
       if (boton) { boton.disabled = true; boton.textContent = '⏳ REVISANDO...'; }
       try {
         const esEstoicismo = (document.getElementById('script-niche')?.value || '') === 'Estoicismo y Filosofía Práctica';
         const fuente = [
           'Descripción original: ' + String(escena.descripcion || '').slice(0, 900),
           'Fragmento del guion: ' + String(escena.fragmento || '').slice(0, 1100)
-        ].join('\n');
+        ].join('\\n');
         const instrucciones = esEstoicismo
           ? 'Reformula el contenido como una escena visual breve para una novela gráfica medieval ilustrada europea. Debe mostrar EXACTAMENTE UN hombre vivo, claramente adulto y maduro (40–65 años), como única figura humana. Si el texto fuente menciona mujeres, parejas o grupos, NO los representes literalmente: conserva la idea, emoción, conflicto o acción central mediante un único hombre maduro como protagonista simbólico. No incluyas mujeres ni otras personas, ni siluetas, reflejos humanos, estatuas o bustos. El hombre debe tener cabello natural y abundante; se permiten longitudes corta, media o larga y distintos colores. Nunca calvicie, cabeza rapada, entradas pronunciadas ni cabello visiblemente escaso. Varía rostro, edad, cabello, barba, vestimenta y rasgos para evitar repetir el mismo personaje. No cambies el sentido central del fragmento. Describe sujeto, acción y entorno en una o dos frases concretas. No propongas títulos, encabezados ni rótulos superpuestos; puede haber escritura dentro de pergaminos, libros o documentos que formen parte natural de la escena.'
           : 'Reformula el contenido como una dirección visual breve y concreta que conserve el sentido central. Describe sujeto, acción y entorno en una o dos frases. Sin encabezados, listas ni explicaciones. No propongas títulos o rótulos superpuestos; puede haber escritura en objetos físicos de la escena.';
         const respuesta = await callGeminiSafe(
-          'Eres director de arte. Convierte esta fuente en una descripción visual de máximo 420 caracteres. ' + instrucciones + '\n\n' + fuente,
+          'Eres director de arte. Convierte esta fuente en una descripción visual de máximo 420 caracteres. ' + instrucciones + '\\n\\n' + fuente,
           t => { if (boton) boton.textContent = '⏳ ESPERANDO ' + t + 's'; },
           m => { if (boton) boton.textContent = '⏳ GEMINI ' + m; }
         );
-        const concepto = String(respuesta.text || '').replace(/\s+/g, ' ').trim().replace(/^["']+|["']+$/g, '');
+        const concepto = String(respuesta.text || '').replace(/\\s+/g, ' ').trim().replace(/^["']+|["']+$/g, '');
         if (!concepto || concepto.length > 650) throw new Error('Gemini no devolvió una dirección breve válida. No se guardaron cambios.');
         const direccion = esEstoicismo
           ? concepto + ' European medieval illustrated graphic novel, expressive ink contours, painterly texture, balanced rich colors. Exactly one living, visible mature man aged 40–65 as the sole human figure; natural anatomy, two arms and two hands. He has a full natural head of hair; short, medium or long styles are allowed. Never depict baldness, a shaved head, receding hairline or visibly thinning hair. Vary face, hair, color, length, beard and clothing. No other people, women, minors, silhouettes, human reflections, statues, busts or sculptures. No editorial title, headline, caption, banner or floating typography; writing may appear naturally on physical props such as scrolls, books, manuscripts, maps or documents.'
@@ -2162,12 +2183,13 @@ ${g.capitulos.filter((_, i) => i !== idx).map((t, i) => t.slice(-1400)).join('\n
         const h = document.createElement('div'); h.style.cssText = 'font-size:10px;color:#10b981;font-weight:700;margin-bottom:4px;'; h.textContent = `ESCENA ${k+1}`;
         const d = document.createElement('div'); d.style.cssText = 'font-size:11px;color:#fff;'; d.textContent = e.descripcion;
         const f = document.createElement('div'); f.style.cssText = 'font-size:10px;color:#71717a;margin:4px 0;'; f.textContent = '“'+e.fragmento+'…”';
-        const direccionEscena = e.promptVersion === 'raw-v1' && e.prompt?.trim() ? e.prompt.trim() : (e.descripcion || '').trim();
+        const direccionEscena = (e.visualDirection || '').trim() || (e.promptVersion === 'raw-v1' && e.prompt?.trim() ? e.prompt.trim() : (e.descripcion || '').trim());
         const p = document.createElement('div'); p.style.cssText = 'font-size:10px;color:#a1a1aa;font-family:monospace;margin-bottom:6px;'; p.textContent = direccionEscena;
-        const row = document.createElement('div'); row.style.cssText = 'display:flex;gap:8px;';
-        const copy = document.createElement('button'); copy.className='btn-secondary'; copy.style.marginTop='0'; copy.textContent='📋 COPIAR DIRECCIÓN'; copy.onclick=()=>navigator.clipboard.writeText(direccionEscena).then(()=>alert('Dirección copiada.'));
+        const row = document.createElement('div'); row.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;';
+        const copy = document.createElement('button'); copy.className='btn-secondary'; copy.style.marginTop='0'; copy.textContent='📋 COPIAR DIRECCIÓN'; copy.onclick=()=>copiarTextoKoffi(direccionEscena, 'Dirección copiada.');
         const use = document.createElement('button'); use.className='btn-secondary'; use.style.marginTop='0'; use.textContent='🎨 USAR EN GENERADOR'; use.onclick=()=>{ document.getElementById('img-prompt').value=direccionEscena; document.getElementById('img-ratio').value=ratio; document.getElementById('img-use-style').checked=false; programarGuardado(); openTab('tab-imagenes',document.querySelectorAll('.tab-btn')[2]); };
-        row.append(copy,use); [h,d,f,p,row].forEach(x=>card.appendChild(x)); cont.appendChild(card);
+        const refresh = document.createElement('button'); refresh.className='btn-secondary'; refresh.style.marginTop='0'; refresh.textContent = e.visualDirection ? '↻ REVISAR DIRECCIÓN' : '↻ CREAR DIRECCIÓN BREVE'; refresh.onclick=()=>actualizarDireccionEscena(e.sceneId, refresh, e);
+        row.append(copy,use,refresh); [h,d,f,p,row].forEach(x=>card.appendChild(x)); cont.appendChild(card);
       });
       const note = document.getElementById('scene-note');
       note.textContent = escenas.length === objetivo
@@ -2250,10 +2272,14 @@ Devuelve ÚNICAMENTE un array JSON con EXACTAMENTE ${faltan.length} objetos nuev
             for (const e of faltantesRecibidas) {
               if (escenasGuardadas.length >= n) break;
               if (escenaValida(e)) escenasGuardadas.push({
+                sceneId: `scene-${Date.now()}-${escenasGuardadas.length}-${Math.random().toString(36).slice(2,7)}`,
+                order: escenasGuardadas.length + 1,
                 fragmento: e.fragmento.trim(),
                 descripcion: e.descripcion.trim(),
                 prompt: e.prompt.trim(),
-            promptVersion: 'raw-v1'
+                promptVersion: 'raw-v1',
+                sourceScriptRevision: coreStore?.get(coreActiveProjectId)?.sourceRevision || 1,
+                status: 'ready'
               });
             }
           } catch (errorRecuperacion) {
@@ -2282,13 +2308,88 @@ Devuelve ÚNICAMENTE un array JSON con EXACTAMENTE ${faltan.length} objetos nuev
       }
     }
 
+    // ===== ACCIONES DE IMAGEN =====
+    async function obtenerBlobImagen(imgId) {
+      const img = document.getElementById(imgId);
+      if (!img || !img.src) throw new Error('No hay una imagen disponible.');
+      const response = await fetch(img.src);
+      if (!response.ok) throw new Error('No se pudo leer el archivo de imagen.');
+      return response.blob();
+    }
+
+    async function descargarImagenElemento(imgId, nombre) {
+      try {
+        const blob = await obtenerBlobImagen(imgId);
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = nombre || 'koffi-studio-imagen.png';
+        document.body.appendChild(link); link.click(); link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1500);
+      } catch (error) { alert('No se pudo descargar la imagen: ' + (error.message || 'Error desconocido')); }
+    }
+
+    async function compartirImagenElemento(imgId, nombre) {
+      try {
+        const blob = await obtenerBlobImagen(imgId);
+        const file = new File([blob], nombre || 'koffi-studio-imagen.png', { type: blob.type || 'image/png' });
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file], title: 'Imagen de Koffi Studio' });
+        } else {
+          await descargarImagenElemento(imgId, nombre);
+          alert('Este navegador no permite compartir archivos desde aquí. La imagen se descargó para que puedas compartirla desde tu teléfono.');
+        }
+      } catch (error) {
+        if (error.name !== 'AbortError') alert('No se pudo compartir la imagen: ' + (error.message || 'Función no disponible en este navegador.'));
+      }
+    }
+
+    async function copiarImagenElemento(imgId) {
+      try {
+        const blob = await obtenerBlobImagen(imgId);
+        if (!navigator.clipboard || typeof ClipboardItem === 'undefined') throw new Error('Tu navegador no admite copiar imágenes al portapapeles.');
+        await navigator.clipboard.write([new ClipboardItem({ [blob.type || 'image/png']: blob })]);
+        alert('Imagen copiada al portapapeles.');
+      } catch (error) { alert('No se pudo copiar la imagen: ' + (error.message || 'Función no disponible.')); }
+    }
+
+    function crearMenuAccionesImagen(img, nombre) {
+      if (!img || !img.id) return null;
+      const anterior = img.previousElementSibling;
+      if (anterior?.classList?.contains('image-action-menu')) return anterior;
+      const menu = document.createElement('details');
+      menu.className = 'image-action-menu';
+      menu.innerHTML = '<summary aria-label="Opciones de imagen" title="Opciones de imagen">⋮</summary><div class="image-action-list"><button type="button" data-action="download">⬇ Descargar</button><button type="button" data-action="share">↗ Compartir</button><button type="button" data-action="copy">▣ Copiar imagen</button></div>';
+      menu.querySelector('[data-action="download"]').addEventListener('click', () => { menu.open = false; descargarImagenElemento(img.id, nombre); });
+      menu.querySelector('[data-action="share"]').addEventListener('click', () => { menu.open = false; compartirImagenElemento(img.id, nombre); });
+      menu.querySelector('[data-action="copy"]').addEventListener('click', () => { menu.open = false; copiarImagenElemento(img.id); });
+      img.parentNode.insertBefore(menu, img);
+      return menu;
+    }
+
+    async function copiarTextoKoffi(texto, mensaje) {
+      try {
+        if (!navigator.clipboard?.writeText) throw new Error('El portapapeles no está disponible en este navegador.');
+        await navigator.clipboard.writeText(String(texto || ''));
+        if (mensaje) alert(mensaje);
+      } catch (error) { alert('No se pudo copiar el texto: ' + (error.message || 'Error desconocido')); }
+    }
+
+    function copiarBriefTecnico() {
+      const brief = document.getElementById('img-technical-brief');
+      if (!brief || !brief.textContent.trim()) { alert('Todavía no hay una dirección visual para copiar.'); return; }
+      copiarTextoKoffi(brief.textContent, 'Dirección visual copiada.');
+    }
+
     // ===== GENERADOR DE IMÁGENES =====
     function mostrarImagen(src, info) {
       const img = document.getElementById('img-result');
       const loader = document.getElementById('img-loading');
       const inf = document.getElementById('img-info');
+      const menu = crearMenuAccionesImagen(img, 'koffi-studio-imagen.png');
+      if (menu) menu.style.display = 'none';
       return new Promise((resolve, reject) => {
-        img.onload = () => { loader.style.display = 'none'; img.style.display = 'block'; inf.textContent = info; resolve(); };
+        img.onload = () => { loader.style.display = 'none'; img.style.display = 'block'; if (menu) menu.style.display = 'block'; inf.textContent = info; resolve(); };
         img.onerror = () => reject(new Error('La imagen no cargó'));
         img.src = src;
       });
@@ -2507,6 +2608,8 @@ Devuelve ÚNICAMENTE un array JSON con EXACTAMENTE ${faltan.length} objetos nuev
       img.id = `img-lote-${item.indice}`;
       img.alt = `Imagen generada para la escena ${item.indice + 1}`;
       img.style.cssText = 'width:100%;height:auto;display:block;border-radius:6px;';
+      const menu = crearMenuAccionesImagen(img, `koffi-studio-escena-${item.indice + 1}.png`);
+      if (menu) menu.style.display = 'block';
       const estado = document.createElement('div');
       estado.textContent = '✓ Generada';
       estado.style.cssText = 'font-size:11px;color:#10b981;margin-top:6px;';
@@ -2516,7 +2619,7 @@ Devuelve ÚNICAMENTE un array JSON con EXACTAMENTE ${faltan.length} objetos nuev
       repetir.textContent = '↻ Regenerar esta imagen';
       repetir.style.cssText = 'width:100%;margin-top:7px;font-size:11px;';
       repetir.onclick = () => reintentarImagenLote(item.indice);
-      tarjeta.append(titulo, img, estado, repetir);
+      tarjeta.append(titulo, menu, img, estado, repetir);
       galeria.appendChild(tarjeta);
     }
 
