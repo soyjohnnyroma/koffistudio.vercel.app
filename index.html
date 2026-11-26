@@ -1365,6 +1365,7 @@ Devuelve ÚNICAMENTE un arreglo JSON válido con el siguiente formato exacto, si
         fragmento: typeof item.fragmento === 'string' ? item.fragmento : '',
         descripcion: typeof item.descripcion === 'string' ? item.descripcion : '',
         prompt: typeof item.prompt === 'string' ? item.prompt : '',
+        legacyPrompt: typeof item.legacyPrompt === 'string' ? item.legacyPrompt : '',
         promptVersion: item.promptVersion || 'raw-v1',
         sourceScriptRevision: Number.isInteger(item.sourceScriptRevision) ? item.sourceScriptRevision : sourceRevision,
         status: item.status || statusDefault || 'ready'
@@ -2073,8 +2074,30 @@ ${g.capitulos.filter((_, i) => i !== idx).map((t, i) => t.slice(-1400)).join('\n
         const row = document.createElement('div'); row.style.cssText = 'display:flex;gap:8px;';
         const copy = document.createElement('button'); copy.className='btn-secondary'; copy.style.marginTop='0'; copy.textContent='📋 COPIAR PROMPT'; copy.onclick=()=>navigator.clipboard.writeText(e.prompt || '').then(()=>alert('Prompt copiado.'));
         const use = document.createElement('button'); use.className='btn-secondary'; use.style.marginTop='0'; use.textContent='🎨 USAR EN GENERADOR'; use.onclick=()=>{ document.getElementById('img-prompt').value=e.prompt || ''; document.getElementById('img-use-style').checked=false; programarGuardado(); openTab('tab-imagenes',document.querySelectorAll('.tab-btn')[2]); };
-        row.append(copy,use); [h,d,f,p,row].forEach(x=>card.appendChild(x)); cont.appendChild(card);
+        const refresh = document.createElement('button'); refresh.className='btn-secondary'; refresh.style.marginTop='0'; refresh.textContent=e.promptVersion === 'guided-v2' ? '✓ DIRECCIÓN ACTUALIZADA' : '↻ ACTUALIZAR DIRECCIÓN'; refresh.disabled=e.promptVersion === 'guided-v2'; refresh.onclick=()=>actualizarDireccionEscena(e.sceneId);
+        row.append(copy,use,refresh); [h,d,f,p,row].forEach(x=>card.appendChild(x)); cont.appendChild(card);
       });
+    }
+
+    function actualizarDireccionEscena(sceneId) {
+      const escena = escenasGuardadas.find(item => item.sceneId === sceneId);
+      if (!escena || escena.promptVersion === 'guided-v2') return;
+      if (!confirm('Se actualizará la dirección visual de esta escena. El prompt original se conservará como respaldo. El guion y el fragmento no cambiarán. ¿Continuar?')) return;
+      try {
+        const contexto = obtenerContextoVisual();
+        const escenaNueva = { ...escena, prompt: '', promptVersion: 'guided-v2' };
+        const propuesta = crearConceptoVisual(contexto, '', escenaNueva);
+        if (!propuesta?.prompt) throw new Error('No se pudo preparar un nuevo prompt para esta escena.');
+        validarLongitudPromptFlux(propuesta.prompt, 'El nuevo prompt');
+        escena.legacyPrompt = escena.legacyPrompt || escena.prompt || '';
+        escena.prompt = propuesta.prompt;
+        escena.promptVersion = 'guided-v2';
+        if (!guardarProyecto()) throw new Error('No se pudo guardar la actualización. El prompt original permanece en memoria.');
+        renderizarEscenasGuardadas();
+        estadoGuardado('✓ Dirección visual actualizada. El prompt anterior quedó conservado.');
+      } catch (error) {
+        alert('No se actualizó la escena: ' + error.message);
+      }
     }
 
     // ===== ESCENAS VISUALES =====
