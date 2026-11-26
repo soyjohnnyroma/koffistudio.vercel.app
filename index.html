@@ -2125,16 +2125,16 @@ ${g.capitulos.filter((_, i) => i !== idx).map((t, i) => t.slice(-1400)).join('\n
         const fuente = [
           'Descripción original: ' + String(escena.descripcion || '').slice(0, 900),
           'Fragmento del guion: ' + String(escena.fragmento || '').slice(0, 1100)
-        ].join('\\n');
+        ].join('\n');
         const instrucciones = esEstoicismo
           ? 'Reformula el contenido como una escena visual breve para una novela gráfica medieval ilustrada europea. Debe mostrar EXACTAMENTE UN hombre vivo, claramente adulto y maduro (40–65 años), como única figura humana. Si el texto fuente menciona mujeres, parejas o grupos, NO los representes literalmente: conserva la idea, emoción, conflicto o acción central mediante un único hombre maduro como protagonista simbólico. No incluyas mujeres ni otras personas, ni siluetas, reflejos humanos, estatuas o bustos. El hombre debe tener cabello natural y abundante; se permiten longitudes corta, media o larga y distintos colores. Nunca calvicie, cabeza rapada, entradas pronunciadas ni cabello visiblemente escaso. Varía rostro, edad, cabello, barba, vestimenta y rasgos para evitar repetir el mismo personaje. No cambies el sentido central del fragmento. Describe sujeto, acción y entorno en una o dos frases concretas. No propongas títulos, encabezados ni rótulos superpuestos; puede haber escritura dentro de pergaminos, libros o documentos que formen parte natural de la escena.'
           : 'Reformula el contenido como una dirección visual breve y concreta que conserve el sentido central. Describe sujeto, acción y entorno en una o dos frases. Sin encabezados, listas ni explicaciones. No propongas títulos o rótulos superpuestos; puede haber escritura en objetos físicos de la escena.';
         const respuesta = await callGeminiSafe(
-          'Eres director de arte. Convierte esta fuente en una descripción visual de máximo 420 caracteres. ' + instrucciones + '\\n\\n' + fuente,
+          'Eres director de arte. Convierte esta fuente en una descripción visual de máximo 420 caracteres. ' + instrucciones + '\n\n' + fuente,
           t => { if (boton) boton.textContent = '⏳ ESPERANDO ' + t + 's'; },
           m => { if (boton) boton.textContent = '⏳ GEMINI ' + m; }
         );
-        const concepto = String(respuesta.text || '').replace(/\\s+/g, ' ').trim().replace(/^["']+|["']+$/g, '');
+        const concepto = String(respuesta.text || '').replace(/\s+/g, ' ').trim().replace(/^["']+|["']+$/g, '');
         if (!concepto || concepto.length > 650) throw new Error('Gemini no devolvió una dirección breve válida. No se guardaron cambios.');
         const direccion = esEstoicismo
           ? concepto + ' European medieval illustrated graphic novel, expressive ink contours, painterly texture, balanced rich colors. Exactly one living, visible mature man aged 40–65 as the sole human figure; natural anatomy, two arms and two hands. He has a full natural head of hair; short, medium or long styles are allowed. Never depict baldness, a shaved head, receding hairline or visibly thinning hair. Vary face, hair, color, length, beard and clothing. No other people, women, minors, silhouettes, human reflections, statues, busts or sculptures. No editorial title, headline, caption, banner or floating typography; writing may appear naturally on physical props such as scrolls, books, manuscripts, maps or documents.'
@@ -2363,7 +2363,7 @@ Devuelve ÚNICAMENTE un array JSON con EXACTAMENTE ${faltan.length} objetos nuev
       menu.querySelector('[data-action="download"]').addEventListener('click', () => { menu.open = false; descargarImagenElemento(img.id, nombre); });
       menu.querySelector('[data-action="share"]').addEventListener('click', () => { menu.open = false; compartirImagenElemento(img.id, nombre); });
       menu.querySelector('[data-action="copy"]').addEventListener('click', () => { menu.open = false; copiarImagenElemento(img.id); });
-      img.parentNode.insertBefore(menu, img);
+      if (img.parentNode) img.parentNode.insertBefore(menu, img);
       return menu;
     }
 
