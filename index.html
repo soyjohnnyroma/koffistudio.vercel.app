@@ -1207,7 +1207,7 @@
       return e;
     }
 
-    async function callGemini(prompt, onStatus, videoUrl) {
+    async function callGemini(prompt, onStatus, videoUrl, jsonMode = false) {
       const key = localStorage.getItem('koffi_gemini_key');
       if (!key) throw new Error('Falta la llave de Gemini.');
       const choice = document.querySelector('input[name="gem_model"]:checked');
@@ -1227,7 +1227,10 @@
           const res = await fetch(GEMINI_API_BASE + '/models/' + m + ':generateContent', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
-            body: JSON.stringify({ contents: [{ parts: partes }] }), signal: ctl.signal
+            body: JSON.stringify({
+            contents: [{ parts: partes }],
+            ...(jsonMode ? { generationConfig: { responseMimeType: 'application/json', maxOutputTokens: 8192 } } : {})
+          }), signal: ctl.signal
           });
           const data = await res.json().catch(() => ({}));
           clearTimeout(to);
@@ -1265,11 +1268,11 @@
 
     // Barandilla: solo los 429 ambiguos reciben espera y reintento; la cuota diaria exige evidencia explícita.
     const PAUSA_ENTRE_LLAMADAS_MS = 6000;
-    async function callGeminiSafe(prompt, onWait, onStatus, videoUrl) {
+    async function callGeminiSafe(prompt, onWait, onStatus, videoUrl, jsonMode = false) {
       const esperas = videoUrl ? [] : [35, 65];
       for (let intento = 0; ; intento++) {
         try {
-          return await callGemini(prompt, onStatus, videoUrl);
+          return await callGemini(prompt, onStatus, videoUrl, jsonMode);
         } catch (e) {
           if (!e.rateLimited) throw e;
           if (e.daily) throw new Error('Google informó que se alcanzó una cuota diaria de Gemini. Tu avance guardado no se ha borrado; podrás continuar cuando la cuota se restablezca.');
@@ -2211,15 +2214,24 @@ ${g.capitulos.filter((_, i) => i !== idx).map((t, i) => t.slice(-1400)).join('\n
 
     // ===== ESCENAS VISUALES =====
     function extraerEscenasGemini(texto) {
-      const t = String(texto || '').replace(/```json/gi, '').replace(/```/g, '').trim();
-      const i1 = t.indexOf('['), i2 = t.lastIndexOf(']');
-      if (i1 === -1 || i2 === -1 || i2 < i1) return [];
+      const t = String(texto || '').replace(/```(?:json)?/gi, '').trim();
+      if (!t) throw new Error('Gemini respondió sin contenido de texto.');
       try {
-        const parsed = JSON.parse(t.slice(i1, i2 + 1));
-        return Array.isArray(parsed) ? parsed : [];
-      } catch (_) {
-        return [];
+        const parsed = JSON.parse(t);
+        if (Array.isArray(parsed)) return parsed;
+        if (Array.isArray(parsed.escenas)) return parsed.escenas;
+        if (Array.isArray(parsed.scenes)) return parsed.scenes;
+      } catch (_) {}
+      const i1 = t.indexOf('['), i2 = t.lastIndexOf(']');
+      if (i1 !== -1 && i2 > i1) {
+        try {
+          const parsed = JSON.parse(t.slice(i1, i2 + 1));
+          if (Array.isArray(parsed)) return parsed;
+        } catch (_) {
+          throw new Error('Gemini devolvió una respuesta JSON incompleta o mal formada. Posible truncamiento. Fragmento: ' + t.slice(0, 240).replace(/\\s+/g, ' '));
+        }
       }
+      throw new Error('Gemini respondió, pero no entregó un arreglo JSON de escenas. Fragmento: ' + t.slice(0, 240).replace(/\\s+/g, ' '));
     }
 
     function escenaValida(escena) {
@@ -2269,15 +2281,23 @@ ${g.capitulos.filter((_, i) => i !== idx).map((t, i) => t.slice(-1400)).join('\n
       let modelo = 'Gemini';
       try {
         const esEstoicismo = contexto.niche === 'Estoicismo y Filosofía Práctica';
-        const instruccionesComunes = `ENTREGA OBLIGATORIA: devuelve EXACTAMENTE la cantidad solicitada de escenas, ni una más ni una menos. Cada escena debe ser un objeto JSON con los tres campos no vacíos: fragmento, descripcion y prompt. No omitas, combines ni numeres escenas fuera del JSON.`;
+        const instruccionesComunes = `ENTREGA OBLIGATORIA: devuelve exactamente ${n} objetos JSON, ni más ni menos. Cada objeto debe contener tres strings no vacíos: fragmento, descripcion y prompt. No agregues comentarios ni Markdown. Mantén cada prompt de imagen en un máximo de 650 caracteres para que las ${n} escenas quepan completas en la respuesta.`;
         const instruccionesNarrativas = esEstoicismo
-          ? `Para Ser Estoico utiliza SIEMPRE una NOVELA MEDIEVAL ILUSTRADA EUROPEA: ilustración pictórica de fantasía histórica con línea de tinta visible, formas humanas naturales, color rico pero equilibrado y composición narrativa clara. Divide el guion en exactamente ${n} escenas consecutivas que representen visualmente su desarrollo en orden. Cada escena debe interpretar el fragmento concreto que le corresponde. REGLA VISUAL INNEGOCIABLE PARA CADA ESCENA: debe aparecer EXACTAMENTE UNA PERSONA VIVA, RECONOCIBLE Y VISIBLE; esa única persona es la protagonista y debe representar el fragmento del guion. No puede aparecer ninguna otra persona: ni parejas, grupos, multitudes, figuras al fondo, siluetas humanas, reflejos de otras personas ni personajes secundarios. No se permiten imágenes sin personas, paisajes vacíos ni objetos aislados. El protagonista de TODAS las escenas debe ser un hombre adulto maduro de aproximadamente 40–65 años, nunca una mujer, niña, niño, adolescente o joven de apariencia juvenil. Varía deliberadamente la identidad facial, complexión, edad dentro del rango, peinados (cabello corto, medio o largo; nunca calvicie ni cabeza rapada), color y textura del cabello, barbas, vestimentas, acciones, escenarios, escalas y perspectivas para que no parezca siempre el mismo hombre. No repitas el mismo rostro ni el mismo oficio en escenas consecutivas, salvo que la continuidad narrativa lo exija. Alterna de forma equilibrada castillos, fortalezas, torres, murallas, patios interiores, aldeas amuralladas, plazas medievales, mercados sin multitudes, monasterios, catedrales, bibliotecas, scriptoriums, salones, cocinas, establos, jardines, huertos, puentes, puertos, caminos, bosques, montañas y valles. No uses herreros, forjas, canteros ni talleres como solución visual por defecto. La variedad debe ser deliberada y perceptible en toda la colección: alterna personajes de distintos ámbitos sociales (reyes, príncipes, nobles, consejeros, soldados, viajeros, escribas, maestros, comerciantes, campesinos, monjes, artesanos de oficios diferentes y hombres comunes), acciones (gobernar, deliberar, caminar, viajar, leer, enseñar, observar, cuidar un jardín, navegar, descansar, entrenar o trabajar) y escenarios (salones de castillo, tronos, fortalezas, torres, murallas, patios, plazas, aldeas, catedrales, bibliotecas, jardines, puertos, caminos, bosques, montañas y valles). No repitas el mismo oficio, rol social, acción ni tipo de entorno en escenas consecutivas; evita que más de una escena de cada seis tenga como foco una forja o un oficio metalúrgico. La elección siempre debe nacer del fragmento concreto del guion, no de una plantilla. Cada escena debe tener un solo protagonista masculino maduro. Cada imagen debe ser una única composición continua, a pantalla completa y desde un solo punto de vista: PROHIBIDO dividir el lienzo en dos mitades, paneles, viñetas, dípticos, trípticos, collage, storyboard, imágenes arriba y abajo, imágenes lado a lado, recuadros insertados, bordes o líneas separadoras. Nunca muestres dos versiones del protagonista. No agregues títulos, encabezados, subtítulos, rótulos, banners ni tipografía superpuesta; la imagen no debe parecer miniatura, póster, portada ni tarjeta de título. Se permite escritura imperfecta o legible dentro de objetos físicos que formen parte natural de la escena, como pergaminos, libros, manuscritos, mapas, cartas y documentos. El tema y el guion son referencias conceptuales: nunca deben aparecer como título o rótulo. No conviertas cada escena en una imagen de Marco Aurelio; no uses bustos, estatuas, esculturas ni figuras de mármol. Si el guion requiere representar a una figura histórica, muéstrala como una persona viva y única. Cada prompt debe ser autónomo, visualmente coherente y técnicamente consistente. Exige anatomía humana natural: exactamente dos brazos y dos manos, sin extremidades adicionales, deformes o fusionadas. El protagonista debe tener cabello natural y abundante; se permiten longitudes corta, media o larga y distintos colores. Nunca calvicie, cabeza rapada, entradas pronunciadas ni cabello visiblemente escaso. Prohíbe cualquier título, encabezado, subtítulo, banner, rótulo o texto editorial superpuesto sobre la imagen. La imagen nunca debe parecer una miniatura, póster, portada o tarjeta de título. Se permite escritura dentro de objetos físicos de la escena, como pergaminos, libros, manuscritos, mapas, cartas y documentos. El nicho, tema y guion son referencias conceptuales: nunca deben convertirse en título o rótulo.`
-          : `Divide el guion en exactamente ${n} escenas consecutivas que cubran su desarrollo en orden. Mantén continuidad cuando haya personajes, época, vestuario, localización u objetos recurrentes. Varía de verdad sujetos, escalas de plano, perspectivas y composición; no repitas la misma fórmula. Cada prompt debe ser autónomo y contener sujeto, acción, entorno, encuadre, perspectiva, iluminación, atmósfera y detalles del nicho. No incluyas texto, letras, logos ni marcas de agua.`;
+          ? `DIRECCIÓN ARTÍSTICA SER ESTOICO: novela gráfica medieval europea ilustrada, tinta expresiva, pintura de acabado rico y equilibrado, anatomía natural y composición cinematográfica.
+REGLA DE PERSONAJE: cada escena muestra exactamente un hombre adulto maduro de 40–65 años, vivo, reconocible y protagonista único. Sin ninguna otra persona, silueta, reflejo humano, estatua, busto o escultura. Nunca niños, adolescentes ni mujeres.
+CATÁLOGO PRIORITARIO DE ALTA INFLUENCIA: rey, príncipe, emperador, soberano, monarca, general, comandante, caballero de alto rango, señor feudal, estratega militar, consejero real, embajador o diplomático de corte. En una colección de ${n} escenas, al menos ${Math.ceil(n * 0.8)} deben tener uno de estos personajes como protagonista, salvo que el guion exija explícitamente otro perfil. El rango debe ser visible por vestuario, insignias, armadura, corona cuando corresponda, capa, tejidos nobles, porte y contexto. No conviertas a todos en el mismo rey coronado.
+PERSONAJES Y SITUACIONES SON VARIABLES INDEPENDIENTES: elige el arquetipo por separado de la acción. Cualquier rey, príncipe, emperador, general, caballero o estratega puede caminar, viajar, observar su territorio, estudiar mapas, deliberar, leer una carta, tomar una decisión en soledad, descansar, meditar, inspeccionar una fortaleza o contemplar un paisaje tras un conflicto. PROHIBIDO fijar rey=trono, caballero=espada, estratega=mapa o cualquier asociación automática. La acción representa el fragmento concreto del guion y puede combinarse con cualquier personaje compatible.
+VARIEDAD: alterna rostros, edades adultas, peinados, cabello, barba, complexión, vestuario, acciones, escalas de plano y escenarios. Evita repetir personaje, acción o encuadre en escenas consecutivas. Monjes, herreros, artesanos, campesinos y hombres comunes no son opciones por defecto; úsalos solo si el fragmento los exige claramente.
+ENTORNOS: alterna cámaras privadas, bibliotecas, salones de consejo, fortalezas, murallas, torres, jardines, puentes, caminos, montañas, bosques, puertos y paisajes medievales europeos. El entorno tampoco queda atado al rango del personaje.
+NARRATIVA: divide el guion en exactamente ${n} escenas consecutivas, en orden. Cada una debe tener un fragmento fiel y una situación visual concreta, autónoma y distinta.
+COMPOSICIÓN: una sola imagen continua, una sola cámara, un solo momento y un solo protagonista. Nunca collage, díptico, tríptico, paneles, viñetas, storyboard, divisiones, bordes ni líneas separadoras. Anatomía natural con exactamente dos brazos y dos manos. Sin títulos, rótulos, banners, tipografía superpuesta, logos ni marcas de agua. Escritura solo en objetos físicos naturales.
+FORMATO: fragmento breve; descripcion concreta; prompt visual autónomo y detallado de máximo 650 caracteres.`
+          : `Divide el guion en exactamente ${n} escenas consecutivas que cubran su desarrollo en orden. Mantén continuidad cuando haya personajes, época, vestuario, localización u objetos recurrentes. Varía sujetos, escalas de plano, perspectivas y composición. Cada prompt debe ser autónomo e incluir sujeto, acción, entorno, encuadre, perspectiva, iluminación y atmósfera. Devuelve descripciones concisas y no incluyas texto, letras, logos ni marcas de agua.`;
         const cabecera = `Eres director de arte y supervisor de continuidad visual de Koffi Studio.
 Nicho: ${contexto.niche}. Perfil visual: ${contexto.perfil.lenguaje}. Formato nativo: ${ratio}. Composición obligatoria: ${COMPOSICIONES_FORMATO[ratio]}. Estilo: ${estilo}.
 ${instruccionesComunes}
 ${instruccionesNarrativas}
-Devuelve ÚNICAMENTE JSON válido, sin Markdown ni explicaciones, con esta estructura: [{"fragmento":"...","descripcion":"...","prompt":"..."}]`;
+Devuelve ÚNICAMENTE un arreglo JSON válido, sin Markdown ni explicaciones, con esta estructura exacta: [{"fragmento":"texto del guion","descripcion":"descripción de la escena","prompt":"dirección visual autónoma"}]`;
 
         const primera = await callGeminiSafe(`${cabecera}
 
@@ -2286,7 +2306,7 @@ CANTIDAD SOLICITADA: ${n} escenas exactas.
 GUION:
 ${guion}`,
           (t) => { note.textContent = `Google pidió calma. Reintentando en ${t} s...`; },
-          (m) => { note.textContent = `Consultando a ${m}... (máx. 45 s)`; });
+          (m) => { note.textContent = `Consultando a ${m}... (máx. 45 s)`; }, undefined, true);
         modelo = primera.model || modelo;
         const recibidas = extraerEscenasGemini(primera.text);
         const unicas = [];
@@ -2298,7 +2318,7 @@ ${guion}`,
             promptVersion: 'raw-v1'
           });
         }
-        if (!unicas.length) throw new Error('Gemini no devolvió escenas válidas. Se conserva la colección anterior.');
+        if (!unicas.length) throw new Error(`Gemini devolvió ${recibidas.length} elemento(s), pero ninguno contiene los tres campos de texto requeridos (fragmento, descripcion y prompt). Modelo: ${modelo}. Se conservará la colección anterior.`);
         escenasGuardadas = unicas.map((scene, index) => ({ ...scene, sceneId: `scene-${Date.now()}-${index}`, order: index + 1, sourceScriptRevision: coreStore?.get(coreActiveProjectId)?.sourceRevision || 1, status: 'ready' }));
         renderizarEscenas(escenasGuardadas, ratio, contexto, modelo, n);
 
@@ -2320,7 +2340,7 @@ Devuelve ÚNICAMENTE un array JSON con EXACTAMENTE ${faltan.length} objetos nuev
           try {
             const segunda = await callGeminiSafe(recuperacion,
               (t) => { note.textContent = `Recuperando escenas faltantes. Reintento en ${t} s...`; },
-              (m) => { note.textContent = `Solicitando solo las escenas faltantes a ${m}... (máx. 45 s)`; });
+              (m) => { note.textContent = `Solicitando solo las escenas faltantes a ${m}... (máx. 45 s)`; }, undefined, true);
             modelo = segunda.model || modelo;
             const faltantesRecibidas = extraerEscenasGemini(segunda.text);
             for (const e of faltantesRecibidas) {
