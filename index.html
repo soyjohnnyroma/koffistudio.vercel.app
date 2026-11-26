@@ -705,7 +705,7 @@
       return '';
     }
 
-    function crearBriefFotografico(contexto, ancla, semilla, preservarDireccion = false) {
+    function crearBriefFotografico(contexto, ancla, semilla, preservarDireccion = false, compacto = false) {
       const p = contexto.perfil;
       const ratio = contexto.ratio;
       const esEstoicismo = contexto.niche === 'Estoicismo y Filosofía Práctica';
@@ -737,7 +737,18 @@
       const tema = ancla
         ? `${preservarDireccion ? 'CREATIVE DIRECTION TO PRESERVE — keep its intended subject, action, setting and visual meaning without contradiction' : 'Narrative and thematic reference'}: ${ancla}.`
         : `Create an original, niche-relevant visual concept for ${contexto.niche}; do not default to a generic stock-photo scene.`;
-      const prompt = [
+      const promptCompacto = [
+        `Create one finished, publication-ready image for ${contexto.niche}.`,
+        `Art direction: ${p.lenguaje}. ${estilo}`,
+        `Scene to preserve faithfully: ${ancla || 'Create a scene relevant to the script'}.`,
+        `Subject: ${sujeto}. Action: ${accion}. Setting: ${entorno}. Keep historical period, clothing, architecture and props coherent.`,
+        `Framing: ${camara}. Composition: ${COMPOSICIONES_FORMATO[ratio]}.`,
+        `Lighting: ${luz}. Palette: ${paleta}. Texture: ${textura}.`,
+        `Quality: ${CAPA_VISUAL_UNIVERSAL}. Natural, anatomically correct human body with exactly two arms and two hands, natural fingers; no extra, missing, fused or duplicated limbs.`,
+        ...(esEstoicismo ? ['SER ESTOICO — NON-NEGOTIABLE: show exactly ONE living, clearly visible, recognizable mature man aged 40–65 as the sole protagonist. No women, girls, boys, teenagers, youthful-looking adults, other people, background figures, crowds, silhouettes, reflections, statues, busts or sculptures. European medieval illustrated graphic-novel style, visible ink contours, rich balanced colors. Vary mature male appearance, clothing, activity, framing and medieval settings. Never default to Roman emperors or Marco Aurelius unless the scene explicitly requires it; depict any required historical figure as a living man.'] : []),
+        'ABSOLUTELY NO TEXT: no words, letters, glyphs, numbers, typography, captions, labels, signs, inscriptions, runes, logos, signatures or watermarks. Never render the script, topic or niche as writing; express meaning only visually.'
+      ].filter(Boolean).join('\\n');
+      const prompt = compacto ? promptCompacto : [
         `Create one finished, publication-ready image for the editorial niche: ${contexto.niche}.`,
         `Art direction and visual language: ${p.lenguaje}.`,
         tema,
@@ -767,7 +778,7 @@
       return longitud;
     }
 
-    function crearConceptoVisual(contexto, promptUsuario = '', escenaEspecifica = null) {
+    function crearConceptoVisual(contexto, promptUsuario = '', escenaEspecifica = null, compacto = false) {
       const escenaActiva = escenaEspecifica || (contexto.escenas.length ? contexto.escenas[contexto.escenas.length - 1] : null);
       const anclaEscena = escenaActiva
         ? (escenaActiva.promptVersion === 'raw-v1' && escenaActiva.prompt?.trim()
@@ -780,7 +791,7 @@
       let propuesta = null;
       for (let intento = 0; intento < 12; intento++) {
         const semilla = [contexto.niche, contexto.ratio, ancla, Date.now(), Math.random(), intento].join('|');
-        const brief = crearBriefFotografico(contexto, ancla, semilla, Boolean(promptUsuario.trim() || escenaActiva));
+        const brief = crearBriefFotografico(contexto, ancla, semilla, Boolean(promptUsuario.trim() || escenaActiva), compacto);
         const firma = brief.prompt.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().slice(0, 240);
         propuesta = {
           titulo: promptUsuario ? 'Desarrollo profesional de tu idea' : escenaActiva ? 'Dirección visual de escena' : ancla ? 'Interpretación visual contextual' : 'Concepto autónomo del nicho',
@@ -2086,7 +2097,7 @@ ${g.capitulos.filter((_, i) => i !== idx).map((t, i) => t.slice(-1400)).join('\n
       try {
         const contexto = obtenerContextoVisual();
         const escenaNueva = { ...escena, prompt: '', promptVersion: 'guided-v2' };
-        const propuesta = crearConceptoVisual(contexto, '', escenaNueva);
+        const propuesta = crearConceptoVisual(contexto, '', escenaNueva, true);
         if (!propuesta?.prompt) throw new Error('No se pudo preparar un nuevo prompt para esta escena.');
         validarLongitudPromptFlux(propuesta.prompt, 'El nuevo prompt');
         escena.legacyPrompt = escena.legacyPrompt || escena.prompt || '';
