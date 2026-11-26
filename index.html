@@ -561,9 +561,57 @@
     const PERFILES_VISUALES = {
       'Estoicismo y Filosofía Práctica': {
         lenguaje:'European medieval graphic novel; richly painted historical-fantasy illustration with expressive hand-inked contours, mature masculine character design, believable medieval European architecture and expansive natural landscapes, layered painterly textures, cinematic narrative composition, natural human proportions and rich but balanced colors. The setting must follow the specific script passage and must not default to Roman imperial imagery.',
-        sujetos:['one solitary mature adult man aged 40–65, with a weathered or distinguished face, whose expression and posture communicate the specific emotional conflict in the script','one mature adult male traveler or thinker aged 40–65 moving through a medieval European landscape, alone and clearly visible','one mature adult man aged 40–65 performing a concrete action relevant to the narration, with no companions or background figures; vary his facial features, build, hair, beard and clothing between images'],
-        acciones:['making a difficult decision alone in a specific moment','walking alone through a stone passage while reflecting on a challenge','showing restraint during a moment of personal conflict','performing an ordinary task with deliberate attention','pausing alone to examine a difficult choice'],
-        entornos:['a medieval European castle courtyard, fortress gate or stone keep with believable architecture','a dramatic mountain pass overlooking distant castles, towers or fortified settlements','a medieval stone bridge crossing a river in a broad valley','a quiet monastery, abbey cloister, cathedral interior or ancient scriptorium','a winding forest road, mountain village or walled town beneath imposing medieval towers','a castle library, stone hall, workshop or chamber lit by a narrow window or candle'],
+        sujetos:[
+          'one solitary adult king aged 40–65, unmistakably high-ranking through a historically coherent crown, signet ring, rich mantle or royal clothing; mature distinctive face, natural full hair, no attendants',
+          'one solitary adult prince aged 35–60, visibly of royal lineage through refined court clothing, embroidered mantle and restrained dynastic insignia; no companions',
+          'one solitary adult emperor aged 40–65, commanding mature presence, historically coherent imperial regalia and layered formal garments; no guards or attendants',
+          'one solitary adult medieval general aged 40–65, experienced military commander in credible period armor or command attire, carrying authority without needing a weapon',
+          'one solitary adult knight aged 35–60, distinctive noble bearing, historically plausible armor or travel-worn surcoat, mature face and natural full hair',
+          'one solitary adult warrior aged 35–60, seasoned and physically credible, wearing practical period clothing or battle-worn armor rather than a generic costume',
+          'one solitary adult strategist aged 40–65, an intelligent seasoned man in refined but practical noble clothing, with maps or documents only when relevant',
+          'one solitary adult feudal lord aged 40–65, visibly powerful through quality fabrics, heraldic details and confident bearing, not necessarily wearing a crown',
+          'one solitary adult royal commander aged 40–65, experienced and disciplined, in distinctive military-noble clothing with restrained insignia',
+          'one solitary adult noble envoy or diplomat aged 40–65, mature and authoritative, wearing elegant period court garments suited to travel or negotiation',
+          'one solitary adult veteran ruler aged 50–65, weathered but dignified, with individualized facial features, natural full hair and understated signs of rank'
+        ],
+        acciones:[
+          'standing alone at a high window, studying the lands under his rule',
+          'weighing a consequential decision in private, with restrained and readable emotion',
+          'walking alone through a fortress passage while considering a difficult choice',
+          'studying a campaign map and planning his next move',
+          'sitting in a quiet chamber after receiving troubling news',
+          'surveying a distant settlement from a hilltop or battlement',
+          'riding alone across a broad landscape, focused on a distant destination',
+          'pausing beside a stone bridge after a costly conflict, reflective rather than triumphant',
+          'reading a letter or document that forces him to reconsider his plans',
+          'resting alone in a private chamber after a long and demanding day',
+          'practicing deliberate stillness in a quiet garden or secluded courtyard',
+          'inspecting the defenses of a fortress without any soldiers or attendants visible',
+          'crossing a great hall with measured purpose, caught in a specific narrative moment',
+          'considering a treaty or strategic choice over an open map',
+          'standing alone before a vast landscape, confronting uncertainty',
+          'washing or tending to a minor wound in private after hardship',
+          'observing the aftermath of a battle from a distance, with no other people visible',
+          'making a solitary journey through a forest road or mountain pass',
+          'examining a meaningful object or keepsake connected to a difficult memory',
+          'pausing before entering an important chamber, visibly gathering resolve'
+        ],
+        entornos:[
+          'a medieval European royal chamber with a tall window overlooking fields and a distant walled town',
+          'a fortress rampart or gatehouse overlooking the surrounding territory',
+          'a richly appointed but believable council chamber with a large wooden table and period maps',
+          'a quiet castle library or private study lit by daylight from a narrow window',
+          'a medieval stone bridge crossing a broad river valley',
+          'a mountain pass with distant watchtowers and a winding road',
+          'a walled European town seen from an elevated terrace, with no visible inhabitants',
+          'a secluded royal garden enclosed by weathered stone walls',
+          'a great stone hall with timber roof beams, banners and restrained period decoration',
+          'a remote forest road or rugged hillside far from any settlement',
+          'a coastal fortress or medieval harbor viewed from a quiet stone quay',
+          'a private bedchamber or austere resting room with period furnishings',
+          'a fortified courtyard at dawn, empty except for the protagonist',
+          'a landscape beyond a battlefield after the fighting has ended, with no other people visible'
+        ],
         luz:['soft natural daylight with readable shadows and painterly depth','overcast European daylight with restrained atmospheric perspective','warm candle or hearth light balanced by cool ambient shadow','cinematic natural side light without exaggerated chiaroscuro'],
         optica:['35mm environmental composition with one clearly isolated human protagonist and no other people','50mm eye-level medium shot focused on the single protagonist','85mm expressive portrait of the single protagonist with believable anatomy and restrained depth','wide establishing composition featuring exactly one visible person as the protagonist'],
         color:'rich but balanced historical colors: muted ultramarine, forest green, warm earth, faded burgundy, parchment neutrals and natural skin tones; avoid excessive saturation',
@@ -715,9 +763,13 @@
       const p = contexto.perfil;
       const ratio = contexto.ratio;
       const esEstoicismo = contexto.niche === 'Estoicismo y Filosofía Práctica';
-      const sujeto = preservarDireccion
-        ? 'Preserve the specified primary subject and focal point; do not replace it or add unrelated people, objects or settings'
-        : elegirVariacion(p.sujetos, semilla+'|subject');
+      // In Stoicism, character identity is independent from the scene's action:
+      // a king, prince, general or knight can inhabit any script-compatible situation.
+      const sujeto = esEstoicismo
+        ? elegirVariacion(p.sujetos, semilla+'|character')
+        : preservarDireccion
+          ? 'Preserve the specified primary subject and focal point; do not replace it or add unrelated people, objects or settings'
+          : elegirVariacion(p.sujetos, semilla+'|subject');
       const accion = preservarDireccion
         ? 'Preserve the specified action, stillness and emotional intention without contradiction'
         : elegirVariacion(p.acciones, semilla+'|action');
