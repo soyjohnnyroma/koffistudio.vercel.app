@@ -748,7 +748,7 @@
         `Quality control: ${CAPA_VISUAL_UNIVERSAL}. Avoid anatomical errors, duplicated objects, contradictory shadows, warped architecture, unrequested lettering and irrelevant decorative elements.`,
         reglaEstoicaNarrativa,
         estilo
-      ].filter(Boolean).join('\\n');
+      ].filter(Boolean).join('\n');
       return { sujeto, accion, entorno, luz, camara, paleta, aplicarClaroscuroEstoico: false, reglaEstoicaAtmosferica: reglaEstoicaNarrativa, prompt };
     }
 
