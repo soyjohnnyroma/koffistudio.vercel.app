@@ -104,6 +104,8 @@
       <button type="button" id="core-project-confirm-script" class="btn-secondary" style="width:auto;">CONFIRMAR GUION</button>
       <button type="button" id="core-project-import-v2" class="btn-secondary" style="width:auto;">IMPORTAR V2</button>
       <button type="button" id="core-project-export" class="btn-secondary" style="width:auto;">RESPALDO JSON</button>
+      <button type="button" id="core-project-archive" class="btn-secondary" style="width:auto;border-color:#7f1d1d;color:#fca5a5;">ARCHIVAR</button>
+      <button type="button" id="core-project-archived" class="btn-secondary" style="width:auto;">VER ARCHIVADAS</button>
     </section>
     <div class="marquee-wrapper"><div class="marquee-track marquee-left" id="track-1"></div></div>
     <div class="marquee-wrapper"><div class="marquee-track marquee-right" id="track-2"></div></div>
@@ -1622,6 +1624,124 @@ Devuelve ÚNICAMENTE un arreglo JSON válido con el siguiente formato exacto, si
       }
     }
 
+    function coreCerrarDialogoProduccion() {
+      document.getElementById('core-production-dialog')?.remove();
+    }
+
+    function coreMostrarDialogoProduccion(tituloTexto, contenido, acciones) {
+      coreCerrarDialogoProduccion();
+      const overlay = document.createElement('div');
+      overlay.id = 'core-production-dialog';
+      overlay.style.cssText = 'position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.82);display:flex;align-items:center;justify-content:center;padding:18px;';
+      const panel = document.createElement('div');
+      panel.style.cssText = 'width:min(100%,420px);max-height:85vh;overflow:auto;background:#111113;border:1px solid #3f3f46;border-radius:12px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.55);';
+      const title = document.createElement('div');
+      title.textContent = tituloTexto;
+      title.style.cssText = 'font-size:16px;font-weight:700;color:#fff;margin-bottom:10px;';
+      const body = document.createElement('div');
+      body.style.cssText = 'font-size:12px;line-height:1.6;color:#d4d4d8;margin-bottom:16px;';
+      if (typeof contenido === 'string') body.textContent = contenido;
+      else body.appendChild(contenido);
+      const footer = document.createElement('div');
+      footer.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;margin-top:12px;';
+      acciones(footer, overlay);
+      panel.append(title, body, footer);
+      overlay.appendChild(panel);
+      overlay.addEventListener('click', event => { if (event.target === overlay) overlay.remove(); });
+      document.body.appendChild(overlay);
+      return overlay;
+    }
+
+    function coreBotonDialogo(texto, estilo, accion) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = texto;
+      button.style.cssText = estilo;
+      button.addEventListener('click', accion);
+      return button;
+    }
+
+    function coreArchivarProduccion() {
+      try {
+        if (!coreStore) throw new Error('El almacén local no está inicializado.');
+        const project = coreStore.get(coreActiveProjectId);
+        if (!project || project.archivedAt) throw new Error('No se encontró la producción activa.');
+        const activeProjects = coreStore.list();
+        if (activeProjects.length <= 1) {
+          alert('Por seguridad, Koffi Studio necesita conservar al menos una producción activa. Crea otra producción antes de archivar esta.');
+          return;
+        }
+        const message = document.createElement('div');
+        message.textContent = 'La producción "' + project.title + '" saldrá de la lista activa. Su guion, escenas y datos se conservarán y podrás recuperarla desde VER ARCHIVADAS. No se borrará nada.';
+        coreMostrarDialogoProduccion('¿Archivar esta producción?', message, (footer, overlay) => {
+          footer.append(
+            coreBotonDialogo('CANCELAR', 'background:#27272a;color:#e4e4e7;border:1px solid #52525b;border-radius:7px;padding:10px 12px;', () => overlay.remove()),
+            coreBotonDialogo('SÍ, ARCHIVAR', 'background:#7f1d1d;color:#fff;border:1px solid #991b1b;border-radius:7px;padding:10px 14px;font-weight:700;', () => {
+              try {
+                clearTimeout(saveTimer);
+                guardarProyecto();
+                coreStore.archive(project.projectId);
+                const next = coreStore.getActive();
+                if (next && !next.archivedAt) {
+                  coreActiveProjectId = next.projectId;
+                  coreLoadProject(next);
+                }
+                coreRenderSelector();
+                overlay.remove();
+                estadoGuardado('✓ Producción archivada. Sus datos se conservaron y puedes recuperarla desde VER ARCHIVADAS.');
+              } catch (error) {
+                overlay.remove();
+                coreMostrarError('No se pudo archivar la producción: ' + (error.message || 'error desconocido'));
+              }
+            })
+          );
+        });
+      } catch (error) {
+        coreMostrarError('No se pudo preparar el archivo: ' + (error.message || 'error desconocido'));
+      }
+    }
+
+    function coreMostrarProduccionesArchivadas() {
+      try {
+        if (!coreStore) throw new Error('El almacén local no está inicializado.');
+        const archived = coreStore.list({ includeArchived: true }).filter(project => !!project.archivedAt);
+        const list = document.createElement('div');
+        if (!archived.length) {
+          const empty = document.createElement('p');
+          empty.textContent = 'Todavía no hay producciones archivadas.';
+          list.appendChild(empty);
+        } else {
+          archived.forEach(project => {
+            const row = document.createElement('div');
+            row.style.cssText = 'display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:10px 0;border-bottom:1px solid #27272a;';
+            const name = document.createElement('div');
+            name.style.cssText = 'min-width:0;flex:1;color:#fff;font-weight:600;overflow-wrap:anywhere;';
+            name.textContent = project.title;
+            const restore = coreBotonDialogo('RECUPERAR', 'background:#064e3b;color:#d1fae5;border:1px solid #047857;border-radius:7px;padding:8px 10px;font-size:11px;font-weight:700;', () => {
+              try {
+                const recovered = coreStore.update(project.projectId, p => { p.archivedAt = null; return p; });
+                const selected = coreStore.select(recovered.projectId);
+                coreActiveProjectId = selected.projectId;
+                coreLoadProject(selected);
+                coreRenderSelector();
+                coreCerrarDialogoProduccion();
+                estadoGuardado('✓ Producción recuperada. Vuelve a estar activa con sus datos originales.');
+              } catch (error) {
+                coreMostrarError('No se pudo recuperar la producción: ' + (error.message || 'error desconocido'));
+              }
+            });
+            row.append(name, restore);
+            list.appendChild(row);
+          });
+        }
+        coreMostrarDialogoProduccion('Producciones archivadas', list, (footer, overlay) => {
+          footer.append(coreBotonDialogo('CERRAR', 'background:#27272a;color:#e4e4e7;border:1px solid #52525b;border-radius:7px;padding:10px 12px;', () => overlay.remove()));
+        });
+      } catch (error) {
+        coreMostrarError('No se pudieron consultar las producciones archivadas: ' + (error.message || 'error desconocido'));
+      }
+    }
+
     function coreConectarControles() {
       if (window.__koffiCoreControlsConnected) return;
       window.__koffiCoreControlsConnected = true;
@@ -1629,6 +1749,8 @@ Devuelve ÚNICAMENTE un arreglo JSON válido con el siguiente formato exacto, si
       document.getElementById('core-project-confirm-script')?.addEventListener('click', confirmarRevisionGuion);
       document.getElementById('core-project-import-v2')?.addEventListener('click', coreImportarV2);
       document.getElementById('core-project-export')?.addEventListener('click', coreExportarRespaldo);
+      document.getElementById('core-project-archive')?.addEventListener('click', coreArchivarProduccion);
+      document.getElementById('core-project-archived')?.addEventListener('click', coreMostrarProduccionesArchivadas);
     }
 
     function restaurarProyecto() {
