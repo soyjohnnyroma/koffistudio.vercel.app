@@ -2086,27 +2086,41 @@ ${g.capitulos.filter((_, i) => i !== idx).map((t, i) => t.slice(-1400)).join('\n
         const row = document.createElement('div'); row.style.cssText = 'display:flex;gap:8px;';
         const copy = document.createElement('button'); copy.className='btn-secondary'; copy.style.marginTop='0'; copy.textContent='📋 COPIAR PROMPT'; copy.onclick=()=>navigator.clipboard.writeText(e.prompt || '').then(()=>alert('Prompt copiado.'));
         const use = document.createElement('button'); use.className='btn-secondary'; use.style.marginTop='0'; use.textContent='🎨 USAR EN GENERADOR'; use.onclick=()=>{ document.getElementById('img-prompt').value=e.prompt || ''; document.getElementById('img-use-style').checked=false; programarGuardado(); openTab('tab-imagenes',document.querySelectorAll('.tab-btn')[2]); };
-        const refresh = document.createElement('button'); refresh.className='btn-secondary'; refresh.style.marginTop='0'; refresh.textContent=e.promptVersion === 'guided-v2' ? '✓ DIRECCIÓN ACTUALIZADA' : '↻ ACTUALIZAR DIRECCIÓN'; refresh.disabled=e.promptVersion === 'guided-v2'; refresh.onclick=()=>actualizarDireccionEscena(e.sceneId);
+        const refresh = document.createElement('button'); refresh.className='btn-secondary'; refresh.style.marginTop='0'; const direccionBreveLista = e.promptVersion === 'guided-v3'; refresh.textContent = direccionBreveLista ? '✓ DIRECCIÓN BREVE' : (e.promptVersion === 'guided-v2' ? '↻ REDUCIR DIRECCIÓN' : '↻ ACTUALIZAR DIRECCIÓN'); refresh.disabled = direccionBreveLista; refresh.onclick=()=>actualizarDireccionEscena(e.sceneId);
         row.append(copy,use,refresh); [h,d,f,p,row].forEach(x=>card.appendChild(x)); cont.appendChild(card);
       });
     }
 
+    function crearDireccionBreveEscena(escena) {
+      const descripcion = String(escena?.descripcion || '').trim();
+      const fragmento = String(escena?.fragmento || '').trim();
+      if (!descripcion) throw new Error('La escena no tiene una descripción que podamos conservar.');
+      return [
+        'ESCENA: ' + descripcion,
+        fragmento ? 'CONTEXTO DEL GUION: ' + fragmento : '',
+        'DIRECCIÓN ARTÍSTICA: novela gráfica medieval ilustrada europea, con línea de tinta visible, textura pictórica, color rico y equilibrado y arquitectura y vestuario históricamente coherentes.',
+        'PROTAGONISTA: exactamente un hombre adulto maduro, vivo, visible y reconocible; debe ser la única figura humana de la imagen.',
+        'INTERPRETACIÓN: representa visualmente la acción y el sentido de esta escena. Conserva su identidad narrativa; no inventes otra escena ni agregues personas.',
+        'RESTRICCIONES: anatomía natural, dos brazos y dos manos; sin figuras humanas adicionales, mujeres, menores, multitudes, siluetas, reflejos humanos, estatuas ni bustos. Sin texto, letras, números, carteles, inscripciones, logotipos ni marcas de agua.'
+      ].filter(Boolean).join('\\n');
+    }
+
     function actualizarDireccionEscena(sceneId) {
       const escena = escenasGuardadas.find(item => item.sceneId === sceneId);
-      if (!escena || escena.promptVersion === 'guided-v2') return;
-      if (!confirm('Se actualizará la dirección visual de esta escena. El prompt original se conservará como respaldo. El guion y el fragmento no cambiarán. ¿Continuar?')) return;
+      if (!escena || escena.promptVersion === 'guided-v3') return;
+      if (!confirm('Se guardará una dirección visual breve para esta escena. La descripción, el fragmento y el prompt anterior quedarán conservados. ¿Continuar?')) return;
       try {
-        const contexto = obtenerContextoVisual();
-        const escenaNueva = { ...escena, prompt: '', promptVersion: 'guided-v2' };
-        const propuesta = crearConceptoVisual(contexto, '', escenaNueva, true);
-        if (!propuesta?.prompt) throw new Error('No se pudo preparar un nuevo prompt para esta escena.');
-        validarLongitudPromptFlux(propuesta.prompt, 'El nuevo prompt');
+        const direccionBreve = crearDireccionBreveEscena(escena);
+        if (direccionBreve.length > 1600) throw new Error('La dirección breve supera 1.600 caracteres. No se guardó ningún cambio.');
+        if (escena.prompt && escena.promptVersion === 'guided-v2') {
+          escena.previousGuidedPrompt = escena.prompt;
+        }
         escena.legacyPrompt = escena.legacyPrompt || escena.prompt || '';
-        escena.prompt = propuesta.prompt;
-        escena.promptVersion = 'guided-v2';
-        if (!guardarProyecto()) throw new Error('No se pudo guardar la actualización. El prompt original permanece en memoria.');
+        escena.prompt = direccionBreve;
+        escena.promptVersion = 'guided-v3';
+        if (!guardarProyecto()) throw new Error('No se pudo guardar la actualización. Los textos anteriores se conservan en memoria.');
         renderizarEscenasGuardadas();
-        estadoGuardado('✓ Dirección visual actualizada. El prompt anterior quedó conservado.');
+        estadoGuardado('✓ Dirección breve guardada. La descripción, el fragmento y los prompts anteriores quedaron conservados.');
       } catch (error) {
         alert('No se actualizó la escena: ' + error.message);
       }
