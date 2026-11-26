@@ -8,12 +8,14 @@
 
       const MODEL = "@cf/black-forest-labs/flux-2-klein-4b";
       
+
 const ALLOWED_ORIGINS = new Set([
   "https://koffistudio.vercel.app",
   "https://koffistudiovercelapp-git-estabilizacion-ko-c1622d-soyjohnnyroma.vercel.app",
   "https://koffistudiovercel-jxa4wgosq-soyjohnnyroma.vercel.app",
   "https://koffistudiovercel-fzh1qew0h-soyjohnnyroma.vercel.app",
   "https://koffistudiovercel-9ibnhu7c6-soyjohnnyroma.vercel.app",
+  "https://koffistudiovercelapp-git-dev-soyjohnnyroma.vercel.app",
 ]);
 
 const ALLOWED_HOSTNAMES = new Set([
@@ -22,8 +24,8 @@ const ALLOWED_HOSTNAMES = new Set([
   "koffistudiovercel-jxa4wgosq-soyjohnnyroma.vercel.app",
   "koffistudiovercel-fzh1qew0h-soyjohnnyroma.vercel.app",
   "koffistudiovercel-9ibnhu7c6-soyjohnnyroma.vercel.app",
+  "koffistudiovercelapp-git-dev-soyjohnnyroma.vercel.app",
 ]);
-
       
       const ALLOWED_SIZES = new Set([512, 720, 768, 1024, 1280]);
 
