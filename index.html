@@ -850,7 +850,8 @@
       const contexto = obtenerContextoVisual();
       const ideaUsuario = document.getElementById('img-prompt').value.trim();
       if (!document.getElementById('img-use-style')?.checked) contexto.estilo = '';
-      const concepto = crearConceptoVisual(contexto, ideaUsuario);
+      const usarPromptCompacto = contexto.niche === 'Estoicismo y Filosofía Práctica';
+      const concepto = crearConceptoVisual(contexto, ideaUsuario, null, usarPromptCompacto);
       if (!concepto || !concepto.prompt) {
         alert('No pude preparar una dirección visual. Revisa el contexto e inténtalo de nuevo.');
         return;
