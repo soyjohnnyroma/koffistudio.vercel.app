@@ -512,7 +512,7 @@
   <script>
     // ===== DATOS =====
     const NICHOS = [
-      ['Estoicismo y Filosofía Práctica', '🏛️ Estoicismo & Filosofía Práctica', 'Ej: Por qué Marco Aurelio escribía cada noche'],
+      ['Estoicismo y Filosofía Práctica', '🏛️ Estoicismo & Filosofía Práctica', 'Ej: Cómo mantener la calma cuando todo se complica'],
       ['Psicología Oscura y Conducta Humana', '🧠 Psicología Oscura & Conducta Humana', 'Ej: Las señales de una persona manipuladora'],
       ['Terror y Misterio Real', '🕯️ Historias de Terror & Misterio', 'Ej: El caso sin resolver del faro abandonado'],
       ['Finanzas y Riqueza', '📈 Finanzas, Economía & Alto RPM', 'Ej: Por qué la clase media nunca logra ahorrar'],
@@ -539,7 +539,7 @@
       { n: '🌆 Vaporwave 80s', d: 'Neón retro, púrpura y nostalgia.', en: 'vaporwave 80s retro aesthetic, neon purple and pink glow, synthwave grid, nostalgic atmosphere' },
       { n: '🕯️ Terror Psicológico', d: 'Luz de vela y penumbra.', en: 'psychological horror, candlelight and deep shadows, desaturated colors, film grain' },
       { n: '🎞️ Documental 35mm', d: 'Grano analógico retro.', en: '35mm documentary film still, analog grain, muted natural colors' },
-      { n: '💥 Cómic / Novela Gráfica', d: 'Tinta dura, viñetas y contraste.', en: 'graphic novel comic style, hard black ink, bold contrast, halftone pop art' },
+      { n: '💥 Novela Gráfica Europea', d: 'Ilustración histórica, tinta y color pictórico.', en: 'European medieval illustrated graphic novel, expressive hand-inked contours, painterly historical fantasy illustration, layered gouache and oil-like color, natural human proportions, richly detailed period environments, balanced cinematic composition, restrained texture, no anime, no manga, no pop-art halftone' },
       { n: '📈 Finanzas & Alto RPM', d: 'Estética sobria y ejecutiva.', en: 'sober executive aesthetic, dark minimal, subtle gold accents' },
       { n: '📜 Archivo Histórico', d: 'Mapas y pergaminos antiguos.', en: 'aged parchment, antique maps, historical archive look' },
       { n: '🧠 Conducta Humana', d: 'Siluetas y psicología oscura.', en: 'dark psychology, human silhouettes, high contrast, moody lighting' },
@@ -552,14 +552,14 @@
     // Cada perfil contiene decisiones de producción propias; no es una etiqueta decorativa.
     const PERFILES_VISUALES = {
       'Estoicismo y Filosofía Práctica': {
-        lenguaje:'historical-philosophical editorial realism; Roman imperial material culture, restrained symbolism, contemplative human presence; atmospheric philosophical imagery rather than literal scene illustration',
-        sujetos:['a living Roman philosopher in a plain wool toga, standing in quiet contemplation within a Roman setting','an elderly Roman philosopher seen in profile or from behind, looking toward a distant horizon','a solitary contemplative figure integrated naturally into a monumental Roman colonnade','a Roman traveler or philosopher visible within an ancient forum or misty landscape, with the setting remaining visually dominant'],
-        acciones:['standing quietly while looking toward a distant horizon','walking slowly beneath a sequence of ancient Roman columns','remaining seated in silent contemplation','pausing in stillness within a wider atmospheric Roman establishing view'],
-        entornos:['a quiet colonnaded courtyard at dawn','a monumental Roman terrace overlooking a distant misty landscape','a vast imperial forum after the crowd has dispersed','a historically grounded Roman study or library with restrained period-accurate details'],
-        luz:['dramatic motivated lateral light with deep controlled shadows and restrained warm highlights','soft dawn light entering a Roman colonnade through atmospheric haze','low-key natural side light with strong negative fill and readable shadow detail'],
-        optica:['50mm spherical lens, eye-level medium portrait, natural perspective','85mm portrait lens, intimate three-quarter profile, shallow but readable depth','28mm environmental frame, symmetrical architectural perspective'],
-        color:'deep charcoal, iron grey, dark umber and restrained aged-bronze highlights; natural skin tones when people are present',
-        detail:'historically plausible Roman textiles, worn stone, restrained architectural details, subtle period objects and understated philosophical atmosphere'
+        lenguaje:'European medieval illustrated novel; painterly historical fantasy graphic-novel illustration with visible expressive ink linework, natural human proportions, rich but balanced color, layered painted textures and clear narrative composition. The visual setting must follow the specific script passage rather than defaulting to Roman imperial imagery.',
+        sujetos:['a living person whose expression and posture communicate the specific emotional conflict in the script','two people in a historically plausible European setting, their body language revealing the central tension','a solitary traveler or thinker moving through a medieval European landscape','a small group of ordinary people engaged in a concrete action relevant to the narration','a meaningful historical environment or object that carries the scene without requiring a human figure'],
+        acciones:['making a difficult decision in a specific moment','walking through a stone passage while reflecting on a challenge','listening carefully during a tense conversation','showing restraint in the middle of a conflict','performing an ordinary task with deliberate attention'],
+        entornos:['a medieval European town street with believable stone and timber architecture','a quiet abbey courtyard or scriptorium with historically plausible details','a rural path crossing a European landscape','a modest medieval interior lit by a window or candle','a castle courtyard, market square or stone bridge when relevant to the scene'],
+        luz:['soft natural daylight with readable shadows and painterly depth','overcast European daylight with restrained atmospheric perspective','warm candle or hearth light balanced by cool ambient shadow','cinematic natural side light without exaggerated chiaroscuro'],
+        optica:['35mm environmental composition with clear spatial storytelling','50mm eye-level medium shot with natural perspective','85mm expressive portrait with believable anatomy and restrained depth','wide establishing composition that gives the setting narrative importance'],
+        color:'rich but balanced historical colors: muted ultramarine, forest green, warm earth, faded burgundy, parchment neutrals and natural skin tones; avoid excessive saturation',
+        detail:'visible hand-inked contours, painterly brushwork, believable medieval European clothing and materials when the scene calls for them, expressive but natural faces, coherent architecture and meaningful environmental details; avoid decorative clutter'
       },
       'Psicología Oscura y Conducta Humana': {
         lenguaje:'psychological editorial realism, emotionally legible body language, subtle interpersonal tension, contemporary believable environments',
@@ -706,70 +706,30 @@
       const p = contexto.perfil;
       const ratio = contexto.ratio;
       const esEstoicismo = contexto.niche === 'Estoicismo y Filosofía Práctica';
-      // El claroscuro romano se mantiene condicionado al nicho y al estilo elegidos.
-      // La regla atmosférica y la presencia humana obligatoria pertenecen al nicho estoico; no se propagan a otros nichos.
-      const aplicarClaroscuroEstoico = esEstoicismo
-        && estiloActual === 0
-        && Boolean(contexto.estilo);
-      const sujetosEstoicosAtmosfericos = [
-        'a photorealistic living Roman philosopher in a plain wool toga, standing quietly on a monumental terrace, seen from behind',
-        'a photorealistic elderly Roman philosopher seated in contemplative silence, with natural skin and historically plausible clothing',
-        'a living Roman figure seen at a thoughtful distance within a monumental colonnade, with architecture remaining the dominant visual subject',
-        'a living Roman traveler or philosopher integrated naturally into an ancient archway or quiet imperial forum at dusk'
-      ];
-      const accionesEstoicasAtmosfericas = [
-        'standing still and looking toward the distant horizon',
-        'walking slowly beneath ancient columns',
-        'remaining seated in quiet contemplation',
-        'pausing in stillness within a wide atmospheric establishing composition'
-      ];
-      const entornosEstoicosAtmosfericos = [
-        'a Roman terrace overlooking a distant misty landscape',
-        'a quiet colonnaded courtyard with historically plausible stonework',
-        'a monumental forum after the crowd has dispersed',
-        'a restrained Roman study or library with period-accurate materials'
-      ];
       const sujeto = preservarDireccion
-        ? (esEstoicismo ? 'Preserve the specified primary subject and focal point, while integrating at least one clearly recognizable living human figure naturally into the same scene; if the supplied direction says no people or describes only architecture, landscape or an isolated object, retain that subject as the visual focus and include the person as a secondary, scale-bearing presence. Do not substitute the primary subject or introduce an unrelated setting.' : 'Preserve the primary subject and focal point specified in the supplied creative direction; do not substitute it or introduce an unrelated subject')
-        : aplicarClaroscuroEstoico
-          ? elegirVariacion(sujetosEstoicosAtmosfericos, semilla+'|stoic-atmospheric-subject')
-          : elegirVariacion(p.sujetos, semilla+'|subject');
+        ? 'Preserve the specified primary subject and focal point; do not replace it or add unrelated people, objects or settings'
+        : elegirVariacion(p.sujetos, semilla+'|subject');
       const accion = preservarDireccion
-        ? 'Preserve the specified action, stillness and emotional intention; do not invent a conflicting action'
-        : aplicarClaroscuroEstoico
-          ? elegirVariacion(accionesEstoicasAtmosfericas, semilla+'|stoic-atmospheric-action')
-          : elegirVariacion(p.acciones, semilla+'|action');
+        ? 'Preserve the specified action, stillness and emotional intention without contradiction'
+        : elegirVariacion(p.acciones, semilla+'|action');
       const entorno = preservarDireccion
-        ? 'Preserve the specified location, era, props and environmental details; do not add unrelated settings or objects'
-        : aplicarClaroscuroEstoico
-          ? elegirVariacion(entornosEstoicosAtmosfericos, semilla+'|stoic-atmospheric-setting')
-          : elegirVariacion(p.entornos, semilla+'|setting');
+        ? 'Preserve the specified location, era, props and environmental details; do not add unrelated set dressing'
+        : elegirVariacion(p.entornos, semilla+'|setting');
       const luz = preservarDireccion
-        ? 'Follow the lighting direction and exposure specified in the supplied creative direction; do not introduce a conflicting light source or tonal treatment'
-        : aplicarClaroscuroEstoico
-          ? 'dramatic motivated lateral key light, strong negative fill, very low ambient fill, deep controlled shadows, subtle warm highlights on natural human skin when a person is present; preserve shadow detail without lifting the scene into beige daylight'
-          : elegirVariacion(p.luz, semilla+'|light');
+        ? 'Preserve the lighting direction and exposure specified in the creative direction'
+        : elegirVariacion(p.luz, semilla+'|light');
       const camara = preservarDireccion
-        ? 'Follow the specified shot size, camera angle, perspective and lens. If any camera detail is absent, choose a coherent setup that supports the described subject and framing'
+        ? 'Preserve the specified shot size, camera angle, perspective and lens; choose a coherent setup only where details are absent'
         : elegirVariacion(p.optica, semilla+'|camera');
       const paleta = preservarDireccion
-        ? 'Preserve the supplied color palette, contrast and tonal range; do not add a conflicting color treatment'
-        : aplicarClaroscuroEstoico
-          ? 'deep charcoal and near-black shadows, iron grey, dark umber and restrained aged-bronze highlights; natural human skin tones when a person is present, no dominant beige or bright ivory exposure'
-          : p.color;
+        ? 'Preserve the supplied color palette and tonal range'
+        : p.color;
       const textura = preservarDireccion
-        ? 'Preserve only the materials, textures and props specified or clearly implied by the supplied creative direction; do not add unrelated set dressing'
+        ? 'Preserve only the materials, textures and props specified or clearly implied by the creative direction'
         : p.detail;
-      const estilo = aplicarClaroscuroEstoico
-        ? 'Selected visual treatment: Roman chiaroscuro, human-centered photorealism when a person is present, dramatic lateral light and deep shadow; never render a living human as stone.'
-        : contexto.estilo ? `Selected visual treatment: ${contexto.estilo}.` : '';
-      const reglaEstoicaAtmosferica = esEstoicismo
-        ? 'Stoic visual-language rule: use atmospheric philosophical imagery by default. The image may accompany the broader Stoic theme without literally illustrating the narration, a sentence or an abstract concept. Every image must contain at least one clearly recognizable living human figure; vary distance, scale, posture and placement so the person may be the main subject or a naturally integrated secondary figure while Roman architecture, colonnades, forums, libraries, roads, landscapes and mist provide the atmosphere. A hand alone, an indistinct shadow or a statue does not satisfy human presence. Use literal illustration only when the supplied creative direction explicitly requests a concrete event or action. Do not force symbolic objects into every image.'
-        : '';
-      const restriccionEstoica = esEstoicismo
-        ? (aplicarClaroscuroEstoico
-          ? 'For Estoicismo y Filosofía Práctica with Claroscuro Romano: every image must visibly include at least one living human figure with natural skin and anatomy, never a bust, statue, sculpture or marble figure. The person may be distant or secondary, but must be clearly recognizable as human; do not create architecture-only, landscape-only or object-only images.'
-          : 'For Estoicismo y Filosofía Práctica: every image must visibly include at least one living human figure, never a statue or sculpture. The person may be distant or secondary, but must be clearly recognizable as human; do not create people-free images.')
+      const estilo = contexto.estilo ? `Selected visual treatment: ${contexto.estilo}.` : '';
+      const reglaEstoicaNarrativa = esEstoicismo
+        ? 'Stoic channel art direction: European medieval illustrated novel and painterly historical-fantasy graphic-novel illustration, with visible expressive ink contours, natural proportions, rich but balanced color and clear narrative storytelling. Interpret the specific script passage and scene direction; vary people, places, landscapes, architecture and meaningful objects according to the idea. Do not default to Roman imperial portraits, busts, marble statues, sculptures or Marco Aurelius. If a historical person is relevant, depict a living human being rather than a bust or statue. A human figure is not mandatory when the scene is more clearly told through a landscape, setting or object.'
         : '';
       const tema = ancla
         ? `${preservarDireccion ? 'CREATIVE DIRECTION TO PRESERVE — keep its intended subject, action, setting and visual meaning without contradiction' : 'Narrative and thematic reference'}: ${ancla}.`
@@ -779,18 +739,17 @@
         `Art direction and visual language: ${p.lenguaje}.`,
         tema,
         `Primary subject: ${sujeto}. Specific action or stillness: ${accion}.`,
-        `Production design and location: ${entorno}. Ensure period, materials, props, architecture and clothing are internally coherent.`,
-        `Camera and framing: ${camara}. Establish deliberate perspective, natural proportions and a readable focal plane without contradicting the requested shot.`,
+        `Production design and location: ${entorno}. Keep period, materials, props, architecture and clothing internally coherent.`,
+        `Camera and framing: ${camara}. Establish deliberate perspective, natural proportions and a readable focal plane.`,
         `Lighting plan: ${luz}. Preserve highlight texture and realistic material response.`,
         `Color science and palette: ${paleta}.`,
         `Texture and set dressing: ${textura}.`,
         `Composition and delivery: ${COMPOSICIONES_FORMATO[ratio]}. Generate at the supported target dimensions; do not claim unsupported 4K/8K output or invent metadata.`,
         `Quality control: ${CAPA_VISUAL_UNIVERSAL}. Avoid anatomical errors, duplicated objects, contradictory shadows, warped architecture, unrequested lettering and irrelevant decorative elements.`,
-        reglaEstoicaAtmosferica,
-        restriccionEstoica,
+        reglaEstoicaNarrativa,
         estilo
-      ].filter(Boolean).join('\n');
-      return { sujeto, accion, entorno, luz, camara, paleta, aplicarClaroscuroEstoico, reglaEstoicaAtmosferica, prompt };
+      ].filter(Boolean).join('\\n');
+      return { sujeto, accion, entorno, luz, camara, paleta, aplicarClaroscuroEstoico: false, reglaEstoicaAtmosferica: reglaEstoicaNarrativa, prompt };
     }
 
     // El Worker rechaza prompts por encima de 5.000 caracteres. La aplicación
@@ -812,18 +771,6 @@
             : (escenaActiva.descripcion || '').trim())
         : '';
       let ancla = promptUsuario.trim() || anclaEscena || extraerAnclaVisual(contexto, null);
-      if (contexto.niche === 'Estoicismo y Filosofía Práctica') {
-        // Neutraliza órdenes heredadas de escenas sin personas antes de añadir la regla humana obligatoria.
-        ancla = ancla
-          .replace(/\bno people\b/gi, 'include one living human figure naturally integrated')
-          .replace(/\bno person\b/gi, 'include one living human figure naturally integrated')
-          .replace(/\bno humans\b/gi, 'include living human presence naturally integrated')
-          .replace(/\bwithout people\b/gi, 'with one living human figure naturally integrated')
-          .replace(/\bwithout a human figure\b/gi, 'with one living human figure naturally integrated')
-          .replace(/\bno human figure required\b/gi, 'one living human figure is required')
-          .replace(/\ba human figure is optional\b/gi, 'at least one living human figure is required')
-          .replace(/\bdo not insert a person when the creative direction does not call for one\b/gi, 'always include a living human figure, even when secondary');
-      }
       let historial = [];
       try { historial = JSON.parse(localStorage.getItem(HISTORIAL_VISUAL_KEY) || '[]'); } catch (e) {}
       let propuesta = null;
@@ -969,7 +916,7 @@
       return crearConceptoVisual(contexto, (promptBase || '').trim()).prompt;
     }
 
-    let estiloActual = 0;
+    let estiloActual = 4;
     let temaAuto = false;
 
     // ===== INTERFAZ =====
@@ -981,10 +928,15 @@
       document.getElementById('track-1').innerHTML = fila(ESTILOS.slice(0, 5));
       document.getElementById('track-2').innerHTML = fila(ESTILOS.slice(5));
       cambiarNicho();
-      elegirEstilo(0);
+      elegirEstilo(4);
     }
 
     function elegirEstilo(i) {
+      const nichoActual = document.getElementById('script-niche')?.value || '';
+      if (i === 0 && nichoActual === 'Estoicismo y Filosofía Práctica') {
+        alert('Claroscuro Romano se conserva en la biblioteca, pero no se aplica al perfil visual de Ser Estoico. Se mantiene activa la Novela Gráfica Europea.');
+        i = 4;
+      }
       if (estiloActual !== i) invalidarBriefVisual('El estilo visual cambió.');
       estiloActual = i;
       document.querySelectorAll('.style-card').forEach(c => c.classList.toggle('active', Number(c.dataset.i) === i));
@@ -997,6 +949,7 @@
     function cambiarNicho() {
       invalidarBriefVisual('El nicho cambió.');
       const v = document.getElementById('script-niche').value;
+      if (v === 'Estoicismo y Filosofía Práctica' && estiloActual === 0) elegirEstilo(4);
       const n = NICHOS.find(x => x[0] === v);
       const t = document.getElementById('script-topic');
       t.placeholder = n ? n[2] : 'Escribe tu tema';
@@ -2037,7 +1990,7 @@ ${g.capitulos.filter((_, i) => i !== idx).map((t, i) => t.slice(-1400)).join('\n
         const esEstoicismo = contexto.niche === 'Estoicismo y Filosofía Práctica';
         const instruccionesComunes = `ENTREGA OBLIGATORIA: devuelve EXACTAMENTE la cantidad solicitada de escenas, ni una más ni una menos. Cada escena debe ser un objeto JSON con los tres campos no vacíos: fragmento, descripcion y prompt. No omitas, combines ni numeres escenas fuera del JSON.`;
         const instruccionesNarrativas = esEstoicismo
-          ? `Para este nicho aplica NARRATIVA ATMOSFÉRICA como modalidad predeterminada. Las imágenes acompañan el universo del estoicismo y la filosofía práctica; NO tienen que ilustrar literalmente cada frase, concepto o argumento del narrador. Usa el guion para reconocer el tema general, el tono emocional y el recorrido global, no para convertir cada párrafo en una ilustración literal. Crea una secuencia visual de acompañamiento, variada y cinematográfica: filósofos romanos vivos en retratos solemnes o de cuerpo entero, figuras de pie mirando al horizonte, caminando bajo columnas, sentadas en contemplación, vistas de perfil o desde atrás; también foros, templos, bibliotecas, pórticos, caminos, paisajes, arcos, arquitectura y detalles materiales romanos. No es obligatorio que aparezca el mismo personaje en todas las imágenes; mantén continuidad de identidad solo cuando decidas deliberadamente repetir a un personaje. La modalidad ilustrativa es opcional y debe reservarse para un momento concreto que realmente gane valor al representarse. Evita simbolizar literalmente cada idea, repetir objetos alegóricos o forzar una correspondencia frase-imagen. El campo fragmento solo indica la ubicación aproximada en el guion para facilitar el montaje; NO obliga a que la imagen represente ese texto. Cada prompt debe ser autónomo, visualmente coherente con el universo estoico y técnicamente consistente: el plano, la lente, el ángulo, la perspectiva y la iluminación deben corresponder entre sí, sin instrucciones contradictorias. Todas las escenas deben incluir obligatoriamente al menos una figura humana viva y claramente reconocible. La figura puede ser protagonista o secundaria y estar integrada a distancia en una composición dominada por arquitectura, paisaje, biblioteca, pórtico o camino; no es obligatorio repetir el mismo personaje. No cuentan una mano aislada, una sombra indistinta, un busto, una estatua ni una escultura. Conserva la variedad atmosférica y no fuerces una ilustración literal del fragmento. No incluyas texto, letras, logos ni marcas de agua.`
+          ? `Para Ser Estoico utiliza como dirección artística predeterminada una NOVELA MEDIEVAL ILUSTRADA EUROPEA: ilustración pictórica de fantasía histórica con línea de tinta visible, formas humanas naturales, color rico pero equilibrado y composición narrativa clara. Divide el guion en exactamente ${n} escenas consecutivas que representen visualmente su desarrollo en orden. Cada escena debe interpretar el fragmento concreto que le corresponde y aportar una imagen que narre o complemente esa idea; no uses una secuencia genérica de filósofos contemplando paisajes. Varía personajes, edades, acciones, escenarios, escalas y perspectivas según el contenido: calles y plazas medievales, caminos rurales, abadías, bibliotecas, talleres, interiores, puentes, paisajes y situaciones humanas cuando sean pertinentes. Mantén continuidad de vestuario, época, personajes y localizaciones cuando la historia lo requiera. No conviertas cada escena en una imagen de Marco Aurelio; no uses bustos, estatuas, esculturas ni figuras de mármol como recurso automático. Si el guion requiere representar a una figura histórica, muéstrala como persona viva y no como busto. No fuerces la presencia humana cuando la escena se cuente mejor mediante un lugar, paisaje u objeto significativo. Cada prompt debe ser autónomo, visualmente coherente y técnicamente consistente. No incluyas texto, letras, logos ni marcas de agua.`
           : `Divide el guion en exactamente ${n} escenas consecutivas que cubran su desarrollo en orden. Mantén continuidad cuando haya personajes, época, vestuario, localización u objetos recurrentes. Varía de verdad sujetos, escalas de plano, perspectivas y composición; no repitas la misma fórmula. Cada prompt debe ser autónomo y contener sujeto, acción, entorno, encuadre, perspectiva, iluminación, atmósfera y detalles del nicho. No incluyas texto, letras, logos ni marcas de agua.`;
         const cabecera = `Eres director de arte y supervisor de continuidad visual de Koffi Studio.
 Nicho: ${contexto.niche}. Perfil visual: ${contexto.perfil.lenguaje}. Formato nativo: ${ratio}. Composición obligatoria: ${COMPOSICIONES_FORMATO[ratio]}. Estilo: ${estilo}.
