@@ -921,87 +921,94 @@
     }
 
     function prepararDireccionVisual() {
-      const ratio = obtenerFormatoVisual();
-      const contexto = obtenerContextoVisual();
-      const selectorEscena = document.getElementById('img-test-scene');
-      const idEscena = selectorEscena?.value || '';
-      const indiceEscena = escenasGuardadas.findIndex((escena, indice) => (escena.sceneId || String(indice)) === idEscena);
-      if (indiceEscena < 0) {
-        alert('Primero crea las escenas en la pestaña 2 y selecciona una para probar.');
-        return;
-      }
-      const escenaOriginal = escenasGuardadas[indiceEscena];
-      const direccionEscena = (escenaOriginal.visualDirection || '').trim() ||
-        (escenaOriginal.promptVersion === 'raw-v1' && escenaOriginal.prompt?.trim()
-          ? escenaOriginal.prompt.trim()
-          : (escenaOriginal.descripcion || '').trim());
-      const escenaPrueba = { ...escenaOriginal, descripcion: '', prompt: direccionEscena, promptVersion: 'raw-v1' };
-      const ideaUsuario = document.getElementById('img-prompt').value.trim();
-      if (!document.getElementById('img-use-style')?.checked) contexto.estilo = '';
-      const usarPromptCompacto = contexto.niche === 'Estoicismo y Filosofía Práctica';
-      const concepto = crearConceptoVisual(contexto, ideaUsuario ? `${ideaUsuario}\n\nDirección específica de la escena:\n${direccionEscena}` : direccionEscena, escenaPrueba, usarPromptCompacto);
-      if (!concepto || !concepto.prompt) {
-        alert('No pude preparar una dirección visual. Revisa el contexto e inténtalo de nuevo.');
-        return;
-      }
-      try { validarLongitudPromptFlux(concepto.prompt, 'La propuesta individual'); }
-      catch (error) {
-        const estado = document.getElementById('img-brief-status');
-        if (estado) estado.textContent = error.message;
-        alert(error.message);
-        invalidarBriefVisual('La propuesta supera el tamaño admitido.');
-        return;
-      }
-
-      conceptoVisualPendiente = {
-        ratio,
-        contexto: {
-          niche: contexto.niche,
-          ratio: contexto.ratio,
-          tema: contexto.tema,
-          estilo: contexto.estilo,
-          perfil: contexto.perfil
-        },
-        ideaUsuario,
-        sceneId: escenaOriginal.sceneId || idEscena,
-        sceneIndex: indiceEscena,
-        concepto,
-        prompt: concepto.prompt
-      };
-      firmaContextoVisualPendiente = obtenerFirmaContextoBrief();
-
-      const b = concepto.brief;
-      const lineas = [
-        'DIRECCIÓN VISUAL PREPARADA · PENDIENTE DE RENDER',
-        '',
-        `Nicho: ${contexto.niche}`,
-        `Formato: ${ratio}`,
-        `Longitud del prompt: ${concepto.prompt.length}/${LIMITE_PROMPT_FLUX} caracteres`,
-        `Concepto: ${concepto.titulo}`,
-        `Sujeto: ${b.sujeto}`,
-        `Acción: ${b.accion}`,
-        `Entorno: ${b.entorno}`,
-        `Iluminación: ${b.luz}`,
-        `Cámara y encuadre: ${b.camara}`,
-        `Paleta: ${b.paleta || contexto.perfil.color}`,
-        `Tratamiento de estilo: ${contexto.estilo || 'No aplicado'}`,
-        contexto.niche === 'Estoicismo y Filosofía Práctica' ? 'Regla contextual: la presencia humana es opcional; elige persona, lugar, paisaje u objeto según el fragmento.' : '',
-        '',
-        'PROMPT TÉCNICO EXACTO QUE SE ENVIARÁ A FLUX.2 KLEIN 4B',
-        '────────────────────────────────────────',
-        concepto.prompt
-      ].filter(Boolean);
-      const preview = document.getElementById('img-technical-brief');
-      const details = document.getElementById('img-brief-details');
       const estado = document.getElementById('img-brief-status');
-      const render = document.getElementById('btn-render-visual');
-      if (preview) preview.textContent = lineas.join('\n');
-      if (details) details.open = true;
-      if (estado) estado.textContent = '✓ Propuesta preparada. Ahora puedes renderizar esta propuesta; la preparación por sí sola no genera ninguna imagen.';
-      if (render) {
-        render.style.display = 'inline-block';
-        render.disabled = false;
-        render.textContent = '🎨 RENDERIZAR ESTA PROPUESTA';
+      const boton = document.getElementById('btn-prepare-visual');
+      try {
+        if (estado) estado.textContent = 'Preparando la dirección visual de la escena seleccionada...';
+        if (boton) { boton.disabled = true; boton.textContent = '⏳ PREPARANDO...'; }
+
+        const ratio = obtenerFormatoVisual();
+        const contexto = obtenerContextoVisual();
+        const selectorEscena = document.getElementById('img-test-scene');
+        const idEscena = selectorEscena?.value || '';
+        const indiceEscena = escenasGuardadas.findIndex((escena, indice) => (escena.sceneId || String(indice)) === idEscena);
+        if (indiceEscena < 0) {
+          const mensaje = 'No encuentro una escena válida en la memoria activa. No vuelvas a crearlas todavía; revisaremos la recuperación.';
+          if (estado) estado.textContent = '⚠️ ' + mensaje;
+          alert(mensaje);
+          return;
+        }
+
+        const escenaOriginal = escenasGuardadas[indiceEscena];
+        const direccionEscena = (escenaOriginal.visualDirection || '').trim() ||
+          (escenaOriginal.promptVersion === 'raw-v1' && escenaOriginal.prompt?.trim()
+            ? escenaOriginal.prompt.trim()
+            : (escenaOriginal.descripcion || '').trim());
+        if (!direccionEscena) throw new Error('La escena seleccionada no contiene una dirección visual utilizable.');
+        const escenaPrueba = { ...escenaOriginal, descripcion: '', prompt: direccionEscena, promptVersion: 'raw-v1' };
+        const ideaUsuario = document.getElementById('img-prompt').value.trim();
+        if (!document.getElementById('img-use-style')?.checked) contexto.estilo = '';
+        const usarPromptCompacto = contexto.niche === 'Estoicismo y Filosofía Práctica';
+        const concepto = crearConceptoVisual(contexto, ideaUsuario ? `${ideaUsuario}\n\nDirección específica de la escena:\n${direccionEscena}` : direccionEscena, escenaPrueba, usarPromptCompacto);
+        if (!concepto || !concepto.prompt) throw new Error('Koffi no pudo construir la propuesta visual a partir de esta escena.');
+
+        validarLongitudPromptFlux(concepto.prompt, 'La propuesta individual');
+        conceptoVisualPendiente = {
+          ratio,
+          contexto: {
+            niche: contexto.niche,
+            ratio: contexto.ratio,
+            tema: contexto.tema,
+            estilo: contexto.estilo,
+            perfil: contexto.perfil
+          },
+          ideaUsuario,
+          sceneId: escenaOriginal.sceneId || idEscena,
+          sceneIndex: indiceEscena,
+          concepto,
+          prompt: concepto.prompt
+        };
+        firmaContextoVisualPendiente = obtenerFirmaContextoBrief();
+
+        const b = concepto.brief || {};
+        const lineas = [
+          'DIRECCIÓN VISUAL PREPARADA · PENDIENTE DE RENDER',
+          '',
+          `Nicho: ${contexto.niche}`,
+          `Formato: ${ratio}`,
+          `Longitud del prompt: ${concepto.prompt.length}/${LIMITE_PROMPT_FLUX} caracteres`,
+          `Concepto: ${concepto.titulo}`,
+          `Sujeto: ${b.sujeto || 'Según la escena'}`,
+          `Acción: ${b.accion || 'Según la escena'}`,
+          `Entorno: ${b.entorno || 'Según la escena'}`,
+          `Iluminación: ${b.luz || 'Según la escena'}`,
+          `Cámara y encuadre: ${b.camara || 'Según la escena'}`,
+          `Paleta: ${b.paleta || contexto.perfil.color}`,
+          `Tratamiento de estilo: ${contexto.estilo || 'No aplicado'}`,
+          contexto.niche === 'Estoicismo y Filosofía Práctica' ? 'Regla contextual: la presencia humana es opcional; elige persona, lugar, paisaje u objeto según el fragmento.' : '',
+          '',
+          'PROMPT TÉCNICO EXACTO QUE SE ENVIARÁ A FLUX.2 KLEIN 4B',
+          '────────────────────────────────────────',
+          concepto.prompt
+        ].filter(Boolean);
+        const preview = document.getElementById('img-technical-brief');
+        const details = document.getElementById('img-brief-details');
+        const render = document.getElementById('btn-render-visual');
+        if (preview) preview.textContent = lineas.join('\n');
+        if (details) details.open = true;
+        if (estado) estado.textContent = '✓ Propuesta preparada. Ahora puedes renderizar esta propuesta; la preparación por sí sola no genera ninguna imagen.';
+        if (render) {
+          render.style.display = 'inline-block';
+          render.disabled = false;
+          render.textContent = '🎨 RENDERIZAR ESTA PROPUESTA';
+        }
+      } catch (error) {
+        const mensaje = error?.message || String(error || 'Error desconocido');
+        if (estado) estado.textContent = '⚠️ No se pudo preparar la escena: ' + mensaje;
+        console.error('Koffi: error al preparar escena individual:', error);
+        alert('No se pudo preparar la escena. Detalle: ' + mensaje);
+      } finally {
+        if (boton) { boton.disabled = false; boton.textContent = '🧭 PREPARAR ESTA ESCENA'; }
       }
     }
 
