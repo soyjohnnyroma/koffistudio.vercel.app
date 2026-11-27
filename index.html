@@ -2563,7 +2563,7 @@ Devuelve ÚNICAMENTE un array JSON con EXACTAMENTE ${faltan.length} objetos nuev
     function crearMenuAccionesImagen(img, nombre) {
       if (!img || !img.id) return null;
       const anterior = img.previousElementSibling;
-      if (anterior?.classList?.contains('image-action-menu')) return anterior;
+      if (anterior?.classList?.contains('image-action-menu')) anterior.remove();
       const menu = document.createElement('details');
       menu.className = 'image-action-menu';
       menu.innerHTML = '<summary aria-label="Opciones de imagen" title="Opciones de imagen">⋮</summary><div class="image-action-list"><button type="button" data-action="download">⬇ Descargar</button><button type="button" data-action="share">↗ Compartir</button><button type="button" data-action="copy">▣ Copiar imagen</button><button type="button" data-action="delete" style="color:#f87171;">🗑 Eliminar</button></div>';
