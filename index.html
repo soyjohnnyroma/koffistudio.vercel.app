@@ -829,8 +829,21 @@
     }
 
     // El Worker rechaza prompts por encima de 5.000 caracteres. La aplicación
-    // usa un margen preventivo de 4.800 y nunca recorta instrucciones silenciosamente.
+    // compacta redundancias conocidas sin truncar la escena ni eliminar sus instrucciones.
     const LIMITE_PROMPT_FLUX = 4800;
+    function compactarPromptFlux(prompt) {
+      let texto = String(prompt || '').replace(/[ \\t]+/g, ' ').replace(/\\n{3,}/g, '\\n\\n').trim();
+      const reglas = [
+        ['one single, uninterrupted, full-frame illustration in one continuous scene and one camera view', 'one uninterrupted full-frame illustration, one scene and one camera view'],
+        ['The entire canvas must depict one coherent moment, one location and one protagonist; no second version of the character.', 'One coherent moment, one location and one protagonist; no duplicate character.'],
+        ['Never split the canvas, never create a diptych, triptych, comic panels, side-by-side images, top-and-bottom images, collage, storyboard, contact sheet, before-and-after, inset frame, border, divider, white separator line or multiple scenes inside the same image.', 'No split canvas, panels, collage, storyboard, contact sheet, inset, border, divider or multiple scenes.'],
+        ['No editorial overlay of any kind: no title, headline, subtitle, caption, banner, floating text, typography, logo or watermark; never resemble a thumbnail, poster, cover or title card.', 'No text overlays, title, caption, logo or watermark; not a thumbnail, poster or cover.'],
+        ['Anatomy must be natural, with exactly two arms and two hands.', 'Natural anatomy: two arms and two hands.'],
+        ['The protagonist is unaware of the camera, never looks at the viewer and never poses;', 'The protagonist is unaware of the camera, never looks at the viewer or poses;']
+      ];
+      for (const [largo, breve] of reglas) texto = texto.replace(largo, breve);
+      return texto;
+    }
     function validarLongitudPromptFlux(prompt, etiqueta = 'La dirección visual') {
       const longitud = String(prompt || '').length;
       if (longitud > LIMITE_PROMPT_FLUX) {
@@ -853,6 +866,7 @@
       for (let intento = 0; intento < 12; intento++) {
         const semilla = [contexto.niche, contexto.ratio, ancla, Date.now(), Math.random(), intento].join('|');
         const brief = crearBriefFotografico(contexto, ancla, semilla, Boolean(promptUsuario.trim() || escenaActiva), compacto);
+        brief.prompt = compactarPromptFlux(brief.prompt);
         const firma = brief.prompt.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().slice(0, 240);
         propuesta = {
           titulo: promptUsuario ? 'Desarrollo profesional de tu idea' : escenaActiva ? 'Dirección visual de escena' : ancla ? 'Interpretación visual contextual' : 'Concepto autónomo del nicho',
