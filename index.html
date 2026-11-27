@@ -347,8 +347,7 @@
         tone: cleanText(input && input.tone)
       },
       script: { text: '', origin: null, status: 'empty', versions: [] },
-      scenes: { items: [], sourceScriptRevision: null, status: 'empty' },
-      stages: emptyStages(),
+      scenes: { items: [], sourceScriptRevision: null, status: 'empty' },      stages: emptyStages(),
       assetIds: [],
       lastEventId: null,
       sync: { state: 'local_only', serverRevision: null, lastSyncedAt: null },
@@ -697,8 +696,7 @@
         lenguaje:'mythic historical visual storytelling, culturally grounded ancient material culture, symbolic scale and monumental atmosphere',
         sujetos:['a solitary mythic traveler carrying an ancient symbolic object','a monumental carved statue within its original cultural setting','a priestess or guardian in period-inspired but culturally coherent attire','an ancient artifact displayed within a sacred architectural space'],
         acciones:['approaching a monumental threshold','presenting an offering before a carved relief','discovering an artifact in a sealed chamber','standing beneath a vast celestial or architectural symbol'],
-        entornos:['an ancient Mediterranean sanctuary with plausible stonework','a Bronze Age ceremonial chamber','a monumental desert temple courtyard','an archaic mountain shrine with weathered carvings'],
-        luz:['dramatic natural shaft of sunlight through an opening','warm firelight balanced with cool ambient stone bounce','dawn light revealing monumental relief and dust'],
+        entornos:['an ancient Mediterranean sanctuary with plausible stonework','a Bronze Age ceremonial chamber','a monumental desert temple courtyard','an archaic mountain shrine with weathered carvings'],        luz:['dramatic natural shaft of sunlight through an opening','warm firelight balanced with cool ambient stone bounce','dawn light revealing monumental relief and dust'],
         optica:['24mm wide lens emphasizing monumental scale','50mm lens, balanced mythic portrait with environmental context','35mm lens, low-angle architectural composition'],
         color:'weathered sandstone, lapis-inspired deep blue, aged gold and mineral earth pigments',
         detail:'culturally coherent iconography, carved stone, bronze patina and historically plausible objects; avoid mixing unrelated pantheons'
@@ -715,7 +713,7 @@
       }
     };
     const CAPA_VISUAL_UNIVERSAL = 'professional art direction, intentional production design, coherent visual hierarchy, physically plausible anatomy and perspective, natural hands and facial structure, realistic material response, controlled highlights and shadows, precise focal hierarchy. Render a full-bleed narrative illustration, never a poster, cover, thumbnail or title card. Do not add editorial overlays: no headline, title, subtitle, caption, banner, typography, floating words, decorative lettering, logo or watermark anywhere over the scene. Writing may appear naturally and only as part of a physical object in the scene, such as a manuscript, book, scroll, map, letter or document; it must never become a separate title or overlay.';
-    const SER_ESTOICO_VISUAL_CONTRACT = "SER ESTOICO — VISUAL CONTRACT: Show exactly the historically specific living adult protagonist required by the script, of high rank, authority or intellectual influence; never invent a substitute or downgrade the figure to an ordinary person. Show only that one living person: no companions, crowds, background figures, silhouettes, human-shaped shadows, reflections, portraits, busts, statues or sculptures. The protagonist identity, age, gender, facial structure, hair, facial hair, build and clothing must follow the actual historical figure and passage; do not default to an elderly grey-haired, grey-bearded man. If the script does not identify a figure, create a distinctive, credible high-status adult whose appearance differs clearly from previous scenes. Depict a specific, believable candid action tied to the passage, not a posed portrait, character showcase or person merely standing and looking away; never look at the camera. Use an observational side, three-quarter, rear or environmental view that makes the action legible. IMAGE 10 IS STYLE REFERENCE ONLY: borrow only its European historical graphic-novel craft — expressive ink contours, layered painterly color, controlled visible brush texture, natural anatomy, nuanced natural light, atmospheric depth and rich balanced palette. Do not copy or echo its elderly grey-bearded man, dark blue military uniform, gold epaulettes, arched stone window, stone chamber, desk, manuscript, quill, scroll, pose, framing, lighting arrangement or composition. IMAGE 11 IS NOT A STYLE OR COMPOSITION TEMPLATE: do not repeat its elderly grey-bearded man, fur coat, timber-and-stone interior or hand-adjusting-belt action. Never reuse a reference image character, costume, props, architecture, camera angle or layout unless the script explicitly requires that exact element. The actual historical era, culture, architecture, clothing, objects and action must follow the script; never default to Roman or medieval imagery. Avoid repeating visual clichés across scenes. Deliver one complete full-frame image showing one moment, one location and one camera view: no comic page, panels, diptych, triptych, collage, inset, border or separator. No editorial text, titles, logos or watermarks; writing may appear only on physical scene props.";
+    const SER_ESTOICO_VISUAL_CONTRACT = "SER ESTOICO — VISUAL CONTRACT: Show exactly the historically specific living adult protagonist required by the script, of high rank, authority or intellectual influence; never substitute the person. Show only that one living person: no companions, crowds, background figures, silhouettes, reflections, portraits, busts, statues or sculptures. Preserve the person's historically grounded identity, age, gender, facial structure, hair, facial hair and build; do not default to an elderly grey-haired or grey-bearded man. If no figure is named, create a distinctive high-status adult who differs from previous scenes. Depict one specific, believable candid action tied to the passage, not a posed portrait; never look at the camera. Use an observational view that makes the action and body mechanics clear. ANATOMY — NON-NEGOTIABLE: one coherent body with exactly two arms, two hands, two legs and two feet, each attached once to the correct shoulder or hip. No extra, duplicated, missing, detached or fused limbs; no extra hands/fingers, malformed joints, duplicated shoulders, impossible overlaps or hands without a clear arm connection. Keep limb placement unambiguous and physically possible; avoid occlusion that makes an arm appear split or duplicated. COSTUME: when historically compatible, favor elegant, severe black, charcoal or near-black garments suited to the person's rank and period. Do not default to fur coats, fur collars or heavy fur cloaks. Historical accuracy and explicit script requirements take priority. ATMOSPHERE: favor dusk, twilight, late evening or night when compatible with the passage. Use cold dramatic light — moonlight, storm light, blue-hour ambience, directional window light or motivated candle/firelight — with deep but readable shadows. Prefer black, charcoal, slate and steel-blue tones; warm highlights only when motivated by a real light source. The script's stated time and lighting take priority. SETTING VARIETY: derive location, architecture and landscape from the passage and culture. Do not repeatedly default to the same castle, stone chamber, arched window or library; vary settings and camera compositions. Never force medieval or Roman imagery. IMAGE 10 IS STYLE REFERENCE ONLY: borrow its European historical graphic-novel craft — expressive ink contours, layered painterly gouache/oil color, controlled brush texture, natural anatomy, atmospheric depth and balanced color. Do not copy its elderly grey-bearded man, dark blue military uniform, gold epaulettes, arched stone window, stone chamber, desk, manuscript, quill, scrolls, pose, framing, lighting or composition. IMAGE 11 IS NOT A TEMPLATE: do not repeat its elderly grey-bearded man, fur coat, timber-and-stone interior or hand-adjusting-belt action. Never reuse a reference character, costume, props, architecture, camera angle or layout unless the script requires it. Deliver one full-frame image, one moment, one location and one camera view: no panels, diptych, triptych, collage, inset, border or separator. No editorial text, titles, logos or watermarks; writing only on physical scene props.";
     const COMPOSICIONES_FORMATO = {
       '16:9': 'Native landscape 16:9 composition, 1280x720 target canvas: design the full horizontal frame from the outset; use deliberate foreground, midground and background separation, readable lateral environment, balanced negative space, protect the primary subject from edge collisions; never simulate a crop',
       '9:16': 'Native portrait 9:16 composition, 720x1280 target canvas: design vertically from the outset with a clear top-to-bottom visual path, dominant subject and action inside the central safe region, meaningful vertical depth, intentional headroom and footroom, avoid placing essential details at interface-obscured edges; never simulate a crop',
@@ -1047,8 +1045,7 @@
     function construirPromptVisual(promptBase, ratio, incluirEstilo = false) {
       const contexto = obtenerContextoVisual();
       contexto.ratio = COMPOSICIONES_FORMATO[ratio] ? ratio : contexto.ratio;
-      if (incluirEstilo) contexto.estilo = ESTILOS[estiloActual]?.en || contexto.estilo;
-      // La idea del usuario es el ancla semántica; el motor desarrolla el resto del brief.
+      if (incluirEstilo) contexto.estilo = ESTILOS[estiloActual]?.en || contexto.estilo;      // La idea del usuario es el ancla semántica; el motor desarrolla el resto del brief.
       return crearConceptoVisual(contexto, (promptBase || '').trim()).prompt;
     }
 
@@ -1397,8 +1394,7 @@
           const parts = d.candidates?.[0]?.content?.parts;
           const answer = parts ? parts.map(x => x.text || '').join('').trim() : '(respuesta sin texto)';
           L.push('✓ ' + candidato + ' respondió en ' + ((Date.now() - t0) / 1000).toFixed(1) + ' s: ' + answer);
-          L.push('→ Flash está operativo con esta llave. El modo Pro requiere una prueba independiente si se va a utilizar.');
-        }
+          L.push('→ Flash está operativo con esta llave. El modo Pro requiere una prueba independiente si se va a utilizar.');        }
       } catch (e) {
         L.push('✗ Prueba interrumpida: ' + (e.name === 'AbortError' ? 'timeout de 45 s' : e.message));
       } finally { clearTimeout(to); show(); }
@@ -1747,8 +1743,7 @@ Devuelve ÚNICAMENTE un arreglo JSON válido con el siguiente formato exacto, si
       input.value = 'Nueva producción';
       input.style.cssText = 'box-sizing:border-box;width:100%;background:#09090b;color:#fff;border:1px solid #52525b;border-radius:7px;padding:12px;font-size:16px;margin-bottom:14px;';
       const actions = document.createElement('div');
-      actions.style.cssText = 'display:flex;gap:8px;justify-content:flex-end;';
-      const cancel = document.createElement('button');
+      actions.style.cssText = 'display:flex;gap:8px;justify-content:flex-end;';      const cancel = document.createElement('button');
       cancel.type = 'button';
       cancel.textContent = 'CANCELAR';
       cancel.style.cssText = 'background:#27272a;color:#e4e4e7;border:1px solid #52525b;border-radius:7px;padding:10px 12px;';
@@ -2097,7 +2092,6 @@ Devuelve ÚNICAMENTE un arreglo JSON válido con el siguiente formato exacto, si
           guardarProyecto();
           await sleep(PAUSA_ENTRE_LLAMADAS_MS);
         }
-
         const total = avance.esquema.length;
         const listaEsquema = avance.esquema.map((e, k) => `${k + 1}. ${e.titulo}: ${e.resumen}`).join('\n');
         for (let n = avance.capitulos.length; n < total; n++) {
@@ -2447,8 +2441,7 @@ Devuelve ÚNICAMENTE un array JSON con EXACTAMENTE ${faltan.length} objetos nuev
             }
           } catch (errorRecuperacion) {
             console.warn('No se pudieron recuperar todas las escenas faltantes:', errorRecuperacion);
-          }
-        }
+          }        }
 
         if (escenasGuardadas.length > n) escenasGuardadas = escenasGuardadas.slice(0, n);
         renderizarEscenas(escenasGuardadas, ratio, contexto, modelo, n);
@@ -2797,8 +2790,7 @@ Devuelve ÚNICAMENTE un array JSON con EXACTAMENTE ${faltan.length} objetos nuev
           const request = tx.objectStore('images').get(projectId);
           request.onsuccess = () => resolve(request.result || null);
           request.onerror = () => reject(request.error || new Error('No se pudo leer la imagen guardada.'));
-        });
-        if (coreActiveProjectId !== projectId || !record?.blob) return;
+        });        if (coreActiveProjectId !== projectId || !record?.blob) return;
         img.dataset.koffiAssetType = 'production';
         img.dataset.koffiProjectId = projectId;
         if (koffiRestoredImageUrl) URL.revokeObjectURL(koffiRestoredImageUrl);
@@ -3147,8 +3139,7 @@ Devuelve ÚNICAMENTE un array JSON con EXACTAMENTE ${faltan.length} objetos nuev
           pintarEstadoLote(`Preparando escena ${item.indice + 1} de ${lote.length}...\nLa generación continúa automáticamente; no necesitas aprobar cada prompt.`);
           try {
             registrarConceptoVisual(item.prompt);
-            const imagen = await imagenFlux(item.prompt, ratio, w, h);
-            item.imagen = imagen;
+            const imagen = await imagenFlux(item.prompt, ratio, w, h);            item.imagen = imagen;
             item.estado = 'completada';
             let etiqueta = '✓ Generada';
             try {
