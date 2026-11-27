@@ -547,7 +547,7 @@
       { n: '🌆 Vaporwave 80s', d: 'Neón retro, púrpura y nostalgia.', en: 'vaporwave 80s retro aesthetic, neon purple and pink glow, synthwave grid, nostalgic atmosphere' },
       { n: '🕯️ Terror Psicológico', d: 'Luz de vela y penumbra.', en: 'psychological horror, candlelight and deep shadows, desaturated colors, film grain' },
       { n: '🎞️ Documental 35mm', d: 'Grano analógico retro.', en: '35mm documentary film still, analog grain, muted natural colors' },
-      { n: '💥 Novela Gráfica Europea', d: 'Ilustración histórica, tinta y color pictórico.', en: 'European medieval illustrated graphic novel, expressive hand-inked contours, painterly historical fantasy illustration, layered gouache and oil-like color, natural human proportions, richly detailed period environments, balanced cinematic composition, restrained texture, no anime, no manga, no pop-art halftone' },
+      { n: '💥 Novela Gráfica Europea', d: 'Ilustración histórica, tinta y color pictórico.', en: 'European historical graphic-novel illustration with refined hand-drawn ink linework, confident expressive contours, painterly gouache-and-oil color layers, subtle visible brush texture, carefully modeled mature faces and natural anatomy, richly observed stone, timber, cloth and landscape details, cinematic but believable natural light, deep yet balanced color, elegant narrative composition; distinctly illustrated rather than photographic or 3D-rendered; no pixel art, no anime, no manga, no pop-art halftone' },
       { n: '📈 Finanzas & Alto RPM', d: 'Estética sobria y ejecutiva.', en: 'sober executive aesthetic, dark minimal, subtle gold accents' },
       { n: '📜 Archivo Histórico', d: 'Mapas y pergaminos antiguos.', en: 'aged parchment, antique maps, historical archive look' },
       { n: '🧠 Conducta Humana', d: 'Siluetas y psicología oscura.', en: 'dark psychology, human silhouettes, high contrast, moody lighting' },
@@ -560,7 +560,7 @@
     // Cada perfil contiene decisiones de producción propias; no es una etiqueta decorativa.
     const PERFILES_VISUALES = {
       'Estoicismo y Filosofía Práctica': {
-        lenguaje:'European medieval graphic novel; richly painted historical-fantasy illustration with expressive hand-inked contours, mature masculine character design, believable medieval European architecture and expansive natural landscapes, layered painterly textures, cinematic narrative composition, natural human proportions and rich but balanced colors. The setting must follow the specific script passage and must not default to Roman imperial imagery.',
+        lenguaje:'European historical graphic-novel illustration, not a photograph: refined expressive ink drawing with visible confident contours; painterly gouache and oil-like color layers; subtle brush texture and fine material detail; mature, individualized character design with believable anatomy and natural proportions; richly rendered stone fortifications, castles, towers, timber, metal, textiles and expansive landscapes; atmospheric depth, cinematic natural lighting, nuanced shadows, and a rich but controlled palette. The image should feel like a beautifully illustrated page from a serious European historical graphic novel, not a video-game screenshot, pixel art, anime, manga, glossy 3D render or stock photograph. The setting must follow the specific script passage and must not default to Roman imperial imagery.',
         sujetos:[
           'one solitary adult king aged 40–65, unmistakably high-ranking through a historically coherent crown, signet ring, rich mantle or royal clothing; mature distinctive face, natural full hair, no attendants',
           'one solitary adult prince aged 35–60, visibly of royal lineage through refined court clothing, embroidered mantle and restrained dynastic insignia; no companions',
@@ -618,8 +618,8 @@
         ],
         luz:['soft natural daylight with readable shadows and painterly depth','overcast European daylight with restrained atmospheric perspective','warm candle or hearth light balanced by cool ambient shadow','cinematic natural side light without exaggerated chiaroscuro'],
         optica:['35mm candid environmental view from a slight side angle; the protagonist is absorbed in an action and unaware of the camera','50mm three-quarter side view with natural body language and gaze directed away from the viewer','35mm rear three-quarter or over-the-shoulder view toward the landscape or a meaningful object; no other person visible','wide establishing composition with exactly one visible protagonist naturally integrated into the medieval setting','50mm medium side-profile view with the protagonist engaged in a concrete, unposed task'],
-        color:'rich but balanced historical colors: muted ultramarine, forest green, warm earth, faded burgundy, parchment neutrals and natural skin tones; avoid excessive saturation',
-        detail:'visible hand-inked contours and painterly brushwork; believable medieval European clothing, stonework, timber, iron and textiles; expressive mature masculine faces; coherent castles, towers and architecture; anatomically correct human body with exactly two arms and two hands, natural joints and believable fingers; meaningful environmental details; avoid editorial overlays, cover layouts and decorative title treatments; naturally occurring writing may remain on physical props such as manuscripts, books, scrolls, maps or documents'
+        color:'a sophisticated painterly palette: deep ultramarine and slate blue, forest and olive greens, warm ochre, burnt umber, muted burgundy, parchment and stone neutrals, nuanced natural skin tones; luminous highlights and rich shadow color without excessive saturation or artificial neon',
+        detail:'clearly visible but controlled hand-inked contours, expressive line variation and layered painterly brushwork; finely observed stone blocks, weathered masonry, timber grain, iron, leather, woven cloth and natural foliage; mature faces with strong individualized features and believable expressions; coherent European historical architecture and atmospheric landscapes; anatomically correct body with exactly two arms and two hands, natural joints and believable fingers; meaningful environmental detail without clutter; avoid glossy photorealism, plastic 3D surfaces, pixelated blocks, editorial overlays, cover layouts and decorative title treatments; naturally occurring writing may remain only on physical props such as manuscripts, books, scrolls, maps or documents'
       },
       'Psicología Oscura y Conducta Humana': {
         lenguaje:'psychological editorial realism, emotionally legible body language, subtle interpersonal tension, contemporary believable environments',
@@ -800,7 +800,7 @@
         ? `${preservarDireccion ? 'CREATIVE DIRECTION TO PRESERVE — keep its intended subject, action, setting and visual meaning without contradiction' : 'Narrative and thematic reference'}: ${ancla}.`
         : `Create an original, niche-relevant visual concept for ${contexto.niche}; do not default to a generic stock-photo scene.`;
       const promptCompacto = [
-        'Create one full-bleed medieval European graphic-novel illustration, expressive ink contours, painterly texture and balanced natural colors. The niche is thematic context only; never display its name.',
+        'Create one full-bleed European historical graphic-novel illustration. Use refined expressive ink contours, painterly gouache-and-oil color layers, subtle visible brush texture, carefully rendered materials, natural anatomy and atmospheric depth. The result must look hand-illustrated, not photographic, not a glossy 3D render and not pixel art. The niche is thematic context only; never display its name.',
         `Scene: ${ancla || 'Create a scene faithful to the script'}.`,
         `Visual language: ${p.lenguaje}. ${estilo}`,
         `Subject: ${sujeto}. Action: ${accion}. Setting: ${entorno}. Preserve the scene meaning, period and relevant props.`,
@@ -810,7 +810,7 @@
       ].filter(Boolean).join('\\n');
       const usarCompactoEfectivo = compacto || esEstoicismo;
       const prompt = usarCompactoEfectivo ? promptCompacto : [
-        'Create one finished, publication-ready medieval European narrative illustration. Use the selected niche only as internal thematic context; never display or write its name in the image.',
+        'Create one finished, publication-ready European historical graphic-novel illustration with expressive hand-inked contours, layered painterly color, nuanced natural light, subtle brush texture and richly observed environments. It must read unmistakably as illustrated artwork, never as a photograph, glossy 3D render or pixel art. Use the selected niche only as internal thematic context; never display or write its name in the image.',
         `Art direction and visual language: ${p.lenguaje}.`,
         tema,
         `Primary subject: ${sujeto}. Specific action or stillness: ${accion}.`,
