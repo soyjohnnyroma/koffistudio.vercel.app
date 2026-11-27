@@ -215,7 +215,11 @@
           <p class="nota" style="margin-top:5px;">La idea es opcional. El motor puede concebir la escena automáticamente.</p>
           <label style="display:flex; gap:6px; align-items:center; font-size:11px; color:#a1a1aa; margin-top:8px;"><input type="checkbox" id="img-use-style" checked> <span id="img-style-label">Aplicar estilo activo</span></label>
 
-          <button class="btn-secondary" id="btn-prepare-visual" style="margin-top:10px;" onclick="prepararDireccionVisual()">🧭 PREPARAR PROPUESTA INDIVIDUAL (OPCIONAL)</button>
+          <label class="input-label" for="img-test-scene" style="margin-top:10px;">Escena para prueba individual:</label>
+          <select id="img-test-scene" class="input-field" style="margin-bottom:8px;" disabled>
+            <option value="">Primero crea las escenas en la pestaña 2</option>
+          </select>
+          <button class="btn-secondary" id="btn-prepare-visual" style="margin-top:4px;" onclick="prepararDireccionVisual()">🧭 PREPARAR ESTA ESCENA</button>
           <p id="img-brief-status" class="nota" style="margin:4px 0 8px;">La preparación y validación se realizan automáticamente para cada escena. Puedes revisar los prompts si lo deseas, pero no es necesario aprobarlos uno por uno.</p>
           <button class="btn-main" id="btn-render-batch" style="margin-top:4px;" onclick="generarLoteImagenes()">🎬 GENERAR TODAS LAS IMÁGENES</button>
           <button class="btn-secondary" id="btn-render-visual" style="margin-top:8px;display:none;" onclick="generarImagen()" disabled>🎨 RENDERIZAR UNA PROPUESTA</button>
@@ -908,7 +912,7 @@
     }
 
     function conectarInvalidacionBrief() {
-      ['script-niche','script-format','img-ratio','script-topic','script-console','img-prompt','img-use-style'].forEach(id => {
+      ['script-niche','script-format','img-ratio','script-topic','script-console','img-prompt','img-use-style','img-test-scene'].forEach(id => {
         const el = document.getElementById(id);
         if (!el) return;
         el.addEventListener('input', () => invalidarBriefVisual('La propuesta anterior quedó desactualizada.'));
@@ -919,10 +923,23 @@
     function prepararDireccionVisual() {
       const ratio = obtenerFormatoVisual();
       const contexto = obtenerContextoVisual();
+      const selectorEscena = document.getElementById('img-test-scene');
+      const idEscena = selectorEscena?.value || '';
+      const indiceEscena = escenasGuardadas.findIndex((escena, indice) => (escena.sceneId || String(indice)) === idEscena);
+      if (indiceEscena < 0) {
+        alert('Primero crea las escenas en la pestaña 2 y selecciona una para probar.');
+        return;
+      }
+      const escenaOriginal = escenasGuardadas[indiceEscena];
+      const direccionEscena = (escenaOriginal.visualDirection || '').trim() ||
+        (escenaOriginal.promptVersion === 'raw-v1' && escenaOriginal.prompt?.trim()
+          ? escenaOriginal.prompt.trim()
+          : (escenaOriginal.descripcion || '').trim());
+      const escenaPrueba = { ...escenaOriginal, descripcion: '', prompt: direccionEscena, promptVersion: 'raw-v1' };
       const ideaUsuario = document.getElementById('img-prompt').value.trim();
       if (!document.getElementById('img-use-style')?.checked) contexto.estilo = '';
       const usarPromptCompacto = contexto.niche === 'Estoicismo y Filosofía Práctica';
-      const concepto = crearConceptoVisual(contexto, ideaUsuario, null, usarPromptCompacto);
+      const concepto = crearConceptoVisual(contexto, ideaUsuario ? `${ideaUsuario}\n\nDirección específica de la escena:\n${direccionEscena}` : direccionEscena, escenaPrueba, usarPromptCompacto);
       if (!concepto || !concepto.prompt) {
         alert('No pude preparar una dirección visual. Revisa el contexto e inténtalo de nuevo.');
         return;
@@ -946,6 +963,8 @@
           perfil: contexto.perfil
         },
         ideaUsuario,
+        sceneId: escenaOriginal.sceneId || idEscena,
+        sceneIndex: indiceEscena,
         concepto,
         prompt: concepto.prompt
       };
@@ -966,7 +985,7 @@
         `Cámara y encuadre: ${b.camara}`,
         `Paleta: ${b.paleta || contexto.perfil.color}`,
         `Tratamiento de estilo: ${contexto.estilo || 'No aplicado'}`,
-        contexto.niche === 'Estoicismo y Filosofía Práctica' ? 'Regla contextual: presencia humana visible obligatoria en cada imagen; nunca bustos, estatuas ni esculturas.' : '',
+        contexto.niche === 'Estoicismo y Filosofía Práctica' ? 'Regla contextual: la presencia humana es opcional; elige persona, lugar, paisaje u objeto según el fragmento.' : '',
         '',
         'PROMPT TÉCNICO EXACTO QUE SE ENVIARÁ A FLUX.2 KLEIN 4B',
         '────────────────────────────────────────',
@@ -2271,6 +2290,19 @@ ${g.capitulos.filter((_, i) => i !== idx).map((t, i) => t.slice(-1400)).join('\n
         const refresh = document.createElement('button'); refresh.className='btn-secondary'; refresh.style.marginTop='0'; refresh.textContent = e.visualDirection ? '↻ REVISAR DIRECCIÓN' : '↻ CREAR DIRECCIÓN BREVE'; refresh.onclick=()=>actualizarDireccionEscena(e.sceneId, refresh, e);
         row.append(copy,use,refresh); [h,d,f,p,row].forEach(x=>card.appendChild(x)); cont.appendChild(card);
       });
+      const selectorPrueba = document.getElementById('img-test-scene');
+      if (selectorPrueba) {
+        const seleccionAnterior = selectorPrueba.value;
+        selectorPrueba.innerHTML = '';
+        escenas.forEach((escena, indice) => {
+          const opcion = document.createElement('option');
+          opcion.value = escena.sceneId || String(indice);
+          opcion.textContent = `Escena ${indice + 1} · ${(escena.descripcion || escena.fragmento || '').slice(0, 72)}`;
+          selectorPrueba.appendChild(opcion);
+        });
+        selectorPrueba.disabled = !escenas.length;
+        if (escenas.some((escena, indice) => (escena.sceneId || String(indice)) === seleccionAnterior)) selectorPrueba.value = seleccionAnterior;
+      }
       const note = document.getElementById('scene-note');
       note.textContent = escenas.length === objetivo
         ? `✓ ${escenas.length} escenas listas · ${contexto.niche} · ${ratio} · Gemini: ${modelo}. Se conservarán al recargar.`
@@ -2844,6 +2876,25 @@ Devuelve ÚNICAMENTE un array JSON con EXACTAMENTE ${faltan.length} objetos nuev
       return data.image;
     }
 
+    async function mostrarImagenPruebaEscena(src, info) {
+      const img = document.getElementById('img-result');
+      const loader = document.getElementById('img-loading');
+      const inf = document.getElementById('img-info');
+      const menu = crearMenuAccionesImagen(img, 'koffi-studio-prueba-escena.png');
+      if (menu) menu.style.display = 'none';
+      return new Promise((resolve, reject) => {
+        img.onload = () => {
+          loader.style.display = 'none';
+          img.style.display = 'block';
+          if (menu) menu.style.display = 'block';
+          inf.textContent = info + '\\nEsta prueba no modifica ni reemplaza la imagen principal guardada en la producción. Descárgala si quieres conservarla.';
+          resolve();
+        };
+        img.onerror = () => reject(new Error('La imagen de prueba no cargó.'));
+        img.src = src;
+      });
+    }
+
     async function generarImagen() {
       const aprobado = conceptoVisualPendiente;
       const firmaActual = obtenerFirmaContextoBrief();
@@ -2879,8 +2930,8 @@ Devuelve ÚNICAMENTE un array JSON con EXACTAMENTE ${faltan.length} objetos nuev
 
       try {
         const imagen = await imagenFlux(prompt, ratio, w, h);
-        await mostrarImagen(imagen, `✓ ${concepto.titulo}: ${concepto.idea} · ${contexto.niche} · ${ratio}. Imagen generada con FLUX.2 Klein 4B.`);
-        info.textContent = `✓ ${concepto.titulo}: ${concepto.idea} · ${contexto.niche} · ${ratio}.`;
+        const etiquetaPrueba = `✓ Prueba individual · Escena ${(aprobado.sceneIndex ?? 0) + 1} · ${concepto.titulo}: ${concepto.idea} · ${contexto.niche} · ${ratio}. Imagen generada con FLUX.2 Klein 4B.`;
+        await mostrarImagenPruebaEscena(imagen, etiquetaPrueba);
       } catch (error) {
         loader.style.display = 'none';
         info.textContent = '⚠️ No se pudo generar la imagen.\n' + (error.message || 'Error desconocido');
