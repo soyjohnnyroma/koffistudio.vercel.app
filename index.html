@@ -838,23 +838,23 @@
         ? `Selected visual treatment: ${contexto.estilo}.`
         : '';
       const tema = ancla
-        ? `${preservarDireccion ? 'Creative direction to preserve' : 'Narrative re        prompt = [
-          sceneLine,
-          productionLine,
-          \`Native \${ratio} composition: \${COMPOSICIONES_FORMATO[ratio]}.\`,
-          SER_ESTOICO_VISUAL_CONTRACT
-        ].filter(Boolean).join('\\n');a || 'Create a scene faithful to the script'}.`
+        ? `${preservarDireccion ? 'Creative direction to preserve' : 'Narrative reference'}: ${ancla}.`
+        : `Create an original, niche-relevant visual concept for ${contexto.niche}.`;
+
+      let prompt;
+      if (esEstoicismo) {
+        const sceneLine = preservarDireccion
+          ? `Scene direction: ${ancla || 'Create a scene faithful to the script'}.`
           : `Scene: ${ancla || 'Create a scene faithful to the script'}. Protagonist: ${sujeto}. Action: ${accion}. Setting: ${entorno}.`;
         const productionLine = preservarDireccion
           ? `Respect the scene's period and physical details. Lighting: ${luz}. Camera: ${camara}. Palette: ${paleta}.`
           : `Camera: ${camara}. Lighting: ${luz}. Palette: ${paleta}.`;
         prompt = [
-          p.lenguaje,
           sceneLine,
           productionLine,
           `Native ${ratio} composition: ${COMPOSICIONES_FORMATO[ratio]}.`,
           SER_ESTOICO_VISUAL_CONTRACT
-        ].filter(Boolean).join('\n');
+        ].filter(Boolean).join('\\n');
       } else {
         prompt = [
           'Create one finished, publication-ready illustration with coherent art direction, expressive contours, layered color, nuanced natural light, subtle texture and richly observed environments. It must read as illustrated artwork, never as a photograph, glossy 3D render or pixel art. Use the selected niche only as internal thematic context; never display its name.',
