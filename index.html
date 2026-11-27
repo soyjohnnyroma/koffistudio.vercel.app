@@ -759,14 +759,33 @@
         ' European historical graphic-novel-style illustration, expressive ink contours, painterly texture, balanced rich colors, single standalone full-frame image, not a comic page.',
         'DIRECCIÓN ARTÍSTICA SER ESTOICO:',
         'COMPOSITION LOCK — NON-NEGOTIABLE:',
-        'SER ESTOICO — REGLA DE PROTAGONISTA:'
+        'SER ESTOICO — REGLA DE PROTAGONISTA:',
+        'SER ESTOICO — DIRECCIÓN VISUAL:',
+        'SER ESTOICO — UNA SOLA FIGURA DE ALTA JERARQUÍA:'
       ];
       let corte = texto.length;
       for (const marca of sufijosAntiguos) {
         const indice = texto.indexOf(marca);
         if (indice >= 0) corte = Math.min(corte, indice);
       }
-      return texto.slice(0, corte).replace(/\s+/g, ' ').trim();
+      texto = texto.slice(0, corte).replace(/\s+/g, ' ').trim();
+
+      // La descripción de Gemini aporta la escena; el contrato Ser Estoico gobierna la luz.
+      // Se neutralizan contradicciones sin borrar la hora del día ni cambiar la acción.
+      const luzFria = /\b(dawn|early morning|morning|sunrise|alba|amanecer|mañana|daylight|daytime|día)\b/i.test(texto)
+        ? 'cold, faint, localized blue dawn/daylight'
+        : 'cold, sparse, localized directional light';
+      const contradicciones = [
+        /\b(cinematic|dramatic)\s+natural\s+lighting\b/gi,
+        /\b(warm|golden|bright|soft|cheerful|cozy)\s+(?:natural\s+)?(?:daylight|light|lighting|illumination|glow)\b/gi,
+        /\b(warm|golden|bright)\s+(?:sunlight|sunshine|sun rays)\b/gi,
+        /\bwell[- ]lit\b/gi,
+        /\bbrightly\s+lit\b/gi,
+        /\b(cinematic natural light|natural cinematic lighting)\b/gi,
+        /\b(luz natural cálida|iluminación natural cinematográfica|luz dorada|luz brillante|iluminación uniforme|ambiente cálido y acogedor)\b/gi
+      ];
+      for (const patron of contradicciones) texto = texto.replace(patron, luzFria);
+      return texto.replace(/\s+/g, ' ').replace(/\s*[,;]\s*([,.])/g, '$1').trim();
     }
 
     function extraerAnclaVisual(contexto, escenaActiva) {
