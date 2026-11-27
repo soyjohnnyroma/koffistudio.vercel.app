@@ -768,12 +768,19 @@
         const indice = texto.indexOf(marca);
         if (indice >= 0) corte = Math.min(corte, indice);
       }
-      texto = texto.slice(0, corte).replace(/\s+/g, ' ').trim();
+      texto = texto.slice(0, corte);
 
-      // La descripción de Gemini aporta la escena; el contrato Ser Estoico gobierna la luz.
-      // Se neutralizan contradicciones sin borrar la hora del día ni cambiar la acción.
+      // La descripción fuente contiene la escena; el motor añade el tratamiento técnico.
+      const fragmentosTecnicos = [
+        /\b(?:hand[- ]drawn|expressive)\s+(?:ink|illustration|brushwork)[^.]*\.?/gi,
+        /\b(?:native|vertical)\s+(?:9:16|16:9|1:1)\s+(?:portrait|landscape|composition|format)[^.]*\.?/gi,
+        /\b(?:cinematic|professional)\s+(?:natural\s+)?lighting\b/gi,
+        /\b(?:single|one)\s+(?:male\s+)?protagonist\b/gi,
+        /\b(?:full[- ]bleed|full[- ]frame)\s+(?:image|composition)[^.]*\.?/gi
+      ];
+      for (const patron of fragmentosTecnicos) texto = texto.replace(patron, ' ');
       const luzFria = /\b(dawn|early morning|morning|sunrise|alba|amanecer|mañana|daylight|daytime|día)\b/i.test(texto)
-        ? 'cold, faint, localized blue dawn/daylight'
+        ? 'cold, faint, localized blue dawn light'
         : 'cold, sparse, localized directional light';
       const contradicciones = [
         /\b(cinematic|dramatic)\s+natural\s+lighting\b/gi,
@@ -785,7 +792,10 @@
         /\b(luz natural cálida|iluminación natural cinematográfica|luz dorada|luz brillante|iluminación uniforme|ambiente cálido y acogedor)\b/gi
       ];
       for (const patron of contradicciones) texto = texto.replace(patron, luzFria);
-      return texto.replace(/\s+/g, ' ').replace(/\s*[,;]\s*([,.])/g, '$1').trim();
+      texto = texto.replace(/\b(?:native\s+)?(?:9:16|16:9|1:1)\s+(?:portrait|landscape|composition|format)[^.]*\.?/gi, ' ');
+      return texto.replace(/\s+/g, ' ').replace(/\s*([,.!?;:])\s*/g, '$1 ')
+        .replace(/([,.!?;:])(?:\s*[,.!?;:])+/g, '$1')
+        .replace(/\s+([,.!?;:])/g, '$1').replace(/\s+/g, ' ').trim().replace(/[. ]+$/, '.');
     }
 
     function extraerAnclaVisual(contexto, escenaActiva) {
@@ -828,13 +838,12 @@
         ? `Selected visual treatment: ${contexto.estilo}.`
         : '';
       const tema = ancla
-        ? `${preservarDireccion ? 'Creative direction to preserve' : 'Narrative reference'}: ${ancla}.`
-        : `Create an original, niche-relevant visual concept for ${contexto.niche}.`;
-    
-      let prompt;
-      if (esEstoicismo) {
-        const sceneLine = preservarDireccion
-          ? `Scene direction: ${ancla || 'Create a scene faithful to the script'}.`
+        ? `${preservarDireccion ? 'Creative direction to preserve' : 'Narrative re        prompt = [
+          sceneLine,
+          productionLine,
+          \`Native \${ratio} composition: \${COMPOSICIONES_FORMATO[ratio]}.\`,
+          SER_ESTOICO_VISUAL_CONTRACT
+        ].filter(Boolean).join('\\n');a || 'Create a scene faithful to the script'}.`
           : `Scene: ${ancla || 'Create a scene faithful to the script'}. Protagonist: ${sujeto}. Action: ${accion}. Setting: ${entorno}.`;
         const productionLine = preservarDireccion
           ? `Respect the scene's period and physical details. Lighting: ${luz}. Camera: ${camara}. Palette: ${paleta}.`
