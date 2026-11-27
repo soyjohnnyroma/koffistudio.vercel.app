@@ -766,7 +766,7 @@
         const indice = texto.indexOf(marca);
         if (indice >= 0) corte = Math.min(corte, indice);
       }
-      return texto.slice(0, corte).replace(/\\s+/g, ' ').trim();
+      return texto.slice(0, corte).replace(/\s+/g, ' ').trim();
     }
 
     function extraerAnclaVisual(contexto, escenaActiva) {
@@ -854,7 +854,7 @@
     // se construye desde un contrato único; los demás perfiles conservan su limpieza de redundancias conocidas.
     const LIMITE_PROMPT_FLUX = 4800;
     function compactarPromptFlux(prompt) {
-      let texto = String(prompt || '').replace(/[ \\t]+/g, ' ').replace(/\\n{3,}/g, '\\n\\n').trim();
+      let texto = String(prompt || '').replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
       const reglas = [
         ['one single, uninterrupted, full-frame illustration in one continuous scene and one camera view', 'one uninterrupted full-frame illustration, one scene and one camera view'],
         ['The entire canvas must depict one coherent moment, one location and one protagonist; no second version of the character.', 'One coherent moment, one location and one protagonist; no duplicate character.'],
