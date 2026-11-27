@@ -2182,6 +2182,24 @@ ${g.capitulos.filter((_, i) => i !== idx).map((t, i) => t.slice(-1400)).join('\n
     }
 
     // Restaura las tarjetas de escenas guardadas sin volver a consumir Gemini.
+    function actualizarSelectorEscenasPrueba(escenas) {
+      const selector = document.getElementById('img-test-scene');
+      if (!selector) return;
+      const seleccionAnterior = selector.value;
+      selector.innerHTML = '';
+      (Array.isArray(escenas) ? escenas : []).forEach((escena, indice) => {
+        const opcion = document.createElement('option');
+        opcion.value = escena.sceneId || String(indice);
+        opcion.textContent = `Escena ${indice + 1} · ${(escena.descripcion || escena.fragmento || '').slice(0, 72)}`;
+        selector.appendChild(opcion);
+      });
+      selector.disabled = !escenas || !escenas.length;
+      if (escenas && escenas.some((escena, indice) => (escena.sceneId || String(indice)) === seleccionAnterior)) {
+        selector.value = seleccionAnterior;
+      }
+    }
+
+    // Restaura las tarjetas y el selector de escenas sin volver a consumir Gemini.
     function renderizarEscenasGuardadas() {
       const cont = document.getElementById('scenes-container');
       if (!cont) return;
@@ -2199,6 +2217,7 @@ ${g.capitulos.filter((_, i) => i !== idx).map((t, i) => t.slice(-1400)).join('\n
         const refresh = document.createElement('button'); refresh.className='btn-secondary'; refresh.style.marginTop='0'; refresh.textContent = e.visualDirection ? '↻ REVISAR DIRECCIÓN' : '↻ CREAR DIRECCIÓN BREVE'; refresh.onclick=()=>actualizarDireccionEscena(e.sceneId, refresh, e);
         row.append(copy,use,refresh); [h,d,f,p,row].forEach(x=>card.appendChild(x)); cont.appendChild(card);
       });
+      actualizarSelectorEscenasPrueba(escenasGuardadas);
     }
 
     async function actualizarDireccionEscena(sceneId, botonRef, escenaRef) {
