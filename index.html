@@ -800,14 +800,16 @@
 
     function obtenerDireccionFuenteEscena(escena, esEstoicismo = false) {
       if (!escena) return '';
-      const estructurada = esEstoicismo
+      const camposCompletos = esEstoicismo && ['protagonista', 'accion', 'entorno', 'momento', 'materiales']
+        .every(campo => typeof escena[campo] === 'string' && escena[campo].trim());
+      const estructurada = camposCompletos
         ? [
-            escena.protagonista ? `Protagonist: ${String(escena.protagonista).trim()}.` : '',
-            escena.accion ? `Action: ${String(escena.accion).trim()}.` : '',
-            escena.entorno ? `Setting: ${String(escena.entorno).trim()}.` : '',
-            escena.momento ? `Time and light cue: ${String(escena.momento).trim()}.` : '',
-            escena.materiales ? `Material details: ${String(escena.materiales).trim()}.` : ''
-          ].filter(Boolean).join(' ')
+            `Protagonist: ${String(escena.protagonista).trim()}.`,
+            `Action: ${String(escena.accion).trim()}.`,
+            `Setting: ${String(escena.entorno).trim()}.`,
+            `Time and light cue: ${String(escena.momento).trim()}.`,
+            `Material details: ${String(escena.materiales).trim()}.`
+          ].join(' ')
         : '';
       if (estructurada) return normalizarDireccionEstoica(estructurada);
       const candidatos = esEstoicismo
@@ -848,6 +850,7 @@
         ].filter(Boolean).join('\n');
         return {
           sujeto: protagonista, accion, entorno, momento, materiales, direccionEscena,
+          camposEstructuradosCompletos: ['protagonista', 'accion', 'entorno', 'momento', 'materiales'].every(campo => typeof escenaActiva?.[campo] === 'string' && escenaActiva[campo].trim()),
           luz: 'Claroscuro frío y localizado; respetar la hora indicada en la escena.',
           camara: 'Encuadre observacional lateral, tres cuartos o posterior; acción legible.',
           paleta: 'Negro, carbón, gris pizarra y azul acero; saturación contenida.',
@@ -1006,12 +1009,10 @@
           `Longitud del prompt: ${concepto.prompt.length}/${LIMITE_PROMPT_FLUX} caracteres`,
           `Concepto: ${concepto.titulo}`,
           ...(esEstoicismo ? [
-            b.sujeto ? `Protagonista: ${b.sujeto}` : '',
-            b.accion ? `Acción: ${b.accion}` : '',
-            b.entorno ? `Entorno: ${b.entorno}` : '',
-            b.momento ? `Momento: ${b.momento}` : '',
-            b.materiales ? `Materiales y detalles: ${b.materiales}` : '',
-            b.direccionEscena && !b.sujeto ? `Dirección narrativa de la escena: ${b.direccionEscena}` : '',
+            ...(b.camposEstructuradosCompletos ? [
+              `Protagonista: ${b.sujeto}`, `Acción: ${b.accion}`, `Entorno: ${b.entorno}`,
+              `Momento: ${b.momento}`, `Materiales y detalles: ${b.materiales}`
+            ] : [b.direccionEscena ? `Dirección narrativa de la escena: ${b.direccionEscena}` : '']),
             'Lenguaje artístico: novela gráfica histórica europea, tinta expresiva y acabado pictórico por capas.',
             'Atmósfera: claroscuro frío, sombras dominantes y luz localizada según la hora de la escena.',
             'Composición: una sola escena completa en formato nativo, sin paneles ni texto superpuesto.'
@@ -2392,7 +2393,7 @@ ${g.capitulos.filter((_, i) => i !== idx).map((t, i) => t.slice(-1400)).join('\n
       try {
         const esEstoicismo = contexto.niche === 'Estoicismo y Filosofía Práctica';
         const instruccionesComunes = esEstoicismo
-          ? `ENTREGA OBLIGATORIA: devuelve exactamente ${n} objetos JSON, ni más ni menos. Cada objeto debe contener strings no vacíos: fragmento, descripcion y prompt; además incluye protagonista, accion, entorno, momento y materiales como campos string. No agregues comentarios ni Markdown. El campo prompt será solo la descripción física de la escena en una o dos frases, máximo 420 caracteres: no incluyas estilo, cámara, iluminación técnica, paleta, formato ni reglas artísticas.`
+          ? `ENTREGA OBLIGATORIA: devuelve exactamente ${n} objetos JSON, ni más ni menos. Cada objeto debe contener strings no vacíos: fragmento, descripcion y prompt; además incluye protagonista, accion, entorno, momento y materiales como campos string. No agregues comentarios ni Markdown. El campo prompt será solo la descripción física de la escena en una o dos frases, máximo 420 caracteres: no incluyas estilo, cámara, iluminación técnica, paleta, formato ni reglas artísticas. Limita protagonista a 110 caracteres, accion a 120, entorno a 140, momento a 90 y materiales a 90 caracteres.`
           : `ENTREGA OBLIGATORIA: devuelve exactamente ${n} objetos JSON, ni más ni menos. Cada objeto debe contener tres strings no vacíos: fragmento, descripcion y prompt. No agregues comentarios ni Markdown. Mantén cada prompt de imagen en un máximo de 650 caracteres para que las ${n} escenas quepan completas en la respuesta.`;
         const instruccionesNarrativas = esEstoicismo
           ? `${SER_ESTOICO_VISUAL_CONTRACT}
