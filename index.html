@@ -212,7 +212,7 @@
 
           <label class="input-label">Prompt Visual:</label>
           <textarea id="img-prompt" class="input-field" rows="4" placeholder="Opcional: describe una idea. Si lo dejas vacío, Koffi Studio creará una propuesta visual según el nicho y el formato."></textarea>
-          <p class="nota" style="margin-top:5px;">La idea es opcional. El motor puede concebir la escena automáticamente.</p>
+          <p class="nota" style="margin-top:5px;">La idea es opcional. En Ser Estoico, al preparar una escena, su dirección narrativa es la fuente única de contenido; este campo no se concatena para evitar duplicados. Ajusta la escena desde su dirección.</p>
           <label style="display:flex; gap:6px; align-items:center; font-size:11px; color:#a1a1aa; margin-top:8px;"><input type="checkbox" id="img-use-style" checked> <span id="img-style-label">Aplicar estilo activo</span></label>
 
           <label class="input-label" for="img-test-scene" style="margin-top:10px;">Escena para prueba individual:</label>
@@ -772,6 +772,7 @@
 
       // La descripción fuente contiene la escena; el motor añade el tratamiento técnico.
       const fragmentosTecnicos = [
+        /\b(?:european historical illustration|historical european illustration|european graphic[- ]novel illustration)[,.]?\s*/gi,
         /\b(?:hand[- ]drawn|expressive)\s+(?:ink|illustration|brushwork)[^.]*\.?/gi,
         /\b(?:native|vertical)\s+(?:9:16|16:9|1:1)\s+(?:portrait|landscape|composition|format)[^.]*\.?/gi,
         /\b(?:cinematic|professional)\s+(?:natural\s+)?lighting\b/gi,
@@ -911,7 +912,7 @@
       const esEstoicismo = contexto.niche === 'Estoicismo y Filosofía Práctica';
       const anclaEscena = escenaActiva ? obtenerDireccionFuenteEscena(escenaActiva, esEstoicismo) : '';
       const direccionUsuario = esEstoicismo ? normalizarDireccionEstoica(promptUsuario) : String(promptUsuario || '').trim();
-      const notaAdicional = esEstoicismo && anclaEscena && direccionUsuario.toLowerCase() === anclaEscena.toLowerCase() ? '' : direccionUsuario;
+      const notaAdicional = esEstoicismo ? (anclaEscena ? '' : direccionUsuario) : direccionUsuario;
       const ancla = esEstoicismo
         ? (anclaEscena || direccionUsuario || extraerAnclaVisual(contexto, null))
         : (direccionUsuario || anclaEscena || extraerAnclaVisual(contexto, null));
@@ -991,7 +992,7 @@
         const direccionEscena = obtenerDireccionFuenteEscena(escenaOriginal, contexto.niche === 'Estoicismo y Filosofía Práctica');
         if (!direccionEscena) throw new Error('La escena seleccionada no contiene una dirección visual utilizable.');
         const ideaUsuarioOriginal = document.getElementById('img-prompt')?.value.trim() || '';
-        const ideaUsuario = contexto.niche === 'Estoicismo y Filosofía Práctica' && normalizarDireccionEstoica(ideaUsuarioOriginal).toLowerCase() === direccionEscena.toLowerCase() ? '' : ideaUsuarioOriginal;
+        const ideaUsuario = contexto.niche === 'Estoicismo y Filosofía Práctica' ? '' : ideaUsuarioOriginal;
         if (!document.getElementById('img-use-style')?.checked) contexto.estilo = '';
         const concepto = crearConceptoVisual(contexto, ideaUsuario, escenaOriginal);
         if (!concepto?.prompt) throw new Error('Koffi no pudo construir la propuesta visual a partir de esta escena.');
@@ -3075,7 +3076,7 @@ Devuelve ÚNICAMENTE un array JSON con EXACTAMENTE ${faltan.length} objetos nuev
         if (!direccionEscena) throw new Error(`La escena ${indice + 1} no contiene dirección visual suficiente.`);
         let concepto;
         if (esEstoicismo) {
-          const nota = normalizarDireccionEstoica(ideaGlobal).toLowerCase() === direccionEscena.toLowerCase() ? '' : ideaGlobal;
+          const nota = '';
           concepto = crearConceptoVisual(contexto, nota, escena);
         } else {
           const escenaNormalizada = { ...escena, descripcion: '', prompt: direccionEscena, promptVersion: 'raw-v1' };
