@@ -715,7 +715,7 @@
       }
     };
     const CAPA_VISUAL_UNIVERSAL = 'professional art direction, intentional production design, coherent visual hierarchy, physically plausible anatomy and perspective, natural hands and facial structure, realistic material response, controlled highlights and shadows, precise focal hierarchy. Render a full-bleed narrative illustration, never a poster, cover, thumbnail or title card. Do not add editorial overlays: no headline, title, subtitle, caption, banner, typography, floating words, decorative lettering, logo or watermark anywhere over the scene. Writing may appear naturally and only as part of a physical object in the scene, such as a manuscript, book, scroll, map, letter or document; it must never become a separate title or overlay.';
-    const SER_ESTOICO_VISUAL_CONTRACT = "SER ESTOICO — VISUAL CONTRACT: Show exactly one visible living adult protagonist of high historical rank, authority or intellectual influence, appropriate to the source passage; never substitute an ordinary or low-ranking person. No other person or human representation: no companions, background figures, silhouettes, human-shaped shadows, reflections, portraits, busts, statues or sculptures. Give the protagonist a distinctive identity; vary adult age, facial structure, hair, facial hair, build and historically appropriate clothing across scenes. Show a specific candid moment, never a posed portrait or direct camera gaze; use an observational side, three-quarter, rear or environmental view. Avoid repeated visual clichés unless the passage requires them. The actual historical era, culture, architecture, clothing and objects must follow the passage; never default to medieval or Roman imagery. Preserve the approved European historical graphic-novel language: expressive ink contours, layered painterly color, visible controlled brush texture, natural anatomy, nuanced natural light, atmospheric depth and a rich balanced palette. Deliver one full-frame image showing one moment, one location and one camera view: no comic page, panels, diptych, triptych, collage, inset, border or separator. No editorial text, titles, logos or watermarks; writing may appear only on physical scene props.";
+    const SER_ESTOICO_VISUAL_CONTRACT = "SER ESTOICO — VISUAL CONTRACT: Show exactly the historically specific living adult protagonist required by the script, of high rank, authority or intellectual influence; never invent a substitute or downgrade the figure to an ordinary person. Show only that one living person: no companions, crowds, background figures, silhouettes, human-shaped shadows, reflections, portraits, busts, statues or sculptures. The protagonist identity, age, gender, facial structure, hair, facial hair, build and clothing must follow the actual historical figure and passage; do not default to an elderly grey-haired, grey-bearded man. If the script does not identify a figure, create a distinctive, credible high-status adult whose appearance differs clearly from previous scenes. Depict a specific, believable candid action tied to the passage, not a posed portrait, character showcase or person merely standing and looking away; never look at the camera. Use an observational side, three-quarter, rear or environmental view that makes the action legible. IMAGE 10 IS STYLE REFERENCE ONLY: borrow only its European historical graphic-novel craft — expressive ink contours, layered painterly color, controlled visible brush texture, natural anatomy, nuanced natural light, atmospheric depth and rich balanced palette. Do not copy or echo its elderly grey-bearded man, dark blue military uniform, gold epaulettes, arched stone window, stone chamber, desk, manuscript, quill, scroll, pose, framing, lighting arrangement or composition. IMAGE 11 IS NOT A STYLE OR COMPOSITION TEMPLATE: do not repeat its elderly grey-bearded man, fur coat, timber-and-stone interior or hand-adjusting-belt action. Never reuse a reference image character, costume, props, architecture, camera angle or layout unless the script explicitly requires that exact element. The actual historical era, culture, architecture, clothing, objects and action must follow the script; never default to Roman or medieval imagery. Avoid repeating visual clichés across scenes. Deliver one complete full-frame image showing one moment, one location and one camera view: no comic page, panels, diptych, triptych, collage, inset, border or separator. No editorial text, titles, logos or watermarks; writing may appear only on physical scene props.";
     const COMPOSICIONES_FORMATO = {
       '16:9': 'Native landscape 16:9 composition, 1280x720 target canvas: design the full horizontal frame from the outset; use deliberate foreground, midground and background separation, readable lateral environment, balanced negative space, protect the primary subject from edge collisions; never simulate a crop',
       '9:16': 'Native portrait 9:16 composition, 720x1280 target canvas: design vertically from the outset with a clear top-to-bottom visual path, dominant subject and action inside the central safe region, meaningful vertical depth, intentional headroom and footroom, avoid placing essential details at interface-obscured edges; never simulate a crop',
@@ -2516,20 +2516,64 @@ Devuelve ÚNICAMENTE un array JSON con EXACTAMENTE ${faltan.length} objetos nuev
       } catch (error) { alert('No se pudo copiar la imagen: ' + (error.message || 'Función no disponible.')); }
     }
 
+    async function eliminarImagenElemento(img) {
+      if (!img) return;
+      if (!confirm('¿Eliminar únicamente esta imagen? Esta acción no elimina la producción ni las demás imágenes.')) return;
+      const tipo = img.dataset.koffiAssetType || 'preview';
+      const projectId = img.dataset.koffiProjectId || coreActiveProjectId;
+      try {
+        if (tipo === 'production') {
+          if (!projectId) throw new Error('No se identificó la producción activa.');
+          const db = await abrirKoffiImageDB();
+          await new Promise((resolve, reject) => {
+            const tx = db.transaction('images', 'readwrite');
+            tx.objectStore('images').delete(projectId);
+            tx.oncomplete = resolve;
+            tx.onerror = () => reject(tx.error || new Error('No se pudo eliminar la imagen guardada.'));
+            tx.onabort = () => reject(tx.error || new Error('Se canceló la eliminación.'));
+          });
+          if (koffiRestoredImageUrl) { URL.revokeObjectURL(koffiRestoredImageUrl); koffiRestoredImageUrl = null; }
+          img.removeAttribute('src'); img.style.display = 'none';
+          const info = document.getElementById('img-info');
+          if (info) info.textContent = 'Imagen eliminada de esta producción. La producción y sus demás datos siguen intactos.';
+        } else if (tipo === 'batch') {
+          if (!projectId || !img.dataset.koffiSceneId) throw new Error('No se identificó la escena de esta imagen.');
+          const db = await abrirKoffiImageDB();
+          const assetId = projectId + '::' + img.dataset.koffiSceneId;
+          await new Promise((resolve, reject) => {
+            const tx = db.transaction('batchImages', 'readwrite');
+            tx.objectStore('batchImages').delete(assetId);
+            tx.oncomplete = resolve;
+            tx.onerror = () => reject(tx.error || new Error('No se pudo eliminar la imagen de la escena.'));
+            tx.onabort = () => reject(tx.error || new Error('Se canceló la eliminación.'));
+          });
+          const url = koffiBatchImageUrls.get(img.dataset.koffiSceneId);
+          if (url) { URL.revokeObjectURL(url); koffiBatchImageUrls.delete(img.dataset.koffiSceneId); }
+          img.closest('[data-batch-scene-id]')?.remove();
+        } else {
+          img.removeAttribute('src'); img.style.display = 'none';
+          const info = document.getElementById('img-info');
+          if (info) info.textContent = 'Vista de prueba eliminada. La producción guardada no fue modificada.';
+        }
+        const menu = img.previousElementSibling;
+        if (menu?.classList?.contains('image-action-menu')) menu.remove();
+      } catch (error) { alert('No se pudo eliminar la imagen: ' + (error.message || 'Error desconocido')); }
+    }
+
     function crearMenuAccionesImagen(img, nombre) {
       if (!img || !img.id) return null;
       const anterior = img.previousElementSibling;
       if (anterior?.classList?.contains('image-action-menu')) return anterior;
       const menu = document.createElement('details');
       menu.className = 'image-action-menu';
-      menu.innerHTML = '<summary aria-label="Opciones de imagen" title="Opciones de imagen">⋮</summary><div class="image-action-list"><button type="button" data-action="download">⬇ Descargar</button><button type="button" data-action="share">↗ Compartir</button><button type="button" data-action="copy">▣ Copiar imagen</button></div>';
+      menu.innerHTML = '<summary aria-label="Opciones de imagen" title="Opciones de imagen">⋮</summary><div class="image-action-list"><button type="button" data-action="download">⬇ Descargar</button><button type="button" data-action="share">↗ Compartir</button><button type="button" data-action="copy">▣ Copiar imagen</button><button type="button" data-action="delete" style="color:#f87171;">🗑 Eliminar</button></div>';
       menu.querySelector('[data-action="download"]').addEventListener('click', () => { menu.open = false; descargarImagenElemento(img.id, nombre); });
       menu.querySelector('[data-action="share"]').addEventListener('click', () => { menu.open = false; compartirImagenElemento(img.id, nombre); });
       menu.querySelector('[data-action="copy"]').addEventListener('click', () => { menu.open = false; copiarImagenElemento(img.id); });
+      menu.querySelector('[data-action="delete"]').addEventListener('click', () => { menu.open = false; eliminarImagenElemento(img); });
       if (img.parentNode) img.parentNode.insertBefore(menu, img);
       return menu;
     }
-
     async function copiarTextoKoffi(texto, mensaje) {
       try {
         if (!navigator.clipboard?.writeText) throw new Error('El portapapeles no está disponible en este navegador.');
@@ -2755,6 +2799,8 @@ Devuelve ÚNICAMENTE un array JSON con EXACTAMENTE ${faltan.length} objetos nuev
           request.onerror = () => reject(request.error || new Error('No se pudo leer la imagen guardada.'));
         });
         if (coreActiveProjectId !== projectId || !record?.blob) return;
+        img.dataset.koffiAssetType = 'production';
+        img.dataset.koffiProjectId = projectId;
         if (koffiRestoredImageUrl) URL.revokeObjectURL(koffiRestoredImageUrl);
         koffiRestoredImageUrl = URL.createObjectURL(record.blob);
         const menu = crearMenuAccionesImagen(img, 'koffi-studio-imagen.png');
@@ -2775,6 +2821,8 @@ Devuelve ÚNICAMENTE un array JSON con EXACTAMENTE ${faltan.length} objetos nuev
       const loader = document.getElementById('img-loading');
       const inf = document.getElementById('img-info');
       const projectId = coreActiveProjectId;
+      img.dataset.koffiAssetType = 'production';
+      img.dataset.koffiProjectId = projectId || '';
       const menu = crearMenuAccionesImagen(img, 'koffi-studio-imagen.png');
       if (menu) menu.style.display = 'none';
       return new Promise((resolve, reject) => {
@@ -2924,6 +2972,8 @@ Devuelve ÚNICAMENTE un array JSON con EXACTAMENTE ${faltan.length} objetos nuev
       const img = document.getElementById('img-result');
       const loader = document.getElementById('img-loading');
       const inf = document.getElementById('img-info');
+      img.dataset.koffiAssetType = 'preview';
+      img.dataset.koffiProjectId = coreActiveProjectId || '';
       const menu = crearMenuAccionesImagen(img, 'koffi-studio-prueba-escena.png');
       if (menu) menu.style.display = 'none';
       return new Promise((resolve, reject) => {
@@ -3043,6 +3093,9 @@ Devuelve ÚNICAMENTE un array JSON con EXACTAMENTE ${faltan.length} objetos nuev
       img.src = imagen;
       img.id = `img-lote-${item.indice}`;
       img.alt = `Imagen generada para la escena ${item.indice + 1}`;
+      img.dataset.koffiAssetType = 'batch';
+      img.dataset.koffiProjectId = coreActiveProjectId || '';
+      img.dataset.koffiSceneId = item.sceneId || '';
       img.style.cssText = 'width:100%;height:auto;display:block;border-radius:6px;';
       const menu = crearMenuAccionesImagen(img, `koffi-studio-escena-${item.indice + 1}.png`);
       if (menu) menu.style.display = 'block';
