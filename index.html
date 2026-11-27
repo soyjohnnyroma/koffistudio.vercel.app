@@ -801,18 +801,8 @@
 
     function obtenerDireccionFuenteEscena(escena, esEstoicismo = false) {
       if (!escena) return '';
-      const camposCompletos = esEstoicismo && ['protagonista', 'accion', 'entorno', 'momento', 'materiales']
-        .every(campo => typeof escena[campo] === 'string' && escena[campo].trim());
-      const estructurada = camposCompletos
-        ? [
-            `Protagonist: ${String(escena.protagonista).trim()}.`,
-            `Action: ${String(escena.accion).trim()}.`,
-            `Setting: ${String(escena.entorno).trim()}.`,
-            `Time and light cue: ${String(escena.momento).trim()}.`,
-            `Material details: ${String(escena.materiales).trim()}.`
-          ].join(' ')
-        : '';
-      if (estructurada) return normalizarDireccionEstoica(estructurada);
+      // La dirección breve revisada es la fuente prioritaria. En escenas nuevas,
+      // prompt contiene solo la descripción física; el contrato técnico vive aparte.
       const candidatos = esEstoicismo
         ? [escena.visualDirection, escena.promptVersion === 'raw-v1' ? escena.prompt : '', escena.descripcion, escena.prompt]
         : [escena.visualDirection, escena.descripcion, escena.promptVersion === 'raw-v1' ? escena.prompt : ''];
