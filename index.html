@@ -618,7 +618,7 @@
           'an everyday medieval setting chosen to fit the passage rather than signal rank'
         ],
         luz:['soft natural daylight with readable shadows and painterly depth','overcast European daylight with restrained atmospheric perspective','warm candle or hearth light balanced by cool ambient shadow','cinematic natural side light without exaggerated chiaroscuro'],
-        optica:['35mm candid environmental view from a slight side angle; any visible character is absorbed in the action and unaware of the camera','50mm three-quarter observational view with natural body language and gaze directed toward the scene','35mm rear three-quarter or over-the-shoulder view toward the landscape or a meaningful object','wide establishing composition where a person may be present or absent according to the narrative need','50mm medium side-profile view during a concrete, unposed action; avoid a presentation portrait'],
+        optica:['35mm candid environmental view from a slight side angle; any visible character is absorbed in the action and unaware of the camera','50mm three-quarter observational view with natural body language and gaze directed toward the scene','35mm rear three-quarter or over-the-shoulder view toward the landscape or a meaningful object','wide environmental composition centered on the single high-ranking protagonist, with no other people visible','50mm medium side-profile view during a concrete, unposed action; avoid a presentation portrait'],
         color:'a sophisticated painterly palette: deep ultramarine and slate blue, forest and olive greens, warm ochre, burnt umber, muted burgundy, parchment and stone neutrals, nuanced natural skin tones; luminous highlights and rich shadow color without excessive saturation or artificial neon',
         detail:'clearly visible but controlled hand-inked contours, expressive line variation and layered painterly brushwork; finely observed stone blocks, weathered masonry, timber grain, iron, leather, woven cloth and natural foliage; mature adult faces with defined, individualized features, firm but calm expressions and believable emotional nuance; solid natural body proportions without exaggerated musculature; varied age, hair, facial hair, build and clothing; coherent European historical architecture and atmospheric landscapes; anatomically correct bodies and hands; meaningful environmental detail without clutter; avoid glossy photorealism, plastic 3D surfaces, pixelated blocks, editorial overlays, cover layouts and decorative title treatments; naturally occurring writing may remain only on physical props such as manuscripts, books, scrolls, maps or documents',
       },
@@ -771,7 +771,9 @@
       // In Stoicism, character identity is independent from the scene's action:
       // a king, prince, general or knight can inhabit any script-compatible situation.
       const sujeto = esEstoicismo
-        ? elegirVariacion(p.sujetos, semilla+'|character')
+        ? preservarDireccion
+          ? 'the single high-ranking protagonist and historical role explicitly specified or implied by the source scene; preserve that identity without substitution'
+          : elegirVariacion(p.sujetos, semilla+'|character')
         : preservarDireccion
           ? 'Preserve the specified primary subject and focal point; do not replace it or add unrelated people, objects or settings'
           : elegirVariacion(p.sujetos, semilla+'|subject');
