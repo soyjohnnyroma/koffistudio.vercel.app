@@ -715,7 +715,7 @@
       }
     };
     const CAPA_VISUAL_UNIVERSAL = 'professional art direction, intentional production design, coherent visual hierarchy, physically plausible anatomy and perspective, natural hands and facial structure, realistic material response, controlled highlights and shadows, precise focal hierarchy. Render a full-bleed narrative illustration, never a poster, cover, thumbnail or title card. Do not add editorial overlays: no headline, title, subtitle, caption, banner, typography, floating words, decorative lettering, logo or watermark anywhere over the scene. Writing may appear naturally and only as part of a physical object in the scene, such as a manuscript, book, scroll, map, letter or document; it must never become a separate title or overlay.';
-    const SER_ESTOICO_VISUAL_CONTRACT = "SER ESTOICO — VISUAL CONTRACT: Create exactly one visible adult protagonist of high historical rank, authority or intellectual influence, appropriate to the source passage. Never show any other person, human silhouette, reflection, portrait, bust or statue. The protagonist must have a distinctive individualized identity; vary adult age, facial features, hair, facial hair, build and historically appropriate clothing across scenes. Show a specific candid moment, never a posed portrait or direct camera gaze; use an observational side, three-quarter, rear or environmental view. Avoid repeated visual clichés unless the passage requires them. The actual historical era, culture, architecture, clothing and objects must follow the passage; never default to medieval or Roman imagery. Use the approved European historical graphic-novel language: expressive ink contours, layered painterly color, visible controlled brush texture, natural anatomy, nuanced natural light, atmospheric depth and a rich balanced palette. Deliver one uninterrupted full-frame image: no comic page, panels, diptych, triptych, collage, inset, border or separator. No editorial text, titles, logos or watermarks; writing may appear only on physical scene props.";
+    const SER_ESTOICO_VISUAL_CONTRACT = "SER ESTOICO — VISUAL CONTRACT: Show exactly one visible living adult protagonist of high historical rank, authority or intellectual influence, appropriate to the source passage; never substitute an ordinary or low-ranking person. No other person or human representation: no companions, background figures, silhouettes, human-shaped shadows, reflections, portraits, busts, statues or sculptures. Give the protagonist a distinctive identity; vary adult age, facial structure, hair, facial hair, build and historically appropriate clothing across scenes. Show a specific candid moment, never a posed portrait or direct camera gaze; use an observational side, three-quarter, rear or environmental view. Avoid repeated visual clichés unless the passage requires them. The actual historical era, culture, architecture, clothing and objects must follow the passage; never default to medieval or Roman imagery. Preserve the approved European historical graphic-novel language: expressive ink contours, layered painterly color, visible controlled brush texture, natural anatomy, nuanced natural light, atmospheric depth and a rich balanced palette. Deliver one full-frame image showing one moment, one location and one camera view: no comic page, panels, diptych, triptych, collage, inset, border or separator. No editorial text, titles, logos or watermarks; writing may appear only on physical scene props.";
     const COMPOSICIONES_FORMATO = {
       '16:9': 'Native landscape 16:9 composition, 1280x720 target canvas: design the full horizontal frame from the outset; use deliberate foreground, midground and background separation, readable lateral environment, balanced negative space, protect the primary subject from edge collisions; never simulate a crop',
       '9:16': 'Native portrait 9:16 composition, 720x1280 target canvas: design vertically from the outset with a clear top-to-bottom visual path, dominant subject and action inside the central safe region, meaningful vertical depth, intentional headroom and footroom, avoid placing essential details at interface-obscured edges; never simulate a crop',
@@ -782,7 +782,7 @@
       return '';
     }
 
-    function crearBriefFotografico(contexto, ancla, semilla, preservarDireccion = false, compacto = false) {
+    function crearBriefFotografico(contexto, ancla, semilla, preservarDireccion = false) {
       const p = contexto.perfil;
       const ratio = contexto.ratio;
       const esEstoicismo = contexto.niche === 'Estoicismo y Filosofía Práctica';
@@ -852,8 +852,8 @@
       };
     }
 
-    // El Worker rechaza prompts por encima de 5.000 caracteres. La aplicación
-    // compacta redundancias conocidas sin truncar la escena ni eliminar sus instrucciones.
+    // El Worker rechaza prompts por encima de 5.000 caracteres. Ser Estoico
+    // se construye desde un contrato único; los demás perfiles conservan su limpieza de redundancias conocidas.
     const LIMITE_PROMPT_FLUX = 4800;
     function compactarPromptFlux(prompt) {
       let texto = String(prompt || '').replace(/[ \\t]+/g, ' ').replace(/\\n{3,}/g, '\\n\\n').trim();
@@ -877,7 +877,7 @@
       return longitud;
     }
 
-    function crearConceptoVisual(contexto, promptUsuario = '', escenaEspecifica = null, compacto = false) {
+    function crearConceptoVisual(contexto, promptUsuario = '', escenaEspecifica = null) {
       const escenaActiva = escenaEspecifica || (contexto.escenas.length ? contexto.escenas[contexto.escenas.length - 1] : null);
       const anclaEscena = escenaActiva
         ? ((escenaActiva.visualDirection || '').trim() || (escenaActiva.descripcion || '').trim() || (escenaActiva.promptVersion === 'raw-v1' ? (escenaActiva.prompt || '').trim() : ''))
@@ -890,8 +890,7 @@
       let propuesta = null;
       for (let intento = 0; intento < 12; intento++) {
         const semilla = [contexto.niche, contexto.ratio, ancla, Date.now(), Math.random(), intento].join('|');
-        const usarPromptCompacto = contexto.niche === 'Estoicismo y Filosofía Práctica';
-        const brief = crearBriefFotografico(contexto, ancla, semilla, Boolean(promptUsuario.trim() || escenaActiva), usarPromptCompacto);
+        const brief = crearBriefFotografico(contexto, ancla, semilla, Boolean(promptUsuario.trim() || escenaActiva));
         brief.prompt = compactarPromptFlux(brief.prompt);
         validarLongitudPromptFlux(brief.prompt, 'El prompt preparado');
         const firma = brief.prompt.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().slice(0, 240);
@@ -974,11 +973,9 @@
         const escenaPrueba = { ...escenaOriginal, descripcion: '', prompt: direccionEscena, promptVersion: 'raw-v1' };
         const ideaUsuario = document.getElementById('img-prompt').value.trim();
         if (!document.getElementById('img-use-style')?.checked) contexto.estilo = '';
-        const usarPromptCompacto = contexto.niche === 'Estoicismo y Filosofía Práctica';
-        const concepto = crearConceptoVisual(contexto, ideaUsuario ? `${ideaUsuario}\n\nDirección específica de la escena:\n${direccionEscena}` : direccionEscena, escenaPrueba, usarPromptCompacto);
+        const concepto = crearConceptoVisual(contexto, ideaUsuario ? `${ideaUsuario}\n\nDirección específica de la escena:\n${direccionEscena}` : direccionEscena, escenaPrueba);
         if (!concepto || !concepto.prompt) throw new Error('Koffi no pudo construir la propuesta visual a partir de esta escena.');
 
-        validarLongitudPromptFlux(concepto.prompt, 'La propuesta individual');
         conceptoVisualPendiente = {
           ratio,
           contexto: {
@@ -3010,8 +3007,7 @@ Devuelve ÚNICAMENTE un array JSON con EXACTAMENTE ${faltan.length} objetos nuev
         const direccionCompleta = ideaGlobal
           ? `${ideaGlobal}\n\nDirección específica de la escena:\n${direccionEscena}`
           : '';
-        const usarPromptCompacto = contexto.niche === 'Estoicismo y Filosofía Práctica';
-        const concepto = crearConceptoVisual(contexto, direccionCompleta, escenaNormalizada, usarPromptCompacto);
+        const concepto = crearConceptoVisual(contexto, direccionCompleta, escenaNormalizada);
         return {
           indice,
           sceneId: escena.sceneId || `scene-${indice + 1}`,
