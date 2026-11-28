@@ -2211,15 +2211,24 @@ ${g.capitulos.filter((_, i) => i !== idx).map((t, i) => t.slice(-1400)).join('\n
       const selector = document.getElementById('img-test-scene');
       if (!selector) return;
       const seleccionAnterior = selector.value;
+      const lista = Array.isArray(escenas) ? escenas : [];
       selector.innerHTML = '';
-      (Array.isArray(escenas) ? escenas : []).forEach((escena, indice) => {
+      lista.forEach((escena, indice) => {
         const opcion = document.createElement('option');
         opcion.value = escena.sceneId || String(indice);
-        opcion.textContent = `Escena ${indice + 1} · ${(escena.descripcion || escena.fragmento || '').slice(0, 72)}`;
+        const direccionVigente = obtenerDireccionFuenteEscena(
+          escena,
+          (document.getElementById('script-niche')?.value || '') === 'Estoicismo y Filosofía Práctica'
+        );
+        const textoVisible = direccionVigente || escena.descripcion || escena.fragmento || '';
+        const fueActualizada = Array.isArray(escena.directionHistory) && escena.directionHistory.length > 0;
+        const marca = fueActualizada ? ' ✓ ACTUALIZADA' : '';
+        opcion.textContent = `Escena ${indice + 1}${marca} · ${textoVisible.slice(0, 72)}`;
+        opcion.title = textoVisible;
         selector.appendChild(opcion);
       });
-      selector.disabled = !escenas || !escenas.length;
-      if (escenas && escenas.some((escena, indice) => (escena.sceneId || String(indice)) === seleccionAnterior)) {
+      selector.disabled = !lista.length;
+      if (lista.some((escena, indice) => (escena.sceneId || String(indice)) === seleccionAnterior)) {
         selector.value = seleccionAnterior;
       }
     }
@@ -2395,19 +2404,7 @@ ${g.capitulos.filter((_, i) => i !== idx).map((t, i) => t.slice(-1400)).join('\n
         const edit = document.createElement('button'); edit.className='btn-secondary'; edit.style.marginTop='0'; edit.textContent='✎ MODIFICAR PROMPT'; edit.onclick=()=>editarDireccionEscena(e.sceneId, e);
         row.append(copy,use,refresh,edit); [h,d,f,p,row].forEach(x=>card.appendChild(x)); cont.appendChild(card);
       });
-      const selectorPrueba = document.getElementById('img-test-scene');
-      if (selectorPrueba) {
-        const seleccionAnterior = selectorPrueba.value;
-        selectorPrueba.innerHTML = '';
-        escenas.forEach((escena, indice) => {
-          const opcion = document.createElement('option');
-          opcion.value = escena.sceneId || String(indice);
-          opcion.textContent = `Escena ${indice + 1} · ${(escena.descripcion || escena.fragmento || '').slice(0, 72)}`;
-          selectorPrueba.appendChild(opcion);
-        });
-        selectorPrueba.disabled = !escenas.length;
-        if (escenas.some((escena, indice) => (escena.sceneId || String(indice)) === seleccionAnterior)) selectorPrueba.value = seleccionAnterior;
-      }
+      actualizarSelectorEscenasPrueba(escenas);
       const note = document.getElementById('scene-note');
       note.textContent = escenas.length === objetivo
         ? `✓ ${escenas.length} escenas listas · ${contexto.niche} · ${ratio} · Gemini: ${modelo}. Se conservarán al recargar.`
