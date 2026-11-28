@@ -2240,7 +2240,7 @@ ${g.capitulos.filter((_, i) => i !== idx).map((t, i) => t.slice(-1400)).join('\n
         const copy = document.createElement('button'); copy.className='btn-secondary'; copy.style.marginTop='0'; copy.textContent='📋 COPIAR DIRECCIÓN'; copy.onclick=()=>copiarTextoKoffi(direccion, 'Dirección copiada.');
         const use = document.createElement('button'); use.className='btn-secondary'; use.style.marginTop='0'; use.textContent='🎨 USAR EN GENERADOR'; use.onclick=()=>{ document.getElementById('img-use-style').checked=false; seleccionarEscenaEnGenerador(e, obtenerFormatoVisual()); };
         const refresh = document.createElement('button'); refresh.className='btn-secondary'; refresh.style.marginTop='0'; refresh.textContent = e.visualDirection ? '↻ REVISAR DIRECCIÓN' : '↻ CREAR DIRECCIÓN BREVE'; refresh.onclick=()=>actualizarDireccionEscena(e.sceneId, refresh, e);
-        const edit = document.createElement('button'); edit.className='btn-secondary'; edit.style.marginTop='0'; edit.textContent='✎ EDITAR DIRECCIÓN'; edit.onclick=()=>editarDireccionEscena(e.sceneId, e);
+        const edit = document.createElement('button'); edit.className='btn-secondary'; edit.style.marginTop='0'; edit.textContent='✎ MODIFICAR PROMPT'; edit.onclick=()=>editarDireccionEscena(e.sceneId, e);
         row.append(copy,use,refresh,edit); [h,d,f,p,row].forEach(x=>card.appendChild(x)); cont.appendChild(card);
       });
       actualizarSelectorEscenasPrueba(escenasGuardadas);
@@ -2392,7 +2392,7 @@ ${g.capitulos.filter((_, i) => i !== idx).map((t, i) => t.slice(-1400)).join('\n
         const copy = document.createElement('button'); copy.className='btn-secondary'; copy.style.marginTop='0'; copy.textContent='📋 COPIAR DIRECCIÓN'; copy.onclick=()=>copiarTextoKoffi(direccionEscena, 'Dirección copiada.');
         const use = document.createElement('button'); use.className='btn-secondary'; use.style.marginTop='0'; use.textContent='🎨 USAR EN GENERADOR'; use.onclick=()=>{ document.getElementById('img-use-style').checked=false; seleccionarEscenaEnGenerador(e, ratio); };
         const refresh = document.createElement('button'); refresh.className='btn-secondary'; refresh.style.marginTop='0'; refresh.textContent = e.visualDirection ? '↻ REVISAR DIRECCIÓN' : '↻ CREAR DIRECCIÓN BREVE'; refresh.onclick=()=>actualizarDireccionEscena(e.sceneId, refresh, e);
-        const edit = document.createElement('button'); edit.className='btn-secondary'; edit.style.marginTop='0'; edit.textContent='✎ EDITAR DIRECCIÓN'; edit.onclick=()=>editarDireccionEscena(e.sceneId, e);
+        const edit = document.createElement('button'); edit.className='btn-secondary'; edit.style.marginTop='0'; edit.textContent='✎ MODIFICAR PROMPT'; edit.onclick=()=>editarDireccionEscena(e.sceneId, e);
         row.append(copy,use,refresh,edit); [h,d,f,p,row].forEach(x=>card.appendChild(x)); cont.appendChild(card);
       });
       const selectorPrueba = document.getElementById('img-test-scene');
